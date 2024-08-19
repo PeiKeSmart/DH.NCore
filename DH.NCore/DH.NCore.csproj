@@ -21,23 +21,23 @@
     <NoWarn>1701;1702;NU5104;NU1505;NETSDK1138;CS7035</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
-	<IsPackable>true</IsPackable>
+	  <IsPackable>true</IsPackable>
     <PackageId>$(AssemblyName)</PackageId>
     <Authors>$(Company)</Authors>
     <PackageProjectUrl>https://www.haocoding.com/</PackageProjectUrl>
     <PackageIcon>DH.png</PackageIcon>
-    <RepositoryUrl>https://github.com/NewLifeX/X</RepositoryUrl>
+    <RepositoryUrl>https://github.com/PeiKeSmart/DH.NCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>湖北登灏科技有限公司;DH组件;DH;$(AssemblyName)</PackageTags>
     <PackageReleaseNotes>v11目标是优化内存占用降低GC</PackageReleaseNotes>
-	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	  <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageReadmeFile>Readme.MD</PackageReadmeFile>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
