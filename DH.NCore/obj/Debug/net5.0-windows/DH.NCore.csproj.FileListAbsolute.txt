@@ -1,0 +1,13 @@
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\DH.NCore.GeneratedMSBuildEditorConfig.editorconfig
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\DH.NCore.AssemblyInfoInputs.cache
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\DH.NCore.AssemblyInfo.cs
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\DH.NCore.csproj.CoreCompileInputs.cache
+E:\Code\Pek.FrameWork\DH.NCore\Bin\net5.0-windows\NewLife.Core.deps.json
+E:\Code\Pek.FrameWork\DH.NCore\Bin\net5.0-windows\NewLife.Core.dll
+E:\Code\Pek.FrameWork\DH.NCore\Bin\net5.0-windows\NewLife.Core.pdb
+E:\Code\Pek.FrameWork\DH.NCore\Bin\net5.0-windows\NewLife.Core.xml
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\NewLife.Core.dll
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\refint\NewLife.Core.dll
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\NewLife.Core.xml
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\NewLife.Core.pdb
+E:\Code\Pek.FrameWork\DH.NCore\DH.NCore\obj\Debug\net5.0-windows\ref\NewLife.Core.dll
