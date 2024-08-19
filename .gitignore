@@ -8,3 +8,7 @@
 /DH.NCore/obj
 /XUnitTest.Core/obj
 /DH.NSecurity/obj
+/Samples/Zero.HttpServer/obj
+/Samples/Zero.Server/obj
+/Test/obj
+/Test2/obj
