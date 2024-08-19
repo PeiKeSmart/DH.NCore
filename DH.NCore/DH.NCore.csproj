@@ -8,8 +8,9 @@
     <Company>湖北登灏科技有限公司</Company>
     <Copyright>©2020-2024 湖北登灏科技有限公司</Copyright>
     <VersionPrefix>3.7</VersionPrefix>
+	<VersionPrefixBeta>0001</VersionPrefixBeta>
     <VersionSuffix>$([System.DateTime]::Now.ToString(`yyyy.MMdd`))</VersionSuffix>
-    <Version>$(VersionPrefix).$(VersionSuffix)</Version>
+    <Version>$(VersionPrefix).$(VersionSuffix)$(VersionPrefixBeta)</Version>
     <FileVersion>$(Version)</FileVersion>
     <AssemblyVersion>$(VersionPrefix).$([System.DateTime]::Now.ToString(`yyyy.MMdd`))</AssemblyVersion>
     <OutputPath>..\Bin</OutputPath>
@@ -20,6 +21,7 @@
     <NoWarn>1701;1702;NU5104;NU1505;NETSDK1138;CS7035</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
+	<IsPackable>true</IsPackable>
     <PackageId>$(AssemblyName)</PackageId>
     <Authors>$(Company)</Authors>
     <PackageProjectUrl>https://www.haocoding.com/</PackageProjectUrl>
@@ -28,12 +30,14 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>湖北登灏科技有限公司;DH组件;DH;$(AssemblyName)</PackageTags>
     <PackageReleaseNotes>v11目标是优化内存占用降低GC</PackageReleaseNotes>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageReadmeFile>Readme.MD</PackageReadmeFile>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
