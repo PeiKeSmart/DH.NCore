@@ -1,8 +1,0 @@
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.csproj.AssemblyReference.cache
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.csproj.SuggestedBindingRedirects.cache
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.exe.config
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.GeneratedMSBuildEditorConfig.editorconfig
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.AssemblyInfoInputs.cache
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.AssemblyInfo.cs
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.csproj.CoreCompileInputs.cache
-E:\Code\Pek.FrameWork\DH.NCore\Test2\obj\Debug\Test2.sourcelink.json

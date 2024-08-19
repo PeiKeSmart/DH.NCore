@@ -1,6 +1,0 @@
-E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.HttpServer\obj\Debug\Zero.HttpServer.csproj.AssemblyReference.cache
-E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.HttpServer\obj\Debug\Zero.HttpServer.GeneratedMSBuildEditorConfig.editorconfig
-E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.HttpServer\obj\Debug\Zero.HttpServer.AssemblyInfoInputs.cache
-E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.HttpServer\obj\Debug\Zero.HttpServer.AssemblyInfo.cs
-E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.HttpServer\obj\Debug\Zero.HttpServer.csproj.CoreCompileInputs.cache
-E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.HttpServer\obj\Debug\Zero.HttpServer.sourcelink.json
