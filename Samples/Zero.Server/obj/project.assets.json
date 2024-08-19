@@ -1,0 +1,312 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "NewLife.Core/10.10.2024.701": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/NewLife.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NewLife.Core.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NewLife.Redis/5.7.2024.701": {
+        "type": "package",
+        "dependencies": {
+          "NewLife.Core": "10.10.2024.701"
+        },
+        "compile": {
+          "lib/netstandard2.1/NewLife.Redis.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/NewLife.Redis.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NewLife.Remoting/3.0.2024.701": {
+        "type": "package",
+        "dependencies": {
+          "NewLife.Core": "10.10.2024.701"
+        },
+        "compile": {
+          "lib/net8.0/NewLife.Remoting.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NewLife.Remoting.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NewLife.Stardust/3.0.2024.707": {
+        "type": "package",
+        "dependencies": {
+          "NewLife.Core": "10.10.2024.701",
+          "NewLife.Remoting": "3.0.2024.701"
+        },
+        "compile": {
+          "lib/net8.0/Stardust.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Stardust.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "DH.NCore/3.7.2024.8190001": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/DH.NCore.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DH.NCore.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "NewLife.Core/10.10.2024.701": {
+      "sha512": "YCiYxH8aSlqeYRWaRJsAjeX3IJgXzNAFuHGa1Xbw468E3JsF0crIVC/i8zw41yIOeCgwyfLqiVvHzkCKmkAXRA==",
+      "type": "package",
+      "path": "newlife.core/10.10.2024.701",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Readme.MD",
+        "leaf.png",
+        "lib/net45/NewLife.Core.dll",
+        "lib/net45/NewLife.Core.xml",
+        "lib/net461/NewLife.Core.dll",
+        "lib/net461/NewLife.Core.xml",
+        "lib/net5.0-windows7.0/NewLife.Core.dll",
+        "lib/net5.0-windows7.0/NewLife.Core.xml",
+        "lib/net5.0/NewLife.Core.dll",
+        "lib/net5.0/NewLife.Core.xml",
+        "lib/net6.0-windows7.0/NewLife.Core.dll",
+        "lib/net6.0-windows7.0/NewLife.Core.xml",
+        "lib/net6.0/NewLife.Core.dll",
+        "lib/net6.0/NewLife.Core.xml",
+        "lib/net7.0-windows7.0/NewLife.Core.dll",
+        "lib/net7.0-windows7.0/NewLife.Core.xml",
+        "lib/net7.0/NewLife.Core.dll",
+        "lib/net7.0/NewLife.Core.xml",
+        "lib/net8.0-windows7.0/NewLife.Core.dll",
+        "lib/net8.0-windows7.0/NewLife.Core.xml",
+        "lib/net8.0/NewLife.Core.dll",
+        "lib/net8.0/NewLife.Core.xml",
+        "lib/netcoreapp3.1/NewLife.Core.dll",
+        "lib/netcoreapp3.1/NewLife.Core.xml",
+        "lib/netstandard2.0/NewLife.Core.dll",
+        "lib/netstandard2.0/NewLife.Core.xml",
+        "lib/netstandard2.1/NewLife.Core.dll",
+        "lib/netstandard2.1/NewLife.Core.xml",
+        "newlife.core.10.10.2024.701.nupkg.sha512",
+        "newlife.core.nuspec"
+      ]
+    },
+    "NewLife.Redis/5.7.2024.701": {
+      "sha512": "6BuspWLD7J8QUqnMeL0D+6QYa8nYcQ1VTi4WJPTferq77LNrewztUWRlDni8GBnXcbi7+4+8iekMUoILvBMbsw==",
+      "type": "package",
+      "path": "newlife.redis/5.7.2024.701",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Readme.MD",
+        "leaf.png",
+        "lib/net45/NewLife.Redis.dll",
+        "lib/net45/NewLife.Redis.xml",
+        "lib/net461/NewLife.Redis.dll",
+        "lib/net461/NewLife.Redis.xml",
+        "lib/netstandard2.0/NewLife.Redis.dll",
+        "lib/netstandard2.0/NewLife.Redis.xml",
+        "lib/netstandard2.1/NewLife.Redis.dll",
+        "lib/netstandard2.1/NewLife.Redis.xml",
+        "newlife.redis.5.7.2024.701.nupkg.sha512",
+        "newlife.redis.nuspec"
+      ]
+    },
+    "NewLife.Remoting/3.0.2024.701": {
+      "sha512": "DwANRUB8CCG6URQPUNiL9a66hP5mrrYhqutGg4J3Di3c+onAYxDk+4Eg9BgmQdXNU4fDnR5u2g60GT3JSLDFDw==",
+      "type": "package",
+      "path": "newlife.remoting/3.0.2024.701",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Readme.MD",
+        "leaf.png",
+        "lib/net40/NewLife.Remoting.dll",
+        "lib/net40/NewLife.Remoting.xml",
+        "lib/net45/NewLife.Remoting.dll",
+        "lib/net45/NewLife.Remoting.xml",
+        "lib/net461/NewLife.Remoting.dll",
+        "lib/net461/NewLife.Remoting.xml",
+        "lib/net5.0/NewLife.Remoting.dll",
+        "lib/net5.0/NewLife.Remoting.xml",
+        "lib/net6.0/NewLife.Remoting.dll",
+        "lib/net6.0/NewLife.Remoting.xml",
+        "lib/net7.0/NewLife.Remoting.dll",
+        "lib/net7.0/NewLife.Remoting.xml",
+        "lib/net8.0/NewLife.Remoting.dll",
+        "lib/net8.0/NewLife.Remoting.xml",
+        "lib/netstandard2.0/NewLife.Remoting.dll",
+        "lib/netstandard2.0/NewLife.Remoting.xml",
+        "lib/netstandard2.1/NewLife.Remoting.dll",
+        "lib/netstandard2.1/NewLife.Remoting.xml",
+        "newlife.remoting.3.0.2024.701.nupkg.sha512",
+        "newlife.remoting.nuspec"
+      ]
+    },
+    "NewLife.Stardust/3.0.2024.707": {
+      "sha512": "T51HyZVEkCWtj0FRs1w+51aOsTcKCuhVf/Nvp3IhMb03eVxvnKmr5UjZSD9B1dsRGbLtD3D1bQxvH7rK+Hg40A==",
+      "type": "package",
+      "path": "newlife.stardust/3.0.2024.707",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Readme.MD",
+        "leaf.png",
+        "lib/net40/Stardust.dll",
+        "lib/net40/Stardust.xml",
+        "lib/net45/Stardust.dll",
+        "lib/net45/Stardust.xml",
+        "lib/net461/Stardust.dll",
+        "lib/net461/Stardust.xml",
+        "lib/net5.0/Stardust.dll",
+        "lib/net5.0/Stardust.xml",
+        "lib/net6.0-windows7.0/Stardust.dll",
+        "lib/net6.0-windows7.0/Stardust.xml",
+        "lib/net6.0/Stardust.dll",
+        "lib/net6.0/Stardust.xml",
+        "lib/net7.0-windows7.0/Stardust.dll",
+        "lib/net7.0-windows7.0/Stardust.xml",
+        "lib/net7.0/Stardust.dll",
+        "lib/net7.0/Stardust.xml",
+        "lib/net8.0-windows7.0/Stardust.dll",
+        "lib/net8.0-windows7.0/Stardust.xml",
+        "lib/net8.0/Stardust.dll",
+        "lib/net8.0/Stardust.xml",
+        "lib/netcoreapp3.1/Stardust.dll",
+        "lib/netcoreapp3.1/Stardust.xml",
+        "lib/netstandard2.0/Stardust.dll",
+        "lib/netstandard2.0/Stardust.xml",
+        "lib/netstandard2.1/Stardust.dll",
+        "lib/netstandard2.1/Stardust.xml",
+        "newlife.stardust.3.0.2024.707.nupkg.sha512",
+        "newlife.stardust.nuspec"
+      ]
+    },
+    "DH.NCore/3.7.2024.8190001": {
+      "type": "project",
+      "path": "../../DH.NCore/DH.NCore.csproj",
+      "msbuildProject": "../../DH.NCore/DH.NCore.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "DH.NCore >= 3.7.2024.8190001",
+      "NewLife.Redis >= 5.7.2024.701",
+      "NewLife.Stardust >= 3.0.2024.707"
+    ]
+  },
+  "packageFolders": {
+    "F:\\.nuget\\packages": {},
+    "d:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.2024.819",
+    "restore": {
+      "projectUniqueName": "E:\\Code\\Pek.FrameWork\\DH.NCore\\Samples\\Zero.Server\\Zero.Server.csproj",
+      "projectName": "Zero.Server",
+      "projectPath": "E:\\Code\\Pek.FrameWork\\DH.NCore\\Samples\\Zero.Server\\Zero.Server.csproj",
+      "packagesPath": "F:\\.nuget\\packages",
+      "outputPath": "E:\\Code\\Pek.FrameWork\\DH.NCore\\Samples\\Zero.Server\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "d:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "E:\\Code\\Pek.FrameWork\\DH.NCore\\NuGet.Config",
+        "C:\\Users\\qcjxb\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "E:\\Code\\DG.FrameWork\\src\\Bin": {},
+        "E:\\Code\\DH.FrameWork\\src\\Bin": {},
+        "E:\\Code\\YRY.UI\\src\\Bin": {},
+        "E:\\Code\\YRYFramework\\src\\Bin": {},
+        "https://api.nuget.org/v3/index.json": {},
+        "https://nuget.cdn.azure.cn/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {
+            "E:\\Code\\Pek.FrameWork\\DH.NCore\\DH.NCore\\DH.NCore.csproj": {
+              "projectPath": "E:\\Code\\Pek.FrameWork\\DH.NCore\\DH.NCore\\DH.NCore.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      }
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "dependencies": {
+          "NewLife.Redis": {
+            "target": "Package",
+            "version": "[5.7.2024.701, )"
+          },
+          "NewLife.Stardust": {
+            "target": "Package",
+            "version": "[3.0.2024.707, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

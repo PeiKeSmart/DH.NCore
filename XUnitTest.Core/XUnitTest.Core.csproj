@@ -55,7 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-    <PackageReference Include="DH.UnitTest" Version="1.0.2024.819-beta0409" />
+    <PackageReference Include="DH.NModbus" Version="3.7.2024.819-beta0706" />
+    <PackageReference Include="DH.UnitTest" Version="1.0.2024.819-beta0634" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
@@ -67,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DH.NCore\DH.NCore.csproj" />
+    <ProjectReference Include="..\DH.NSecurity\DH.NSecurity.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Algorithms\sampled.csv">

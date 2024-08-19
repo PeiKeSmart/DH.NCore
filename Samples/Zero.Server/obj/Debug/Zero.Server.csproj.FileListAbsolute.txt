@@ -1,0 +1,6 @@
+E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.Server\obj\Debug\Zero.Server.csproj.AssemblyReference.cache
+E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.Server\obj\Debug\Zero.Server.GeneratedMSBuildEditorConfig.editorconfig
+E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.Server\obj\Debug\Zero.Server.AssemblyInfoInputs.cache
+E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.Server\obj\Debug\Zero.Server.AssemblyInfo.cs
+E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.Server\obj\Debug\Zero.Server.csproj.CoreCompileInputs.cache
+E:\Code\Pek.FrameWork\DH.NCore\Samples\Zero.Server\obj\Debug\Zero.Server.sourcelink.json

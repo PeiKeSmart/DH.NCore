@@ -1,0 +1,6 @@
+E:\Code\Pek.FrameWork\DH.NCore\Test\obj\Debug\net8.0\Test.csproj.AssemblyReference.cache
+E:\Code\Pek.FrameWork\DH.NCore\Test\obj\Debug\net8.0\Test.GeneratedMSBuildEditorConfig.editorconfig
+E:\Code\Pek.FrameWork\DH.NCore\Test\obj\Debug\net8.0\Test.AssemblyInfoInputs.cache
+E:\Code\Pek.FrameWork\DH.NCore\Test\obj\Debug\net8.0\Test.AssemblyInfo.cs
+E:\Code\Pek.FrameWork\DH.NCore\Test\obj\Debug\net8.0\Test.csproj.CoreCompileInputs.cache
+E:\Code\Pek.FrameWork\DH.NCore\Test\obj\Debug\net8.0\Test.sourcelink.json
