@@ -22,6 +22,7 @@ public class ISocketRemoteTests
         var di = "D:\\Tools".AsDirectory();
         if (di.Exists) src = di.GetFiles().Where(e => e.Length < 10 * 1024 * 1024).OrderByDescending(e => e.Length).FirstOrDefault();
         src ??= "../../".AsDirectory().GetFiles().Where(e => e.Length < 10 * 1024 * 1024).OrderByDescending(e => e.Length).FirstOrDefault();
+        "data/".EnsureDirectory();
         src ??= "data/".AsDirectory().GetFiles().Where(e => e.Length < 10 * 1024 * 1024).OrderByDescending(e => e.Length).FirstOrDefault();
         XTrace.WriteLine("发送文件：{0}", src.FullName);
         XTrace.WriteLine("文件大小：{0}", src.Length.ToGMK());
@@ -87,7 +88,7 @@ public class ISocketRemoteTests
         Assert.Equal(md5.ToHex(), file.AsFile().MD5().ToHex());
     }
 
-    [Fact]
+    [Fact()]
     public void SendFile2()
     {
         // 标准版服务端。可接受文本消息、Json对象和二进制文件数据
