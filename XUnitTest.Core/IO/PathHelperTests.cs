@@ -4,7 +4,7 @@ using Xunit;
 
 namespace XUnitTest.IO;
 
-[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "NewLife.UnitTest")]
+[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "DH.UnitTest")]
 public class PathHelperTests
 {
     [Fact]
