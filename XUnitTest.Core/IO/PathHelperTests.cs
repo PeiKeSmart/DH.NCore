@@ -28,7 +28,7 @@ public class PathHelperTests
     public void FileCompress()
     {
         var dst = "xml.zip".AsFile();
-        var src = "NewLife.Core.xml".AsFile();
+        var src = "DH.NCore.xml".AsFile();
 
         if (dst.Exists) dst.Delete();
 
