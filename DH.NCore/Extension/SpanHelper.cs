@@ -7,6 +7,18 @@ namespace NewLife;
 /// <summary>Span帮助类</summary>
 public static class SpanHelper
 {
+    /// <summary>转字符串</summary>
+    /// <param name="span"></param>
+    /// <param name="encoding"></param>
+    /// <returns></returns>
+    public static String ToStr(this ReadOnlySpan<Byte> span, Encoding? encoding = null) => (encoding ?? Encoding.UTF8).GetString(span);
+
+    /// <summary>转字符串</summary>
+    /// <param name="span"></param>
+    /// <param name="encoding"></param>
+    /// <returns></returns>
+    public static String ToStr(this Span<Byte> span, Encoding? encoding = null) => (encoding ?? Encoding.UTF8).GetString(span);
+
     /// <summary>获取字符串的字节数组</summary>
     public static unsafe Int32 GetBytes(this Encoding encoding, ReadOnlySpan<Char> chars, Span<Byte> bytes)
     {
@@ -32,6 +44,34 @@ public static class SpanHelper
             return encoding.GetString(bytes2, bytes.Length);
         }
 #endif
+    }
+
+    /// <summary>以十六进制编码表示</summary>
+    /// <param name="span"></param>
+    /// <param name="maxLength">最大显示多少个字节。默认-1显示全部</param>
+    /// <param name="separate">分隔符</param>
+    /// <param name="groupSize">分组大小，为0时对每个字节应用分隔符，否则对每个分组使用</param>
+    /// <returns></returns>
+    public static String ToHex(this ReadOnlySpan<Byte> span, Int32 maxLength = 32, String? separate = null, Int32 groupSize = 0)
+    {
+        if (span.Length == 0) return String.Empty;
+
+        if (span.Length > maxLength) span = span[..maxLength];
+        return span.ToArray().ToHex(separate, groupSize);
+    }
+
+    /// <summary>以十六进制编码表示</summary>
+    /// <param name="span"></param>
+    /// <param name="maxLength">最大显示多少个字节。默认-1显示全部</param>
+    /// <param name="separate">分隔符</param>
+    /// <param name="groupSize">分组大小，为0时对每个字节应用分隔符，否则对每个分组使用</param>
+    /// <returns></returns>
+    public static String ToHex(this Span<Byte> span, Int32 maxLength = 32, String? separate = null, Int32 groupSize = 0)
+    {
+        if (span.Length == 0) return String.Empty;
+
+        if (span.Length > maxLength) span = span[..maxLength];
+        return span.ToArray().ToHex(separate, groupSize);
     }
 
     /// <summary>写入Memory到数据流</summary>
