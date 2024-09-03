@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-    <PackageReference Include="DH.NModbus" Version="3.7.2024.902-beta0132" />
+    <PackageReference Include="DH.NModbus" Version="3.7.2024.902-beta0300" />
     <PackageReference Include="DH.UnitTest" Version="1.0.2024.902-beta0137" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
