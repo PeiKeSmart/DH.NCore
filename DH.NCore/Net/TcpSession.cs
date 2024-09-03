@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using NewLife.Data;
 using NewLife.Log;
 using NewLife.Collections;
+using System.Drawing;
 
 namespace NewLife.Net;
 
@@ -290,13 +291,14 @@ public class TcpSession : SessionBase, ISocketSession
     /// </remarks>
     /// <param name="pk">数据包</param>
     /// <returns>是否成功</returns>
-    protected override Int32 OnSend(Packet pk)
+    protected override Int32 OnSend(IPacket pk)
     {
-        var count = pk.Total;
+        var count = pk.Length;
+        var data = pk.GetSpan();
 
-        if (Log != null && Log.Enable && LogSend) WriteLog("Send [{0}]: {1}", count, pk.ToHex(LogDataLength));
+        if (Log != null && Log.Enable && LogSend) WriteLog("Send [{0}]: {1}", count, data.ToHex(LogDataLength));
 
-        using var span = Tracer?.NewSpan($"net:{Name}:Send", pk.Total + "", pk.Total);
+        using var span = Tracer?.NewSpan($"net:{Name}:Send", count + "", count);
 
         var rs = count;
         var sock = Client;
@@ -317,7 +319,11 @@ public class TcpSession : SessionBase, ISocketSession
                 if (count == 0)
                     rs = sock.Send(Pool.Empty);
                 else if (pk.Next == null)
-                    rs = sock.Send(pk.Data, pk.Offset, count, SocketFlags.None);
+#if NETCOREAPP || NETSTANDARD2_1
+                    rs = sock.Send(data);
+#else
+                    rs = sock.Send(data.ToArray(), count, SocketFlags.None);
+#endif
                 else
                     rs = sock.Send(pk.ToSegments());
             }
@@ -326,9 +332,13 @@ public class TcpSession : SessionBase, ISocketSession
                 if (count == 0)
                     _Stream.Write([]);
                 else if (pk.Next == null)
-                    _Stream.Write(pk.Data, pk.Offset, count);
+#if NETCOREAPP || NETSTANDARD2_1
+                    _Stream.Write(data);
+#else
+                    _Stream.Write(data.ToArray());
+#endif
                 else
-                    _Stream.Write(pk.ToArray());
+                    pk.CopyTo(_Stream);
             }
 
             //// 检查返回值
@@ -368,7 +378,7 @@ public class TcpSession : SessionBase, ISocketSession
     #region 接收
     /// <summary>异步接收数据。重载以支持SSL</summary>
     /// <returns></returns>
-    public override async Task<Packet?> ReceiveAsync(CancellationToken cancellationToken = default)
+    public override async Task<IPacket?> ReceiveAsync(CancellationToken cancellationToken = default)
     {
         if (!Open() || Client == null) return null;
 
@@ -378,10 +388,11 @@ public class TcpSession : SessionBase, ISocketSession
             using var span = Tracer?.NewSpan($"net:{Name}:ReceiveAsync", BufferSize + "");
             try
             {
-                var buf = new Byte[BufferSize];
-                var count = await ss.ReadAsync(buf, 0, buf.Length, cancellationToken);
-                if (span != null) span.Value = count;
-                return new Packet(buf, 0, count);
+                var pk = new ArrayPacket(BufferSize);
+                var size = await ss.ReadAsync(pk.Buffer, 0, pk.Length, cancellationToken);
+                if (span != null) span.Value = size;
+
+                return pk.Slice(0, size);
             }
             catch (Exception ex)
             {

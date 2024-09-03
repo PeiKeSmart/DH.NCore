@@ -73,6 +73,9 @@ public class WebSocket
 
             Handler?.Invoke(this, message);
 
+            // 释放内存
+            message.Payload?.TryDispose();
+
             var session = Context?.Connection;
             var socket = Context?.Socket;
             if (session == null && socket == null) return;
@@ -107,7 +110,7 @@ public class WebSocket
         var socket = Context?.Socket;
         if (session == null && socket == null) throw new ObjectDisposedException(nameof(Context));
 
-        var data = msg.ToPacket().GetSpan().ToArray();
+        var data = msg.ToPacket();
         if (session != null)
             session.Send(data);
         else

@@ -17,11 +17,11 @@ public interface ITransport : IDisposable
 
     /// <summary>写入数据</summary>
     /// <param name="data">数据包</param>
-    Int32 Send(Packet data);
+    Int32 Send(IPacket data);
 
     /// <summary>读取数据</summary>
     /// <returns></returns>
-    Packet? Receive();
+    IPacket? Receive();
 
     /// <summary>数据到达事件</summary>
     event EventHandler<ReceivedEventArgs> Received;
