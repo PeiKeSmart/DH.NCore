@@ -640,7 +640,7 @@ public class DefaultConvert
             var ch = input[i];
             if (ch == ',' || ch == '_' || ch == ' ') continue;
 
-            // 支持负数 负号只能出现在第一位
+            // 支持负数
             if (ch == '-' && rs > 0) return 0;
 
             // 全角空格
