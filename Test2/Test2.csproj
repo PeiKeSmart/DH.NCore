@@ -24,7 +24,7 @@
     <None Remove="Model\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DH.NStardust" Version="3.7.2024.918-beta0838" />
+    <PackageReference Include="DH.NStardust" Version="3.9.2024.9210003" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DH.NCore\DH.NCore.csproj" />

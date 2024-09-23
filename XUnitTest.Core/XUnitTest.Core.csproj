@@ -55,12 +55,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-    <PackageReference Include="DH.NModbus" Version="3.7.2024.918-beta1152" />
-    <PackageReference Include="DH.UnitTest" Version="1.0.2024.920-beta0125" />
+    <PackageReference Include="DH.NModbus" Version="3.9.2024.9210003" />
+    <PackageReference Include="DH.UnitTest" Version="1.0.2024.923-beta0132" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit" Version="2.9.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
