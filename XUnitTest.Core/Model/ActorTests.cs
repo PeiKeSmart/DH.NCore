@@ -88,10 +88,5 @@ namespace XUnitTest.Model
                 await Task.Delay(500);
             }
         }
-
-        static bool IsRunningInGitHubActions()
-        {
-            return Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
-        }
     }
 }
