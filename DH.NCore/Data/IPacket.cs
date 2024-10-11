@@ -296,10 +296,11 @@ public static class PacketHelper
     }
 
     /// <summary>尝试扩展头部，用于填充包头，减少内存分配</summary>
-    /// <param name="pk"></param>
-    /// <param name="size"></param>
-    /// <param name="newPacket"></param>
+    /// <param name="pk">数据包</param>
+    /// <param name="size">要扩大的头部大小，不包括负载数据</param>
+    /// <param name="newPacket">扩展后的数据包</param>
     /// <returns></returns>
+    [Obsolete]
     public static Boolean TryExpandHeader(this IPacket pk, Int32 size, [NotNullWhen(true)] out IPacket? newPacket)
     {
         newPacket = null;
@@ -320,6 +321,27 @@ public static class PacketHelper
 
         return false;
     }
+
+    /// <summary>扩展头部，用于填充包头，减少内存分配</summary>
+    /// <param name="pk">数据包</param>
+    /// <param name="size">要扩大的头部大小，不包括负载数据</param>
+    /// <returns>扩展后的数据包</returns>
+    public static IPacket ExpandHeader(this IPacket? pk, Int32 size)
+    {
+        if (pk is ArrayPacket ap && ap.Offset >= size)
+        {
+            return new ArrayPacket(ap.Buffer, ap.Offset - size, ap.Length + size) { Next = ap.Next };
+        }
+        else if (pk is OwnerPacket owner && owner.Offset >= size)
+        {
+            var newPacket = new OwnerPacket(owner.Buffer, owner.Offset - size, owner.Length + size) { Next = owner.Next };
+            owner.Free();
+
+            return newPacket;
+        }
+
+        return new OwnerPacket(size) { Next = pk };
+    }
 }
 
 /// <summary>所有权内存包。具有所有权管理，不再使用时释放</summary>
@@ -333,11 +355,11 @@ public class OwnerPacket : MemoryManager<Byte>, IPacket, IOwnerPacket
     /// <summary>缓冲区</summary>
     public Byte[] Buffer => _buffer;
 
-    private readonly Int32 _offset;
+    private Int32 _offset;
     /// <summary>数据偏移</summary>
     public Int32 Offset => _offset;
 
-    private readonly Int32 _length;
+    private Int32 _length;
     /// <summary>数据长度</summary>
     public Int32 Length => _length;
 
@@ -416,6 +438,30 @@ public class OwnerPacket : MemoryManager<Byte>, IPacket, IOwnerPacket
     ///// <param name="offset">偏移</param>
     ///// <param name="count">个数。默认-1表示到末尾</param>
     //IPacket IPacket.Slice(Int32 offset, Int32 count) => Slice(offset, count);
+
+    /// <summary>重新设置数据包大小。一般用于申请缓冲区并读取数据后设置为实际大小</summary>
+    /// <param name="size"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public OwnerPacket Resize(Int32 size)
+    {
+        if (size < 0) throw new ArgumentNullException(nameof(size));
+
+        if (Next == null)
+        {
+            if (size > _buffer.Length) throw new ArgumentOutOfRangeException(nameof(size));
+
+            _length = size;
+        }
+        else
+        {
+            if (size < _length)
+                _length = size;
+            else
+                throw new NotSupportedException();
+        }
+
+        return this;
+    }
 
     /// <summary>切片得到新数据包，同时转移内存管理权，当前数据包应尽快停止使用</summary>
     /// <remarks>
