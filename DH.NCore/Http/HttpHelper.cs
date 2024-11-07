@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Reflection;
@@ -60,11 +61,12 @@ public static class HttpHelper
     /// </remarks>
     /// <param name="useProxy">是否使用代理</param>
     /// <param name="useCookie">是否使用Cookie</param>
+    /// <param name="ignoreSSL">是否忽略证书检验</param>
     /// <returns></returns>
-    public static HttpMessageHandler CreateHandler(Boolean useProxy, Boolean useCookie)
+    public static HttpMessageHandler CreateHandler(Boolean useProxy, Boolean useCookie, Boolean ignoreSSL)
     {
 #if NET5_0_OR_GREATER
-        return new SocketsHttpHandler
+        var hander = new SocketsHttpHandler
         {
             UseProxy = useProxy,
             UseCookies = useCookie,
@@ -72,21 +74,48 @@ public static class HttpHelper
             PooledConnectionLifetime = TimeSpan.FromMinutes(5),
             ConnectCallback = ConnectCallback,
         };
+
+        if (ignoreSSL)
+        {
+            hander.SslOptions = new SslClientAuthenticationOptions
+            {
+                RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+        }
+
+        return hander;
 #elif NETCOREAPP3_0_OR_GREATER
-        return new SocketsHttpHandler
+        var hander = new SocketsHttpHandler
         {
             UseProxy = useProxy,
             UseCookies = useCookie,
             AutomaticDecompression = DecompressionMethods.All,
             PooledConnectionLifetime = TimeSpan.FromMinutes(5),
         };
+
+        if (ignoreSSL)
+        {
+            hander.SslOptions = new SslClientAuthenticationOptions
+            {
+                RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+        }
+
+        return hander;
 #else
-        return new HttpClientHandler
+        var hander = new HttpClientHandler
         {
             UseProxy = useProxy,
             UseCookies = useCookie,
             AutomaticDecompression = DecompressionMethods.GZip
         };
+
+        if (ignoreSSL)
+        {
+            ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+        }
+
+        return hander;
 #endif
     }
 

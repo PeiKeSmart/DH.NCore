@@ -91,7 +91,7 @@ public class NetworkLog : Logger, IDisposable
                 case NetType.Http:
                 case NetType.Https:
                 case NetType.WebSocket:
-                    var handler = HttpHelper.CreateHandler(false, false);
+                    var handler = HttpHelper.CreateHandler(false, false, false);
                     var http = new HttpClient(handler)
                     {
                         BaseAddress = new Uri(Server)

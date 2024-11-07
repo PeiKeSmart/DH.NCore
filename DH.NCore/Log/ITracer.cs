@@ -288,7 +288,7 @@ public static class TracerExtension
     /// <returns></returns>
     public static HttpClient CreateHttpClient(this ITracer? tracer, HttpMessageHandler? handler = null)
     {
-        handler ??= HttpHelper.CreateHandler(false, false);
+        handler ??= HttpHelper.CreateHandler(false, false, false);
 
         var client = tracer == null ?
             new HttpClient(handler) :
