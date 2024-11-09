@@ -258,16 +258,9 @@ public class DefaultConvert
 
         try
         {
-            // 转换接口
-            if (value is IConvertible conv) return conv.ToInt32(null);
-
-            //return Convert.ToInt32(value);
+            return Convert.ToInt32(value);
         }
-        catch { }
-
-        // 转字符串再转整数，作为兜底方案
-        var str2 = value.ToString();
-        return !str2.IsNullOrEmpty() && Int32.TryParse(str2.Trim(), out var n2) ? n2 : defaultValue;
+        catch { return defaultValue; }
     }
 
     /// <summary>转为长整数。支持字符串、全角、字节数组（小端）、时间（Unix毫秒）</summary>
@@ -340,18 +333,12 @@ public class DefaultConvert
             }
         }
 
+        //暂时不做处理  先处理异常转换
         try
         {
-            // 转换接口
-            if (value is IConvertible conv) return conv.ToInt64(null);
-
-            //return Convert.ToInt64(value);
+            return Convert.ToInt64(value);
         }
-        catch { }
-
-        // 转字符串再转整数，作为兜底方案
-        var str2 = value.ToString();
-        return !str2.IsNullOrEmpty() && Int64.TryParse(str2.Trim(), out var n2) ? n2 : defaultValue;
+        catch { return defaultValue; }
     }
 
     /// <summary>转为浮点数</summary>
@@ -390,16 +377,9 @@ public class DefaultConvert
 
         try
         {
-            // 转换接口
-            if (value is IConvertible conv) return conv.ToDouble(null);
-
-            //return Convert.ToDouble(value);
+            return Convert.ToDouble(value);
         }
-        catch { }
-
-        // 转字符串再转整数，作为兜底方案
-        var str2 = value.ToString();
-        return !str2.IsNullOrEmpty() && Double.TryParse(str2.Trim(), out var n2) ? n2 : defaultValue;
+        catch { return defaultValue; }
     }
 
     /// <summary>转为高精度浮点数</summary>
@@ -471,16 +451,9 @@ public class DefaultConvert
 
         try
         {
-            // 转换接口
-            if (value is IConvertible conv) return conv.ToDecimal(null);
-
-            //return Convert.ToDecimal(value);
+            return Convert.ToDecimal(value);
         }
-        catch { }
-
-        // 转字符串再转整数，作为兜底方案
-        var str2 = value.ToString();
-        return !str2.IsNullOrEmpty() && Decimal.TryParse(str2.Trim(), out var n2) ? n2 : defaultValue;
+        catch { return defaultValue; }
     }
 
     /// <summary>转为布尔型。支持大小写True/False、0和非零</summary>
@@ -516,16 +489,9 @@ public class DefaultConvert
 
         try
         {
-            // 转换接口
-            if (value is IConvertible conv) return conv.ToBoolean(null);
-
-            //return Convert.ToBoolean(value);
+            return Convert.ToBoolean(value);
         }
-        catch { }
-
-        // 转字符串再转整数，作为兜底方案
-        var str2 = value.ToString();
-        return !str2.IsNullOrEmpty() && Boolean.TryParse(str2.Trim(), out var n2) ? n2 : defaultValue;
+        catch { return defaultValue; }
     }
 
     /// <summary>转为时间日期，转换失败时返回最小时间。支持字符串、整数（Unix秒）</summary>
@@ -592,15 +558,12 @@ public class DefaultConvert
 
         try
         {
-            // 转换接口
-            if (value is IConvertible conv) return conv.ToDateTime(null);
-
-            //return Convert.ToDateTime(value);
+            return Convert.ToDateTime(value);
         }
-        catch { }
-
-        // 转字符串再转整数，作为兜底方案
-        return ToDateTime(value.ToString(), defaultValue);
+        catch
+        {
+            return defaultValue;
+        }
     }
 
     /// <summary>转为时间日期，转换失败时返回最小时间。支持字符串、整数（Unix秒）</summary>
