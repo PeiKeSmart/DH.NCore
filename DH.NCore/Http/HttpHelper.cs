@@ -61,6 +61,16 @@ public static class HttpHelper
     /// </remarks>
     /// <param name="useProxy">是否使用代理</param>
     /// <param name="useCookie">是否使用Cookie</param>
+    /// <returns></returns>
+    public static HttpMessageHandler CreateHandler(Boolean useProxy, Boolean useCookie) => CreateHandler(useProxy, useCookie, false);
+
+    /// <summary>为HttpClient创建Socket处理器，默认设置连接生命为5分钟，有效反映DNS网络更改</summary>
+    /// <remarks>
+    /// PooledConnectionLifetime 属性定义池中的最大连接生存期，从建立连接的时间跟踪其年龄，而不考虑其空闲时间或活动时间。
+    /// 在主动用于服务请求时，连接不会被拆毁。此生存期非常有用，以便定期重新建立连接，以便更好地反映 DNS 或其他网络更改。
+    /// </remarks>
+    /// <param name="useProxy">是否使用代理</param>
+    /// <param name="useCookie">是否使用Cookie</param>
     /// <param name="ignoreSSL">是否忽略证书检验</param>
     /// <returns></returns>
     public static HttpMessageHandler CreateHandler(Boolean useProxy, Boolean useCookie, Boolean ignoreSSL)
@@ -480,7 +490,12 @@ public static class HttpHelper
     public static String GetString(this HttpClient client, String requestUri, IDictionary<String, String>? headers = null)
     {
         if (headers != null) client.AddHeaders(headers);
+#if NET5_0_OR_GREATER
+        using var source = new CancellationTokenSource(client.Timeout);
+        return client.GetStringAsync(requestUri, source.Token).ConfigureAwait(false).GetAwaiter().GetResult();
+#else
         return client.GetStringAsync(requestUri).ConfigureAwait(false).GetAwaiter().GetResult();
+#endif
     }
 
     private static async Task<String> PostAsync(HttpClient client, String requestUri, HttpContent content, IDictionary<String, String>? headers, CancellationToken cancellationToken)

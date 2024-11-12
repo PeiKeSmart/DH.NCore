@@ -5,6 +5,9 @@ using System.Net.Sockets;
 using NewLife.Data;
 using NewLife.Log;
 using NewLife.Model;
+#if !NET45
+using TaskEx = System.Threading.Tasks.Task;
+#endif
 
 namespace NewLife.Net;
 
@@ -490,7 +493,7 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
 
                     // 同步执行，直接使用数据，不需要拷贝
                     // 直接在IO线程调用业务逻辑
-                    ProcessReceive(pk, se.ReceiveMessageFromPacketInfo.Address, ep);
+                    ProcessReceive(pk, se, ep);
                 }
             }
 
@@ -519,15 +522,16 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
 
     /// <summary>接收预处理，粘包拆包</summary>
     /// <param name="pk">数据包</param>
-    /// <param name="local">接收数据的本地地址</param>
+    /// <param name="se">socket异步事件</param>
     /// <param name="remote">远程地址</param>
-    private void ProcessReceive(IPacket pk, IPAddress local, IPEndPoint remote)
+    private void ProcessReceive(IPacket pk, SocketAsyncEventArgs se, IPEndPoint remote)
     {
         // 打断上下文调用链，这里必须是起点
         DefaultSpan.Current = null;
 
         var total = pk.Length;
-        using var span = Tracer?.NewSpan($"net:{Name}:ProcessReceive", total + "", total);
+        var local = se.ReceiveMessageFromPacketInfo.Address;
+        using var span = Tracer?.NewSpan($"net:{Name}:ProcessReceive", new { total, local, remote }, total);
         try
         {
             LastTime = DateTime.Now;
@@ -550,6 +554,7 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
             {
                 var ctx = CreateContext(ss);
                 ctx.Data = e;
+                ctx.EventArgs = se;
 
                 // 进入管道处理，如果有一个或多个结果通过Finish来处理
                 pp.Read(ctx, pk);
@@ -650,16 +655,16 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
         try
         {
             var ctx = CreateContext(this);
+#if NET45
             var source = new TaskCompletionSource<Object>();
+#else
+            var source = new TaskCompletionSource<Object>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
             ctx["TaskSource"] = source;
             ctx["Span"] = span;
 
             var rs = (Int32)(Pipeline.Write(ctx, message) ?? 0);
-#if NET45
-            if (rs < 0) return Task.FromResult(0);
-#else
-            if (rs < 0) return Task.CompletedTask;
-#endif
+            if (rs < 0) return TaskEx.CompletedTask;
 
             return await source.Task;
         }
@@ -685,16 +690,16 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
         try
         {
             var ctx = CreateContext(this);
+#if NET45
             var source = new TaskCompletionSource<Object>();
+#else
+            var source = new TaskCompletionSource<Object>(TaskCreationOptions.RunContinuationsAsynchronously);
+#endif
             ctx["TaskSource"] = source;
             ctx["Span"] = span;
 
             var rs = (Int32)(Pipeline.Write(ctx, message) ?? 0);
-#if NET45
-            if (rs < 0) return Task.FromResult(0);
-#else
-            if (rs < 0) return Task.CompletedTask;
-#endif
+            if (rs < 0) return TaskEx.CompletedTask;
 
             // 注册取消时的处理，如果没有收到响应，取消发送等待
             // Register返回值需要Dispose，否则会导致内存泄漏
