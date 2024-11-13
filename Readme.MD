@@ -9,3 +9,5 @@
 + **[多线程]** 定时调度TimerX
 + **[APM]** 性能追踪，分布式应用必备
 + **[序列化]** Binary/Json/Xml
+
+各项目默认支持net9.0/netstandard2.1/netstandard2.0/net4.61/net4.5
