@@ -49,7 +49,7 @@ public class PathHelperTests
     [Fact]
     public void DirectoryCompress()
     {
-        var dst = "alg.zip".AsFile();
+        var dst = "alg2.zip".AsFile();
         var src = "Algorithms".AsDirectory();
 
         if (dst.Exists) dst.Delete();

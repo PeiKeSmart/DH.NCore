@@ -32,7 +32,11 @@ public class CsvFileTests
         }
 
         var txt = ms.ToArray().ToStr();
+#if NET462
+        var lines = txt.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
+#else
         var lines = txt.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+#endif
         Assert.Equal(3, lines.Length);
         Assert.Equal("Code,Name,Enable,CreateTime", lines[0]);
         Assert.Equal($"1234,Stone,1,{((DateTime)list[0][3]).ToFullString()}", lines[1]);
@@ -112,7 +116,7 @@ public class CsvFileTests
         }
 
         var txt = ms.ToArray().ToStr();
-        var lines = txt.Split(Environment.NewLine);
+        var lines = txt.Split([Environment.NewLine], StringSplitOptions.None);
         Assert.Equal(6, lines.Length);
         Assert.Equal("Code,Name,Enable,CreateTime", lines[0]);
         Assert.Equal($"1234,Stone,1,{((DateTime)list[0][3]).ToFullString()}", lines[1]);
