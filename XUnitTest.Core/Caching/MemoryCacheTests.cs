@@ -14,7 +14,7 @@ using Xunit;
 
 namespace XUnitTest.Caching;
 
-[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "DH.UnitTest")]
+[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "NewLife.UnitTest")]
 public class MemoryCacheTests
 {
     public MemoryCache Cache { get; set; }
@@ -207,6 +207,7 @@ public class MemoryCacheTests
         Assert.Equal(pk.ToHex(), pk2.ToHex());
     }
 
+#if NET6_0_OR_GREATER
     [Fact(DisplayName = "正常锁")]
     public void TestLock1()
     {
@@ -285,6 +286,7 @@ public class MemoryCacheTests
         //Assert.True(sw.ElapsedMilliseconds >= 500);
         //Assert.True(sw.ElapsedMilliseconds <= 1000);
     }
+#endif
 
     [Theory]
     [InlineData(false)]
