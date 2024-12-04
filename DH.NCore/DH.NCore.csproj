@@ -30,7 +30,7 @@
     <RepositoryUrl>https://github.com/PeiKeSmart/DH.NCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>湖北登灏科技有限公司;DH组件;DH;$(AssemblyName)</PackageTags>
-    <PackageReleaseNotes>改进IPacket；v3.91目标是优化内存占用降低GC；</PackageReleaseNotes>
+    <PackageReleaseNotes>优化ITracer/ISpan埋点架构，减少GC；优化await状态机，减少UI上下文捕获；改进IPacket；目标是优化内存占用降低GC</PackageReleaseNotes>
 	  <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
