@@ -106,7 +106,6 @@ public class SaltPasswordProvider : IPasswordProvider
     /// <returns></returns>
     public Boolean Verify(String password, String hash)
     {
-        XTrace.WriteLine($"排查数据：{password}:{hash}");
         var ss = hash?.Split('$');
         if (ss == null || ss.Length == 0) throw new ArgumentNullException(nameof(hash));
 
@@ -140,7 +139,8 @@ public class SaltPasswordProvider : IPasswordProvider
                 // 传输密码是MD5哈希
                 return ss[3] == password.GetBytes().SHA1(salt.GetBytes()).ToBase64();
             case "md5+sha512":
-                return ss[3] == password.GetBytes().SHA512(salt.GetBytes()).ToBase64();
+                if (ss[3] == password.GetBytes().SHA512(salt.GetBytes()).ToBase64()) return true;
+                return ss[3] == password.MD5().GetBytes().SHA1(salt.GetBytes()).ToBase64();
             default:
                 throw new NotSupportedException($"Unsupported password hash mode [{ss[1]}]");
         }
