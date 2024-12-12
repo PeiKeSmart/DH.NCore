@@ -1,4 +1,5 @@
 ﻿using NewLife.Collections;
+using NewLife.Log;
 
 namespace NewLife.Security;
 
@@ -105,6 +106,7 @@ public class SaltPasswordProvider : IPasswordProvider
     /// <returns></returns>
     public Boolean Verify(String password, String hash)
     {
+        XTrace.WriteLine($"排查数据：{password}:{hash}");
         var ss = hash?.Split('$');
         if (ss == null || ss.Length == 0) throw new ArgumentNullException(nameof(hash));
 
