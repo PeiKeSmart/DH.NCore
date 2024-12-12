@@ -140,7 +140,7 @@ public class SaltPasswordProvider : IPasswordProvider
                 return ss[3] == password.GetBytes().SHA1(salt.GetBytes()).ToBase64();
             case "md5+sha512":
                 if (ss[3] == password.GetBytes().SHA512(salt.GetBytes()).ToBase64()) return true;
-                return ss[3] == password.MD5().GetBytes().SHA1(salt.GetBytes()).ToBase64();
+                return ss[3] == password.MD5().GetBytes().SHA512(salt.GetBytes()).ToBase64();
             default:
                 throw new NotSupportedException($"Unsupported password hash mode [{ss[1]}]");
         }
