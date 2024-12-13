@@ -1,4 +1,5 @@
 ﻿using NewLife.Collections;
+using NewLife.Log;
 
 namespace NewLife.Security;
 
