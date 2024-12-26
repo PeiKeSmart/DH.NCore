@@ -25,8 +25,8 @@
     <None Remove="Model\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DH.NCode" Version="4.0.2024.1213-beta0910" />
-    <PackageReference Include="DH.NStardust" Version="4.0.2024.1218-beta1150" />
+    <PackageReference Include="DH.NCode" Version="4.0.2024.1224-beta0218" />
+    <PackageReference Include="DH.NStardust" Version="4.0.2024.1224-beta0253" />
     <!--<PackageReference Include="System.Speech" Version="7.0.0" />-->
   </ItemGroup>
   <ItemGroup>
