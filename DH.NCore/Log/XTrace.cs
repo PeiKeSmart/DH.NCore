@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -37,13 +38,14 @@ public static class XTrace
 
     /// <summary>输出日志</summary>
     /// <param name="msg">信息</param>
-    public static void WriteLine(String msg)
+    /// <param name="memberName">方法名</param>
+    public static void WriteLine(String msg, [CallerMemberName] String memberName = "")
     {
         if (!InitLog()) return;
 
         WriteVersion();
 
-        Log.Info(msg);
+        Log.Info(memberName + ":" + msg);
     }
 
     /// <summary>写日志</summary>
