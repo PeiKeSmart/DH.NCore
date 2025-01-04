@@ -28,6 +28,10 @@ public class Setting : Config<Setting>
     [Description("文件日志目录。默认Log子目录")]
     public String LogPath { get; set; } = "";
 
+    /// <summary>显示引用方法名。默认false</summary>
+    [Description("显示引用方法名。默认false")]
+    public Boolean LogShowMethodName { get; set; }
+
     /// <summary>日志文件上限。超过上限后拆分新日志文件，默认10MB，0表示不限制大小</summary>
     [Description("日志文件上限。超过上限后拆分新日志文件，默认10MB，0表示不限制大小")]
     public Int32 LogFileMaxBytes { get; set; } = 10;
