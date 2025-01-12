@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -44,15 +43,6 @@ public static class XTrace
 
         WriteVersion();
 
-        if (Setting.Current.LogShowMethodName)
-        {
-            var method = new StackFrame(1).GetMethod();
-            var methodName = method?.DeclaringType != null ? $"{method.DeclaringType.Name}.{method.Name}" : method?.Name;
-
-            Log.Info($"[{methodName}]:{msg}");
-            return;
-        }
-
         Log.Info(msg);
     }
 
@@ -64,15 +54,6 @@ public static class XTrace
         if (!InitLog()) return;
 
         WriteVersion();
-
-        if (Setting.Current.LogShowMethodName)
-        {
-            var method = new StackFrame(1).GetMethod();
-            var methodName = method?.DeclaringType != null ? $"{method.DeclaringType.Name}.{method.Name}" : method?.Name;
-
-            Log.Info($"[{methodName}]:{format}", args);
-            return;
-        }
 
         Log.Info(format, args);
     }
