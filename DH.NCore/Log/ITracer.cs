@@ -292,7 +292,7 @@ public class DefaultTracer : DisposeBase, ITracer, ILogFeature
         // 设置结束时间
         foreach (var item in bs2)
         {
-            item.EndTime = Runtime.UtcNow.ToLong();
+            item.EndTime = DateTime.UtcNow.ToLong();
         }
 
         return bs2;

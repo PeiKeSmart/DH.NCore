@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using NewLife;
 using NewLife.Log;
 using NewLife.Serialization;
 using Xunit;
@@ -46,7 +45,7 @@ public class TracerTests
             Assert.NotEmpty(span.TraceId);
             Assert.NotEmpty(span.Id);
             Assert.Null(span.ParentId);
-            Assert.Equal(Runtime.UtcNow.ToLocalTime().Date, span.StartTime.ToDateTime().ToLocalTime().Date);
+            Assert.Equal(DateTime.Today, span.StartTime.ToDateTime().ToLocalTime().Date);
 
             Assert.Equal(span, DefaultSpan.Current);
 

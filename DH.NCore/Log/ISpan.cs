@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Net.Http;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Web.Script.Serialization;
@@ -153,7 +155,7 @@ public class DefaultSpan : ISpan
     /// <summary>设置跟踪标识</summary>
     public virtual void Start()
     {
-        StartTime = Runtime.UtcNow.ToLong();
+        StartTime = DateTime.UtcNow.ToLong();
 
         //if (Id.IsNullOrEmpty()) Id = Rand.NextBytes(8).ToHex().ToLower();
         if (Id.IsNullOrEmpty()) Id = CreateId();
@@ -204,7 +206,7 @@ public class DefaultSpan : ISpan
 
         var sb = Pool.StringBuilder.Get();
         sb.Append(_myip);
-        sb.Append(Runtime.UtcNow.ToLong());
+        sb.Append(DateTime.UtcNow.ToLong());
         var id = Interlocked.Increment(ref _seq2) & 0xFFFF;
         sb.Append(id.ToString("x4").PadLeft(4, '0'));
         sb.Append('e');
@@ -219,7 +221,7 @@ public class DefaultSpan : ISpan
     {
         if (Interlocked.CompareExchange(ref _finished, 1, 0) != 0) return;
 
-        EndTime = Runtime.UtcNow.ToLong();
+        EndTime = DateTime.UtcNow.ToLong();
 
         // 从本线程中清除跟踪标识
         Current = _parent;
