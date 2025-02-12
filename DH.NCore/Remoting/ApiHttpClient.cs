@@ -123,20 +123,33 @@ public class ApiHttpClient : DisposeBase, IApiClient, IConfigMapping, ILogFeatur
             Name = name
         };
 
-        // 解析名称
-        var p = url.IndexOf('=');
+        // master=3*http://newlifex.com
+        var p = url.IndexOf("://");
         if (p > 0)
         {
-            svc.Name = url[..p];
-            url = url[(p + 1)..];
+            // 解析名称
+            var p2 = url.IndexOf('=');
+            if (p2 > 0 && p2 < p)
+            {
+                svc.Name = url[..p2];
+                url = url[(p2 + 1)..];
+            }
+
+            // 解析权重
+            p = url.IndexOf("://");
+            p2 = url.IndexOf("*http", StringComparison.OrdinalIgnoreCase);
+            if (p2 > 0 && p2 < p)
+            {
+                svc.Weight = url[..p2].ToInt();
+                url = url[(p2 + 1)..];
+            }
         }
 
-        // 解析权重
-        p = url.IndexOf("*http");
+        p = url.IndexOf("#token=", StringComparison.OrdinalIgnoreCase);
         if (p > 0)
         {
-            svc.Weight = url[..p].ToInt();
-            url = url[(p + 1)..];
+            svc.Token = url[(p + 7)..];
+            url = url[..p];
         }
 
         svc.Address = new Uri(url);
@@ -370,6 +383,8 @@ public class ApiHttpClient : DisposeBase, IApiClient, IConfigMapping, ILogFeatur
 
                 client = CreateClient();
                 client.BaseAddress = service.Address;
+                if (!service.Token.IsNullOrEmpty()) Token = service.Token;
+
                 service.Client = client;
                 service.CreateTime = DateTime.Now;
             }
@@ -546,6 +561,9 @@ public class ApiHttpClient : DisposeBase, IApiClient, IConfigMapping, ILogFeatur
 
         /// <summary>权重。用于负载均衡，默认1</summary>
         public Int32 Weight { get; set; } = 1;
+
+        /// <summary>访问令牌</summary>
+        public String? Token { get; set; }
 
         /// <summary>轮询均衡时，本项第几次使用</summary>
         internal Int32 Index;
