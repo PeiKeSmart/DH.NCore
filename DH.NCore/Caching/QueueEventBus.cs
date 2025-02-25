@@ -5,21 +5,11 @@ using NewLife.Messaging;
 namespace NewLife.Caching;
 
 /// <summary>消息队列事件总线。通过消息队列来发布和订阅消息</summary>
-public class QueueEventBus<TEvent> : EventBus<TEvent>
+/// <remarks>实例化消息队列事件总线</remarks>
+public class QueueEventBus<TEvent>(ICache cache, String topic) : EventBus<TEvent>
 {
     private IProducerConsumer<TEvent>? _queue;
-    private readonly ICache _cache;
-    private readonly String _topic;
-    private readonly String _clientId;
-    CancellationTokenSource? _source;
-
-    /// <summary>实例化消息队列事件总线</summary>
-    public QueueEventBus(ICache cache, String topic, String clientId)
-    {
-        _cache = cache;
-        _topic = topic;
-        _clientId = clientId;
-    }
+    private CancellationTokenSource? _source;
 
     /// <summary>销毁</summary>
     /// <param name="disposing"></param>
@@ -36,13 +26,14 @@ public class QueueEventBus<TEvent> : EventBus<TEvent>
     {
         if (_queue != null) return;
 
-        _queue = _cache.GetQueue<TEvent>(_topic);
+        _queue = cache.GetQueue<TEvent>(topic);
     }
 
     /// <summary>发布消息到消息队列</summary>
     /// <param name="event">事件</param>
     /// <param name="context">上下文</param>
-    public override Task<Int32> PublishAsync(TEvent @event, IEventContext<TEvent>? context = null)
+    /// <param name="cancellationToken">取消令牌</param>
+    public override Task<Int32> PublishAsync(TEvent @event, IEventContext<TEvent>? context = null, CancellationToken cancellationToken = default)
     {
         Init();
         var rs = _queue.Add(@event);
@@ -83,7 +74,7 @@ public class QueueEventBus<TEvent> : EventBus<TEvent>
                 if (msg != null)
                 {
                     // 发布到事件总线
-                    await base.PublishAsync(msg).ConfigureAwait(false);
+                    await DispatchAsync(msg, null, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
