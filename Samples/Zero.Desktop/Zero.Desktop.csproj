@@ -28,7 +28,7 @@
   <ItemGroup>
     <PackageReference Include="DH.NRemoting" Version="4.11.2025.314-beta1114" />
     <PackageReference Include="DH.NStardust" Version="4.11.2025.314-beta1133" />
-    <PackageReference Include="System.Speech" Version="9.0.3" />
+    <PackageReference Include="System.Speech" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
