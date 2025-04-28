@@ -1,5 +1,4 @@
 ﻿using System.Text;
-
 using NewLife;
 using NewLife.IO;
 using Xunit;

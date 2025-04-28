@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using NewLife;
+﻿using NewLife;
 using NewLife.Algorithms;
 using NewLife.Data;
 using NewLife.IO;

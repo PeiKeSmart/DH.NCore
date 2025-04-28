@@ -4,7 +4,7 @@ using Xunit;
 
 namespace XUnitTest.IO;
 
-[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "DH.UnitTest")]
+[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "NewLife.UnitTest")]
 public class PathHelperTests
 {
     [Fact]
@@ -28,7 +28,7 @@ public class PathHelperTests
     public void FileCompress()
     {
         var dst = "xml.zip".AsFile();
-        var src = "DH.NCore.xml".AsFile();
+        var src = "NewLife.Core.xml".AsFile();
 
         if (dst.Exists) dst.Delete();
 
