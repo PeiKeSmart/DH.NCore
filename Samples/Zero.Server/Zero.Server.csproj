@@ -20,8 +20,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DH.NRedis" Version="4.12.2025.514-beta0916" />
-    <PackageReference Include="DH.NStardust" Version="4.12.2025.520-beta0330" />
+    <PackageReference Include="DH.NRedis" Version="4.12.2025.530-beta0630" />
+    <PackageReference Include="DH.NStardust" Version="4.12.2025.530-beta0627" />
   </ItemGroup>
 
   <ItemGroup>
