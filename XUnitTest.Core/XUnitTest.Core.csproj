@@ -70,7 +70,7 @@
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net9.0'">
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DH.NCore\DH.NCore.csproj" />
