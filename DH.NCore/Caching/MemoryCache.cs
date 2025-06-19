@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+
 using NewLife.Data;
 using NewLife.Log;
 using NewLife.Messaging;
@@ -1025,6 +1026,17 @@ public class MemoryQueue<T> : DisposeBase, IProducerConsumer<T>
 
         return _collection.TryTake(out var item) ? item : default;
     }
+
+    /// <summary>异步消费获取一个，将消息Id抛出便于确认</summary>
+    /// <param name="timeout">超时。单位秒，0秒表示永久等待</param>
+    /// <returns></returns>
+    public async Task<(T?, String)> TakeOneAckAsync(Int32 timeout = 0) => (await TakeOneAsync(timeout).ConfigureAwait(false), "0");
+
+    /// <summary>异步消费获取一个，将消息Id抛出便于确认</summary>
+    /// <param name="timeout">超时。单位秒，0秒表示永久等待</param>
+    /// <param name="cancellationToken">取消通知</param>
+    /// <returns></returns>
+    public async Task<(T?, String)> TakeOneAckAsync(Int32 timeout, CancellationToken cancellationToken) => (await TakeOneAsync(timeout, cancellationToken).ConfigureAwait(false), "0");
 
     /// <summary>确认消费</summary>
     /// <param name="keys"></param>
