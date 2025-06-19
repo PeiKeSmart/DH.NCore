@@ -39,17 +39,6 @@ public interface IProducerConsumer<T>
     /// <returns></returns>
     Task<T?> TakeOneAsync(Int32 timeout, CancellationToken cancellationToken);
 
-    /// <summary>异步消费获取一个，将消息Id抛出便于确认</summary>
-    /// <param name="timeout">超时。单位秒，0秒表示永久等待</param>
-    /// <returns></returns>
-    Task<(T?, String)> TakeOneAckAsync(Int32 timeout = 0);
-
-    /// <summary>异步消费获取一个，将消息Id抛出便于确认</summary>
-    /// <param name="timeout">超时。单位秒，0秒表示永久等待</param>
-    /// <param name="cancellationToken">取消通知</param>
-    /// <returns></returns>
-    Task<(T?, String)> TakeOneAckAsync(Int32 timeout, CancellationToken cancellationToken);
-
     /// <summary>确认消费</summary>
     /// <param name="keys"></param>
     /// <returns></returns>
