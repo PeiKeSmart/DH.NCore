@@ -1,4 +1,6 @@
-﻿namespace NewLife.Caching;
+﻿using NewLife.Messaging;
+
+namespace NewLife.Caching;
 
 /// <summary>轻量级生产者消费者接口</summary>
 /// <remarks>
@@ -38,6 +40,17 @@ public interface IProducerConsumer<T>
     /// <param name="cancellationToken">取消通知</param>
     /// <returns></returns>
     Task<T?> TakeOneAsync(Int32 timeout, CancellationToken cancellationToken);
+
+    /// <summary>异步消费获取一个</summary>
+    /// <param name="timeout">超时时间，默认0秒永远阻塞</param>
+    /// <returns></returns>
+    Task<Message?> TakeMessageAsync(Int32 timeout = 0);
+
+    /// <summary>异步消费获取一个</summary>
+    /// <param name="timeout">超时时间，默认0秒永远阻塞</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
+    Task<Message?> TakeMessageAsync(Int32 timeout = 0, CancellationToken cancellationToken = default);
 
     /// <summary>确认消费</summary>
     /// <param name="keys"></param>
