@@ -26,7 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DH.NCode" Version="4.12.2025.618-beta0923" />
-    <PackageReference Include="DH.NStardust" Version="4.12.2025.617-beta1017" />
+    <PackageReference Include="DH.NStardust" Version="4.12.2025.621-beta0339" />
     <!--<PackageReference Include="System.Speech" Version="7.0.0" />-->
   </ItemGroup>
   <ItemGroup>
