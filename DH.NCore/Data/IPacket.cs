@@ -102,11 +102,12 @@ public static class PacketHelper
     public static String ToStr(this IPacket pk, Encoding? encoding = null, Int32 offset = 0, Int32 count = -1)
     {
         // 总是有异常数据，这里屏蔽异常
-        if (pk == null) return null!;
+        if (pk.Total == 0) return String.Empty;
 
         if (pk.Next == null)
         {
-            if (count < 0) count = pk.Length - offset;
+            if (count == 0) return String.Empty;
+
             var span = pk.GetSpan();
             if (span.Length > count) span = span[..count];
 
