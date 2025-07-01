@@ -600,7 +600,6 @@ public class JsonWriter
             if (c is not '\t' and not '\n' and not '\r' and not '\"' and not '\\' and >= ' ' and <= '~')
             {
                 if (idx == -1) idx = index;
-
                 continue;
             }
 
