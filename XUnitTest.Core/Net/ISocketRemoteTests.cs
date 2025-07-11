@@ -91,6 +91,7 @@ public class ISocketRemoteTests
         Thread.Sleep(1000);
 
         // 验证接收文件是否完整
+        Assert.NotEmpty(svr.Files);
         target.Flush();
         target.Close();
 
