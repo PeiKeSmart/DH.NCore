@@ -7,7 +7,7 @@
     <Description>Core basic components: log (file / network), configuration (XML / JSON / HTTP), cache (memory / redis), network (TCP / UDP / HTTP), RPC framework, serialization (binary / XML / JSON), APM performance tracking. 核心基础组件，日志（文件/网络）、配置（XML/Json/Http）、缓存（内存/Redis）、网络（Tcp/Udp/Http）、RPC框架、序列化（Binary/XML/Json）、APM性能追踪。</Description>
     <Company>湖北登灏科技有限公司</Company>
     <Copyright>©2020-2024 湖北登灏科技有限公司</Copyright>
-    <VersionPrefix>4.13</VersionPrefix>
+    <VersionPrefix>4.14</VersionPrefix>
     <VersionSuffix>$([System.DateTime]::Now.ToString(`yyyy.MMdd`))</VersionSuffix>
     <Version>$(VersionPrefix).$(VersionSuffix)</Version>
     <FileVersion>$(Version)</FileVersion>
@@ -30,7 +30,7 @@
     <RepositoryUrl>https://github.com/PeiKeSmart/DH.NCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>湖北登灏科技有限公司;DH组件;DH;$(AssemblyName)</PackageTags>
-    <PackageReleaseNotes>改进ChangeType；浮点数转换支持科学计数法</PackageReleaseNotes>
+    <PackageReleaseNotes>改进Host.Close让应用有序退出；增强DbTable的大数据文件读写能力，支持机器学场景；优化Binary二进制读写，支持压缩数据流；改进Linux内存采集；改进ExcelReader对常规数字的读取；</PackageReleaseNotes>
 	  <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
