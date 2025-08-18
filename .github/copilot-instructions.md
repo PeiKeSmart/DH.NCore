@@ -17,7 +17,7 @@ PeiKeSmart框架是一个全面的 .NET 组件生态系统，它为构建可扩�
 - `/Test` 和 `/Test2`：包含可运行的局部模块测试用例代码，用于验证功能
 - `/XUnitTest.Core`：包含xUnit单元测试源代码，确保代码质量
 - `/Samples`：包含较完整的示例项目代码，包括Zero.HttpServer、Zero.EchoServer、Zero.Server、Zero.Desktop等
-- `/Doc`：包含项目文档、图标和签名证书newlife.snk
+- `/Doc`：包含项目文档、图标等
 - `/readme.md`：包含项目总体描述
 
 ## 技术栈和框架特性
@@ -39,7 +39,6 @@ PeiKeSmart框架是一个全面的 .NET 组件生态系统，它为构建可扩�
 ### 技术要求
 - **C#版本**: 最新版(latest)，启用nullable和implicit usings
 - **编译**: 支持Visual Studio和dotnet CLI
-- **强命名**: 使用newlife.snk证书进行强命名签名
 - **文档**: 生成XML文档文件用于IntelliSense
 
 ## 编码规范
