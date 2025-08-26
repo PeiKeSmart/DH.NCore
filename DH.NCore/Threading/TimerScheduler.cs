@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using NewLife.Log;
 using NewLife.Model;
 using NewLife.Reflection;

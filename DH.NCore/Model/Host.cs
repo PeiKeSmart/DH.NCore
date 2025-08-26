@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-
 using NewLife.Log;
 #if !NET45
 using TaskEx = System.Threading.Tasks.Task;
