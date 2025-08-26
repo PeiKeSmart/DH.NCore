@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-
 using NewLife.Collections;
 using NewLife.Data;
 #if !NET45
