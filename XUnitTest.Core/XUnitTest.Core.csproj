@@ -60,7 +60,7 @@
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
     <PackageReference Include="DH.NModbus" Version="3.91.2024.1109-beta0313" />
-    <PackageReference Include="DH.UnitTest" Version="4.13.2025.818-beta0241" />
+    <PackageReference Include="DH.UnitTest" Version="4.13.2025.902-beta1136" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -73,7 +73,7 @@
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.9" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net9.0'">
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.6" />
