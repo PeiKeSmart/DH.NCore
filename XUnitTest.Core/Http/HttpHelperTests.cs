@@ -36,7 +36,7 @@ public class HttpHelperTests
     }
 
     [Fact]
-    public async void PostJson()
+    public async Task PostJson()
     {
         var url = "http://star.newlifex.com/cube/info";
 
@@ -53,7 +53,7 @@ public class HttpHelperTests
     }
 
     [Fact]
-    public async void PostXml()
+    public async Task PostXml()
     {
         var url = "http://star.newlifex.com/cube/info";
 
@@ -61,24 +61,24 @@ public class HttpHelperTests
         var rs = client.PostXml(url, new { state = "1234", state2 = "abcd" });
         Assert.NotNull(rs);
         Assert.Contains("""
-            <_f__AnonymousType0_2>
+            <_f__AnonymousType4_2>
               <state>1234</state>
               <state2>abcd</state2>
-            </_f__AnonymousType0_2>
+            </_f__AnonymousType4_2>
             """, rs);
 
         rs = await client.PostXmlAsync(url, new { state = "1234", state2 = "abcd" });
         Assert.NotNull(rs);
         Assert.Contains("""
-            <_f__AnonymousType0_2>
+            <_f__AnonymousType4_2>
               <state>1234</state>
               <state2>abcd</state2>
-            </_f__AnonymousType0_2>
+            </_f__AnonymousType4_2>
             """, rs);
     }
 
     [Fact]
-    public async void PostForm()
+    public async Task PostForm()
     {
         var url = "http://star.newlifex.com/cube/info";
 
@@ -127,7 +127,7 @@ public class HttpHelperTests
     }
 
     [Fact]
-    public async void UploadFile()
+    public async Task UploadFile()
     {
         var url = "http://star.newlifex.com/cube/info";
         var file = "up.txt";
