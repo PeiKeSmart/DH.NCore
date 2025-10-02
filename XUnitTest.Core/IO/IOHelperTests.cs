@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using NewLife;
 using NewLife.Data;
 using Xunit;
@@ -209,7 +210,7 @@ public class IOHelperTests
         v = -1.2345f;
         buf = BitConverter.GetBytes(v);
 
-        buf = buf.Reverse().ToArray();
+        Array.Reverse(buf); // 原地反转避免创建新数组
         value = buf.ToSingle(0, false);
         Assert.Equal(v, value);
 
@@ -236,7 +237,7 @@ public class IOHelperTests
         v = -1.2345d;
         buf = BitConverter.GetBytes(v);
 
-        buf = buf.Reverse().ToArray();
+        Array.Reverse(buf); // 原地反转避免创建新数组
         value = buf.ToDouble(0, false);
         Assert.Equal(v, value);
 
