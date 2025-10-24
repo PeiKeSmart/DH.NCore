@@ -10,13 +10,13 @@ namespace NewLife.Common;
 /// <remarks>
 /// 文档 https://newlifex.com/core/sysconfig
 /// </remarks>
-[Description("用于标识系统的英文名，不能有空格")]
+[DisplayName("系统设置")]
 public class SysConfig : Config<SysConfig>
 {
     #region 属性
     /// <summary>系统名称</summary>
     [DisplayName("系统名称")]
-    [Description("用于标识系统的英文名")]
+    [Description("用于标识系统的英文名，不能有空格")]
     public String Name { get; set; } = "";
 
     /// <summary>系统版本</summary>
