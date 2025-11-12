@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net45;net461;net462;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net45;net461;net462;net8.0;net9.0;net10.0</TargetFrameworks>
     <VersionPrefix>9.0</VersionPrefix>
     <VersionSuffix>$([System.DateTime]::Now.ToString(`yyyy.MMdd`))</VersionSuffix>
     <Version>$(VersionPrefix).$(VersionSuffix)</Version>
@@ -25,8 +25,8 @@
     <None Remove="Model\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DH.NCode" Version="4.14.2025.1009-beta0627" />
-    <PackageReference Include="DH.NStardust" Version="4.15.2025.1002-beta0334" />
+    <PackageReference Include="DH.NCode" Version="4.14.2025.1111-beta0817" />
+    <PackageReference Include="DH.NStardust" Version="4.15.2025.1106-beta0743" />
     <!--<PackageReference Include="System.Speech" Version="7.0.0" />-->
   </ItemGroup>
   <ItemGroup>

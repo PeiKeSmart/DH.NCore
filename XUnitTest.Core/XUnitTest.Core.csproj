@@ -58,10 +58,10 @@
     <EmbeddedResource Include="IO\excel.xlsx" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.4" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.6" />
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
     <PackageReference Include="DH.NModbus" Version="3.91.2024.1109-beta0313" />
-    <PackageReference Include="DH.UnitTest" Version="4.15.2025.1002-beta0255" />
+    <PackageReference Include="DH.UnitTest" Version="4.15.2025.1024-beta1235" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.9.3" />
