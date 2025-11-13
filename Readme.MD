@@ -10,4 +10,4 @@
 + **[APM]** 性能追踪，分布式应用必备
 + **[序列化]** Binary/Json/Xml
 
-各项目默认支持net9.0/netstandard2.1/netstandard2.0/net4.61/net4.5
+各项目默认支持net10.0/netstandard2.1/netstandard2.0/net4.62/net4.5，旧版（2024.0801）支持net4.0/net2.0  
