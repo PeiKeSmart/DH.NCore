@@ -13,6 +13,7 @@ using System.Runtime.Versioning;
 using System.Diagnostics.CodeAnalysis;
 using NewLife.Windows;
 using NewLife.Data;
+
 #if NETFRAMEWORK
 using System.Management;
 using Microsoft.VisualBasic.Devices;
