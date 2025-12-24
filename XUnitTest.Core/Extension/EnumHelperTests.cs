@@ -50,14 +50,14 @@ public class EnumHelperTests
         // 包含的标志位
         Assert.True(flags.Has(TestFlags.Read));
         Assert.True(flags.Has(TestFlags.Write));
-        
+
         // 不包含的标志位
         Assert.False(flags.Has(TestFlags.Execute));
-        
+
         // 组合标志位
         Assert.True(flags.Has(TestFlags.ReadWrite));
         Assert.False(flags.Has(TestFlags.All));
-        
+
         // None 标志位
         Assert.False(flags.Has(TestFlags.None));
         var none = TestFlags.None;
@@ -68,14 +68,14 @@ public class EnumHelperTests
     public void Has_EdgeCases_Test()
     {
         var all = TestFlags.All;
-        
+
         // 包含所有标志位
         Assert.True(all.Has(TestFlags.Read));
         Assert.True(all.Has(TestFlags.Write));
         Assert.True(all.Has(TestFlags.Execute));
         Assert.True(all.Has(TestFlags.ReadWrite));
         Assert.True(all.Has(TestFlags.All));
-        
+
         // 单个标志位测试
         var read = TestFlags.Read;
         Assert.True(read.Has(TestFlags.Read));
@@ -159,10 +159,10 @@ public class EnumHelperTests
     {
         // 没有 DescriptionAttribute 但有 DisplayName 的枚举值
         Assert.Null(TestEnum.Third.GetDescription());
-        
+
         // 完全没有属性的枚举值
         Assert.Null(TestEnum.Fourth.GetDescription());
-        
+
         // 没有任何属性的枚举
         Assert.Null(TestEnumWithoutAttributes.Value1.GetDescription());
     }
@@ -225,7 +225,7 @@ public class EnumHelperTests
         Assert.Equal("第二个值", descriptions[2]);     // Second = 2，Description
         Assert.Equal("Third", descriptions[3]);       // Third = 3，字段名
         Assert.Equal("Fourth", descriptions[4]);      // Fourth = 4，字段名
-        
+
         // FirstAlias = 1，相同值会覆盖，保留最后一个
         Assert.True(descriptions.ContainsKey(1));
     }
@@ -249,7 +249,7 @@ public class EnumHelperTests
     [Fact(DisplayName = "GetDescriptions类型参数方法_非枚举类型测试")]
     public void GetDescriptions_Type_NonEnumType_Test()
     {
-        var descriptions = EnumHelper.GetDescriptions(typeof(string));
+        var descriptions = EnumHelper.GetDescriptions(typeof(String));
 
         Assert.NotNull(descriptions);
         Assert.Empty(descriptions); // 非枚举类型返回空字典
@@ -260,25 +260,25 @@ public class EnumHelperTests
     {
         // 复杂的标志位操作场景
         var permissions = TestFlags.None;
-        
+
         // 逐步添加权限
         permissions = permissions.Set(TestFlags.Read, true);
         Assert.True(permissions.Has(TestFlags.Read));
         Assert.False(permissions.Has(TestFlags.Write));
-        
+
         permissions = permissions.Set(TestFlags.Write, true);
         Assert.True(permissions.Has(TestFlags.ReadWrite));
-        
+
         permissions = permissions.Set(TestFlags.Execute, true);
         Assert.True(permissions.Has(TestFlags.All));
-        
+
         // 部分撤销权限
         permissions = permissions.Set(TestFlags.Write, false);
         Assert.False(permissions.Has(TestFlags.Write));
         Assert.True(permissions.Has(TestFlags.Read));
         Assert.True(permissions.Has(TestFlags.Execute));
         Assert.False(permissions.Has(TestFlags.All));
-        
+
         // 验证最终状态
         var expected = TestFlags.Read | TestFlags.Execute;
         Assert.Equal(expected, permissions);
@@ -289,16 +289,16 @@ public class EnumHelperTests
     {
         // 验证属性优先级：DisplayName > Description > FieldName
         var descriptions = EnumHelper.GetDescriptions(typeof(TestEnum));
-        
+
         // FirstAlias = 1，会覆盖 First 的值，保留最后一个字段名
         Assert.Equal("FirstAlias", descriptions[1]);
-        
+
         // Second 只有 Description
         Assert.Equal("第二个值", descriptions[2]);
-        
+
         // Third 没有属性，使用字段名
         Assert.Equal("Third", descriptions[3]);
-        
+
         // Fourth 没有属性，使用字段名
         Assert.Equal("Fourth", descriptions[4]);
     }
@@ -308,12 +308,12 @@ public class EnumHelperTests
     {
         [Description("")]
         EmptyDesc = 1,
-        
+
         [Description("   ")]
         WhitespaceDesc = 2,
-        
+
         EmptyDisplayName = 3,
-        
+
         WhitespaceDisplayName = 4
     }
 
