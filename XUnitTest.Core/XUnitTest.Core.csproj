@@ -11,6 +11,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <IsTestProject>true</IsTestProject>
+    <NoWarn>1701;1702;CA1416;CS8632</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Applications\**" />
