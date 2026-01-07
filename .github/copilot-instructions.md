@@ -1,7 +1,7 @@
 # PeiKeSmart Copilot 协作指令
 
 本说明适用于沛柯智能（PeiKeSmart）及其全部开源/衍生项目，规范 Copilot 及类似智能助手在 C#/.NET 项目中的协作行为。
-
+**项目组织地址**：<https://github.com/PeiKeSmart>
 ---
 
 ## 1. 核心原则
