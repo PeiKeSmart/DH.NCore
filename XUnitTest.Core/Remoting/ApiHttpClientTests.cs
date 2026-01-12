@@ -2,7 +2,6 @@
 using NewLife;
 using NewLife.Http;
 using NewLife.Log;
-using NewLife.Model;
 using NewLife.Remoting;
 using NewLife.Security;
 using NewLife.Serialization;
@@ -107,6 +106,7 @@ public class ApiHttpClientTests : DisposeBase
     public async Task HttpMethodsTest()
     {
         var client = new ApiHttpClient(_Address);
+        client.Timeout = 3_000;
         var state = Rand.NextString(8);
 
         // GET
