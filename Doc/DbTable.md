@@ -1,148 +1,363 @@
-# DbTable ä½¿ç”¨è¯´æ˜
+# DbTable Ê¹ÓÃÊÖ²á
 
-`NewLife.Data.DbTable` æ˜¯ä¸€ä¸ªè½»é‡çº§çš„è¡¨æ ¼æ•°æ®å®¹å™¨ï¼Œæ”¯æŒä»æ•°æ®åº“è¯»å–ã€äºŒè¿›åˆ¶/Xml/Csv åºåˆ—åŒ–ã€ä¸ `DataTable` äº’è½¬ï¼Œä»¥åŠæ¨¡å‹å¯¹è±¡ä¸è¡Œä¹‹é—´çš„æ˜ å°„ã€‚
+`NewLife.Data.DbTable` ÊÇÒ»¸öÇáÁ¿¼¶µÄÄÚ´æÊı¾İ±í£¬ÓÃÓÚ³ĞÔØ¡°ÁĞ£¨×Ö¶Î£©+ ĞĞ£¨¼ÇÂ¼£©¡±½á¹¹µÄÊı¾İ¡£
 
-- å‘½åç©ºé—´ï¼š`NewLife.Data`
-- ä¸»è¦ç±»å‹ï¼š`DbTable`ã€`DbRow`
-- å…¸å‹åœºæ™¯ï¼š
-  - ä» `IDataReader`/`DbDataReader` è¯»å–æŸ¥è¯¢ç»“æœ
-  - ä¸ `DataTable` äº’è½¬ï¼Œæé«˜ä¸ ADO.NET çš„äº’æ“ä½œ
-  - å°†è¡¨æ•°æ®åºåˆ—åŒ–ä¸ºäºŒè¿›åˆ¶ã€XMLã€CSV æˆ–æ•°æ®åŒ…
-  - å°†æ¨¡å‹åˆ—è¡¨å†™å…¥ä¸ºè¡¨ï¼Œæˆ–å°†è¡¨è¯»å–ä¸ºæ¨¡å‹åˆ—è¡¨
+ÊÊÓÃ³¡¾°£º
 
-## æ ¸å¿ƒæˆå‘˜
+- DAL ²éÑ¯ºó°Ñ½á¹û¼¯»º´æµ½ÄÚ´æ£¬Ö§³Ö¶à´Î±éÀú¡¢É¸Ñ¡¡¢×ª»»
+- ÔÚ²»ÒÀÀµ `DataTable` µÄÇé¿öÏÂ½øĞĞ¿çÆ½Ì¨Êı¾İ½»»»
+- ½«Êı¾İ¶ÁĞ´Îª¶ş½øÖÆ£¨¸ßĞ§/¿ÉÑ¹Ëõ£©¡¢Json¡¢Xml¡¢Csv
+- ÔÚ±íÊı¾İÓëÄ£ĞÍÁĞ±íÖ®¼ä×öÓ³Éä
 
-- åˆ—å®šä¹‰
-  - `string[] Columns` åˆ—åé›†åˆ
-  - `Type[] Types` åˆ—ç±»å‹é›†åˆ
-- æ•°æ®
-  - `IList<object?[]> Rows` è¡Œé›†åˆ
-  - `int Total` æ€»è¡Œæ•°
-- è¯»å–
-  - `Read(IDataReader dr)` / `ReadAsync(DbDataReader dr)`
-  - `ReadData(IDataReader dr, int[]? fields = null)`ï¼šä»…è¯»å–æŒ‡å®šåˆ—ï¼Œ`fields[i]` è¡¨ç¤ºæºæ•°æ®åˆ—ç´¢å¼•æ˜ å°„åˆ°ç›®æ ‡åˆ— `i`
-  - `Read(DataTable table)` ä» `DataTable` è¯»å–
-  - äºŒè¿›åˆ¶è¯»å–ï¼š`Read(Stream)`ã€`ReadHeader(Binary)`ã€`ReadData(Binary, rows)`ã€`ReadRows(Binary, rows)`
-  - æ–‡ä»¶/æ•°æ®åŒ…ï¼š`LoadFile(path)`ã€`LoadRows(path)`ã€`Read(IPacket)`ã€`Read(byte[])`
-- å†™å…¥
-  - `Write(Stream)`/`WriteHeader(Binary)`/`WriteData(Binary)`/`WriteData(Binary, int[] fields)`
-  - `WriteRows(Binary, IEnumerable<object?[]>, int[]? fields = null)`/`WriteRow(...)`
-  - `SaveFile(path)`/`SaveRows(path, rows, fields)`
-  - `ToPacket()` è½¬æ•°æ®åŒ…
-- è½¬æ¢
-  - `ToDataTable()`/`Write(DataTable)`
-  - `ToJson(...)`/`WriteXml(Stream)`/`GetXml()`/`SaveCsv(path)`/`LoadCsv(path)`
-- æ¨¡å‹æ˜ å°„
-  - `WriteModels<T>(IEnumerable<T>)` å°†æ¨¡å‹å†™å…¥ä¸ºè¡¨ï¼ˆä»…åŸºç¡€ç±»å‹å±æ€§ï¼‰
-  - `Cast<T>(IEnumerable<T>)` å°†æ¨¡å‹æŒ‰åˆ—é¡ºåºè½¬ä¸ºè¡Œ
-  - `ReadModels<T>()`/`ReadModels(Type)` å°†è¡¨è½¬ä¸ºæ¨¡å‹åˆ—è¡¨
-- è®¿é—®
-  - `Get<T>(rowIndex, name)`/`TryGet<T>(rowIndex, name, out value)`
-  - `GetColumn(name)` æ ¹æ®åˆ—åæ‰¾ç´¢å¼•
-  - æšä¸¾ï¼š`foreach (var row in table)`ï¼Œæ¯ä¸ª `row` æ˜¯ `DbRow`
+- ÃüÃû¿Õ¼ä£º`NewLife.Data`
+- Ïà¹ØÀàĞÍ£º`DbTable`¡¢`DbRow`
 
-## å¿«é€Ÿä¸Šæ‰‹
+ÎÄµµ£¨Õ¾µã£©£ºhttps://newlifex.com/core/dbtable
 
-### 1) ä»æ•°æ®åº“è¯»å–
+---
+
+## 1. Êı¾İ½á¹¹
+
+`DbTable` µÄºËĞÄÓÉËÄ²¿·Ö×é³É£º
+
+- `Columns`£ºÁĞÃûÊı×é
+- `Types`£ºÁĞÀàĞÍÊı×é£¨Óë `Columns` Ò»Ò»¶ÔÓ¦£©
+- `Rows`£ºĞĞ¼¯ºÏ£¨Ã¿ĞĞÊÇ `Object?[]`£¬Óë `Columns/Types` ¶ÔÆë£©
+- `Total`£º×ÜĞĞÊı£¨¶ÁÈ¡/Ğ´Èë¶ş½øÖÆÊ±»áÊ¹ÓÃ£©
+
+Ê¾Àı£º
+
+```csharp
+var dt = new DbTable
+{
+    Columns = ["Id", "Name", "Enable"],
+    Types = [typeof(Int32), typeof(String), typeof(Boolean)],
+    Rows =
+    [
+        new Object?[] { 1, "Stone", true },
+        new Object?[] { 2, "NewLife", false },
+    ],
+    Total = 2
+};
+```
+
+×¢Òâ£º
+
+- Í¨³£ `Rows[i].Length == Columns.Length`
+- ¶ş½øÖÆ¶ÁĞ´ÒÀÀµ `Types`£¬½¨ÒéÊ¼ÖÕÓë `Columns` Í¬²½ÉèÖÃ
+
+---
+
+## 2. ´ÓÊı¾İ¿â¶ÁÈ¡£¨`IDataReader` / `DbDataReader`£©
+
+### 2.1 Í¬²½¶ÁÈ¡
 
 ```csharp
 using var cmd = connection.CreateCommand();
-cmd.CommandText = "select Id, Name, CreateTime from User";
-using var reader = cmd.ExecuteReader();
+cmd.CommandText = "select Id, Name from User";
+
+using var dr = cmd.ExecuteReader();
 
 var table = new DbTable();
-table.Read(reader);
+table.Read(dr);
 
-Console.WriteLine(table.Total);       // è¡Œæ•°
-Console.WriteLine(table.Columns[0]);  // åˆ—å
+Console.WriteLine(table); // DbTable[ÁĞÊı][ĞĞÊı]
 ```
 
-ä»…é€‰æ‹©éƒ¨åˆ†åˆ—ï¼š
+`Read(dr)` »á×Ô¶¯µ÷ÓÃ£º
+
+- `ReadHeader(dr)`£º¶ÁÈ¡ÁĞÃûÓë×Ö¶ÎÀàĞÍ
+- `ReadData(dr)`£ºÖğĞĞ¶ÁÈ¡²¢Ìî³ä `Rows/Total`
+
+### 2.2 Òì²½¶ÁÈ¡
 
 ```csharp
-// fields: å°†ç›®æ ‡åˆ— i æ˜ å°„åˆ°æº reader çš„åˆ—ç´¢å¼• fields[i]
-// ä¾‹å¦‚åªè¯»ç¬¬ 0 å’Œç¬¬ 2 åˆ—
-int[] fields = [0, 2];
+await using var cmd = connection.CreateCommand();
+cmd.CommandText = "select Id, Name from User";
+
+await using var dr = await cmd.ExecuteReaderAsync();
+
 var table = new DbTable();
-table.ReadHeader(reader);      // å…ˆè¯»å–åˆ—å®šä¹‰
-table.ReadData(reader, fields);
+await table.ReadAsync(dr);
 ```
 
-### 2) ä¸ DataTable äº’è½¬
+¿â´úÂëÄÚ²¿Ê¹ÓÃ `ConfigureAwait(false)`¡£
+
+### 2.3 Ö¸¶¨×Ö¶ÎÓ³Éä£¨`fields`£©
+
+`ReadData`/`ReadDataAsync` Ö§³Ö´«Èë `fields`£¬ÓÃÓÚ½«¡°Ä¿±êÁĞ i¡±Ó³Éäµ½¶ÁÈ¡Æ÷µÄ¡°Ô´ÁĞ fields[i]¡±¡£
 
 ```csharp
-var dataTable = table.ToDataTable();
+// Ä¿±êÁĞ£ºId, Name
+table.Columns = ["Id", "Name"];
+table.Types = [typeof(Int32), typeof(String)];
+
+// ´Ó¶ÁÈ¡Æ÷µÄµÚ 2 ÁĞºÍµÚ 0 ÁĞÈ¡Öµ
+table.ReadData(dr, fields: [2, 0]);
+```
+
+#### `DBNull` Ä¬ÈÏÖµ²ßÂÔ
+
+¶ÁÈ¡µ½ `DBNull.Value` Ê±£¬`DbTable` »á°´¸ÃÁĞÀàĞÍĞ´ÈëÄ¬ÈÏÖµ£¨ÀıÈçÊıÖµ `0`¡¢`false`¡¢`DateTime.MinValue`£©£¬¶ø²»ÊÇ±£Áô `null`¡£
+
+---
+
+## 3. Óë `DataTable` »¥×ª
+
+### 3.1 ´Ó `DataTable` ¶ÁÈ¡
+
+```csharp
+var table = new DbTable();
+var count = table.Read(dataTable);
+```
+
+- »á´Ó `dataTable.Columns` »ñÈ¡ÁĞÃûÓëÀàĞÍ
+- »á°ÑÃ¿ĞĞµÄ `ItemArray` ×÷Îª `Object?[]` ¼ÓÈë `Rows`
+
+### 3.2 Ğ´Èëµ½ `DataTable`
+
+```csharp
+DataTable dataTable = table.ToDataTable();
+
+// »ò¸´ÓÃÒÑÓĞ¶ÔÏó
+var dt2 = table.Write(existing);
+```
+
+---
+
+## 4. ¶ş½øÖÆĞòÁĞ»¯£¨ÍÆ¼ö£©
+
+`DbTable` ÄÚÖÃ¶ş½øÖÆ¶ÁĞ´£¬ÊÊºÏ´óÊı¾İÁ¿´«Êä/ÂäÅÌ£º
+
+- Í·²¿£º»ÃÊı + °æ±¾ + ±ê¼Ç + ÁĞ¶¨Òå + ĞĞÊı
+- Êı¾İÌå£º°´ÁĞÀàĞÍË³ĞòÖğÖµĞ´Èë
+- `*.gz` ÎÄ¼ş¿É×Ô¶¯Ñ¹Ëõ/½âÑ¹
+
+### 4.1 Ğ´Èë/¶ÁÈ¡ `Stream`
+
+```csharp
+using var ms = new MemoryStream();
+table.Write(ms);
+
+ms.Position = 0;
 var table2 = new DbTable();
-table2.Read(dataTable);
+table2.Read(ms);
 ```
 
-### 3) åºåˆ—åŒ–
+### 4.2 ×ªÎªÊı¾İ°ü `IPacket`
 
-- äºŒè¿›åˆ¶ï¼š
+ÊÊºÏÍøÂç´«Êä£¨Í·²¿Ô¤Áô 8 ×Ö½Ú£¬·½±ãÉÏ²ãĞ­Òé×·¼Ó°üÍ·£©£º
 
 ```csharp
-using var fs = File.Create("users.db");
-table.SaveFile("users.db"); // æˆ– table.Write(fs)
+IPacket pk = table.ToPacket();
+```
+
+### 4.3 ±£´æ/¼ÓÔØÎÄ¼ş
+
+```csharp
+table.SaveFile("data.db");
+table.SaveFile("data.db.gz", compressed: true);
 
 var t2 = new DbTable();
-t2.LoadFile("users.db");
+t2.LoadFile("data.db");
 ```
 
-- XML/Csvï¼š
+### 4.4 µü´úÆ÷£º±ß¶Á±ß´¦Àí£¨±ÜÃâÒ»´ÎĞÔ¼ÓÔØÈ«²¿ `Rows`£©
 
 ```csharp
-var xml = table.GetXml();
-table.SaveCsv("users.csv");
-```
-
-- æ•°æ®åŒ…ï¼š
-
-```csharp
-var pk = table.ToPacket();
-```
-
-### 4) æ¨¡å‹æ˜ å°„
-
-```csharp
-public sealed class User
-{
-    public Int32 Id { get; set; }
-    public String Name { get; set; } = "";
-    public DateTime CreateTime { get; set; }
-}
-
-// æ¨¡å‹ -> è¡¨
-var users = new List<User> { new() { Id = 1, Name = "Stone", CreateTime = DateTime.UtcNow } };
 var table = new DbTable();
-table.WriteModels(users);
-
-// è¡¨ -> æ¨¡å‹
-var list = table.ReadModels<User>().ToList();
+foreach (var row in table.LoadRows("data.db.gz"))
+{
+    // row ÊÇ Object?[]
+}
 ```
 
-## è¿›é˜¶è¯´æ˜
+ËµÃ÷£º
 
-- `fields` æ˜ å°„è§„åˆ™
-  - è¯»å–ï¼š`ReadData(dr, fields)` å°†ç›®æ ‡åˆ— `i` æ˜ å°„åˆ°æºåˆ—ç´¢å¼• `fields[i]`ï¼Œç©ºå€¼ä¼šæŒ‰æºåˆ—ç±»å‹å¡«å……é»˜è®¤å€¼ï¼ˆæ•°å€¼ 0ã€`false`ã€`DateTime.MinValue` ç­‰ï¼‰ã€‚
-  - å†™å…¥ï¼š`WriteData(bn, fields)`/`WriteRow(bn, row, fields)` å°†ç›®æ ‡åˆ— `i` å†™å…¥æºè¡Œçš„ `row[fields[i]]`ï¼›è‹¥ `fields[i] == -1` åˆ™æŒ‰ç›®æ ‡åˆ—ç±»å‹å†™å…¥ç©ºå€¼ã€‚
-- å¦‚æœä»¥è¿­ä»£å™¨æ–¹å¼æ¶ˆè´¹ï¼š`ReadRows(bn, -1)` å¯æŒç»­è¯»å–è‡³æµæœ«å°¾ã€‚
-- `DbRow` æä¾›å¿«æ·è®¿é—®ï¼š`row.Get<T>("Name")`ã€‚
+- `LoadRows` »áÏÈ¶ÁÈ¡Í·²¿£¬ÔÙ¸ù¾İ `Total` ¾ö¶¨¶ÁÈ¡ĞĞÊı
+- Èô `Total == 0` ÇÒÎÄ¼ş·Ç¿Õ£¬½«ÒÔ `rows = -1` Ò»Ö±¶Áµ½Á÷½áÊø
 
-## å…¼å®¹ä¸æ³¨æ„
+### 4.5 µü´úÆ÷£º±ß´¦Àí±ßĞ´Èë
 
-- äºŒè¿›åˆ¶æ ¼å¼å¤´å«å¹»æ•°ä¸ç‰ˆæœ¬ï¼Œå½“å‰ç‰ˆæœ¬ `3`ï¼Œå‘å‰å…¼å®¹æ—§ç‰ˆæœ¬æ—¶é—´å†™å…¥æ ¼å¼ã€‚
-- MySQL ç‰¹æ®Šæ—¥æœŸï¼ˆå¦‚ `0000-00-00`ï¼‰å¯èƒ½åœ¨è¯»å–æ—¶å¼‚å¸¸ï¼Œå†…éƒ¨å·²ç”¨ `try/catch` å¿½ç•¥å¹¶å¡«å……é»˜è®¤å€¼ã€‚
-- é«˜æ€§èƒ½è·¯å¾„é¿å…å¤§é‡ LINQ/åå°„ï¼›ç±»å‹ã€åˆ—åç­‰å·²ç¼“å­˜äº `DbTable` çš„ `Columns`/`Types`ã€‚
+```csharp
+var table = new DbTable
+{
+    Columns = ["Id", "Name"],
+    Types = [typeof(Int32), typeof(String)]
+};
 
-## å˜æ›´æ‘˜è¦ï¼ˆæœ¬æ¬¡é‡æ„ï¼‰
+IEnumerable<Object?[]> rows = GetRows();
+var count = table.SaveRows("data.db.gz", rows);
+```
 
-- ä¿®å¤ `ReadData/ReadDataAsync` åœ¨ `fields` æ˜ å°„åœºæ™¯ä¸‹çš„ç±»å‹ç´¢å¼•é”™ä½é—®é¢˜ã€‚
-- ä¿®å¤ `WriteData(Binary, int[])` ä¸ `WriteRow(Binary, object?[], int[]?)` åœ¨ `idx < 0` æ—¶è¶Šç•Œè®¿é—® `ts[idx]` çš„é—®é¢˜ï¼Œæ”¹ä¸ºæŒ‰ç›®æ ‡åˆ—ç±»å‹å†™å…¥ç©ºå€¼ã€‚
-- `Read(DataTable)` è®¾ç½® `Total` ä¸å…¶ä»–è¯»å–æ–¹å¼ä¿æŒä¸€è‡´ã€‚
-- `GetXml()` æ”¹ä¸ºåŒæ­¥ç­‰å¾… `WriteXml` å®Œæˆï¼Œé¿å… `Wait(15000)` å¯èƒ½å¯¼è‡´å†…å®¹ä¸å®Œæ•´ã€‚
-- æ”¹è¿›æšä¸¾å™¨å®ç°ï¼Œæ”¯æŒ `Reset()` åé‡æ–°æšä¸¾ã€‚
+Ö¸¶¨ÁĞÓ³ÉäË³Ğò£º
 
-## å‚è€ƒ
+```csharp
+var fields = new[] { 1, 0 }; // Ä¿±êÁĞ i ¶ÔÓ¦Ô´ row µÄ fields[i]
+var count = table.SaveRows("data.db", rows, fields);
+```
 
-- æ–‡æ¡£ï¼šhttps://newlifex.com/core/dbtable
-- å‘½åç©ºé—´ï¼š`NewLife.Data`
+- `fields[i] == -1` ±íÊ¾Ğ´Èë¿ÕÖµ£¨°´Ä¿±êÁĞÀàĞÍĞ´Èë£©
+
+---
+
+## 5. Json ĞòÁĞ»¯
+
+`ToJson()` »áÏÈ×ª»»Îª¡°×ÖµäÊı×é¡±ÔÙĞòÁĞ»¯£º
+
+```csharp
+String json = table.ToJson(indented: true);
+```
+
+×ÖµäÊı×éĞÎÊ½£º
+
+```csharp
+IList<IDictionary<String, Object?>> list = table.ToDictionary();
+```
+
+- ×Öµä key ÎªÁĞÃû `Columns[i]`
+- value ÎªĞĞÖµ `row[i]`
+
+---
+
+## 6. Xml ĞòÁĞ»¯
+
+`GetXml()` »áÉú³É `DbTable` ¸ù½Úµã£¬ÄÚ²¿Ã¿ĞĞÊÇ `Table` ½Úµã£¬Ã¿¸öÁĞÃû×÷Îª×Ó½Úµã¡£
+
+```csharp
+String xml = table.GetXml();
+```
+
+Ğ´Èëµ½ÈÎÒâ `Stream`£º
+
+```csharp
+await table.WriteXml(stream);
+```
+
+ÀàĞÍĞ´Èë²ßÂÔ£º
+
+- `Boolean`£ºĞ´Èë²¼¶ûÖµ
+- `DateTime`£ºĞ´Èë `DateTimeOffset`
+- `DateTimeOffset`£ºÖ±½ÓĞ´Èë
+- `IFormattable`£º°´¸ñÊ½Ğ´Èë×Ö·û´®
+- ÆäËû£º`ToString()`
+
+---
+
+## 7. Csv ĞòÁĞ»¯
+
+```csharp
+table.SaveCsv("data.csv");
+
+var t2 = new DbTable();
+t2.LoadCsv("data.csv");
+```
+
+- `SaveCsv`£ºÏÈĞ´±íÍ·£¨ÁĞÃûĞĞ£©ÔÙĞ´ÈëËùÓĞĞĞ
+- `LoadCsv`£ºµÚÒ»ĞĞ×÷Îª `Columns`£¬ÆäÓà×÷ÎªÊı¾İĞĞ
+
+---
+
+## 8. Ä£ĞÍ»¥×ª
+
+### 8.1 Ä£ĞÍÁĞ±íĞ´Èë `DbTable`
+
+```csharp
+var list = new[]
+{
+    new User { Id = 1, Name = "Stone" },
+    new User { Id = 2, Name = "NewLife" },
+};
+
+var table = new DbTable();
+table.WriteModels(list);
+```
+
+¹æÔò£º
+
+- Ñ¡Ôñ `T` µÄ¹«¹²ÊôĞÔ
+- ½ö±£Áô¡°»ù´¡ÀàĞÍÊôĞÔ¡±£¨`IsBaseType()`£©
+- Èô `Columns` Îª¿ÕÔò×Ô¶¯°´ÊôĞÔÉú³É `Columns/Types`
+- ĞĞÖµÍ¨¹ı·´Éä¶ÁÈ¡£»ÈôÄ£ĞÍÊµÏÖ `IModel`£¬ÔòÓÅÏÈÓÃË÷ÒıÆ÷ `model[name]`
+
+### 8.2 `DbTable` ¶ÁÈ¡ÎªÄ£ĞÍÁĞ±í
+
+```csharp
+IEnumerable<User> users = table.ReadModels<User>();
+
+// »òÖ¸¶¨ Type
+IEnumerable<Object> objs = table.ReadModels(typeof(User));
+```
+
+Ó³Éä¹æÔò£º
+
+- Ê¹ÓÃ `SerialHelper.GetName(PropertyInfo)` »ñÈ¡×Ö¶ÎÃû£¨Ö§³ÖÌØĞÔ±ğÃû£©
+- ÁĞÃû´óĞ¡Ğ´²»Ãô¸ĞÆ¥ÅäÊôĞÔ
+- ÈôÄ¿±êÄ£ĞÍÊµÏÖ `IModel`£¬ÔòÍ¨¹ıË÷ÒıÆ÷¸³Öµ£¬·ñÔòÍ¨¹ı·´Éä `SetValue`
+
+---
+
+## 9. ±ã½İ¶ÁÈ¡£¨°´ĞĞÁĞ»ñÈ¡Öµ£©
+
+```csharp
+var name = table.Get<String>(row: 0, name: "Name");
+
+if (table.TryGet<Int32>(1, "Id", out var id))
+{
+    // ...
+}
+```
+
+- `GetColumn(name)` Ö§³ÖºöÂÔ´óĞ¡Ğ´
+
+---
+
+## 10. Ã¶¾ÙÓë `DbRow`
+
+`DbTable` ÊµÏÖ `IEnumerable<DbRow>`£¬¿ÉÖ±½Ó `foreach`£º
+
+```csharp
+foreach (var row in table)
+{
+    // row ÊÇ DbRow
+}
+```
+
+»ñÈ¡Ö¸¶¨ĞĞ£º
+
+```csharp
+var row = table.GetRow(0);
+```
+
+---
+
+## 11. ¿ËÂ¡
+
+`Clone()` ÎªÇ³¿½±´£º
+
+- `Columns/Types` ¿½±´ÎªĞÂÊı×é
+- `Rows` Ê¹ÓÃ `ToList()` ´´½¨ĞÂÁĞ±í£¬µ«ĞĞÊı×éÒıÓÃÈÔ¹²Ïí
+
+```csharp
+var copy = table.Clone();
+```
+
+---
+
+## 12. ³£¼ûÎÊÌâ
+
+### 12.1 ÎªÊ²Ã´ `DBNull` »á±ä³ÉÄ¬ÈÏÖµ£¿
+
+ÕâÊÇ `DbTable.ReadData(...)` µÄ¼È¶¨²ßÂÔ£º°´ÁĞÀàĞÍÌî³äÄ¬ÈÏÖµ£¬±ãÓÚºóĞøÖ±½Ó×öÊıÖµ/²¼¶û/Ê±¼ä¼ÆËã¡£
+
+ÈôÒµÎñĞèÒª±£Áô `null` ÓïÒå£¬ÇëÔÚÉÏ²ã×ÔĞĞ´¦Àí¡£
+
+### 12.2 ¶ş½øÖÆ¸ñÊ½ÊÇ·ñÎÈ¶¨£¿
+
+¶ş½øÖÆ¸ñÊ½°üº¬°æ±¾ºÅ£¨µ±Ç°°æ±¾Îª `3`£©¡£¶ÁÈ¡Ê±Óöµ½¸ü¸ß°æ±¾»áÅ×³ö `InvalidDataException`¡£
+
+### 12.3 ´óÊı¾İÁ¿½¨ÒéÔõÃ´ÓÃ£¿
+
+- ¶ÁÈ¡£ºÓÅÏÈ `LoadRows`/`ReadRows` µü´úÏû·Ñ
+- Ğ´Èë£ºÓÅÏÈ `SaveRows`/`WriteRows` µü´úĞ´Èë
+- ÍøÂç´«Êä£ºÊ¹ÓÃ `ToPacket()`
