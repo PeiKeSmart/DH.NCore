@@ -28,7 +28,7 @@
       <_NewLifeCore_CopilotInstructions_ExistingText>@(_NewLifeCore_CopilotInstructions_ExistingLines, '
 ')</_NewLifeCore_CopilotInstructions_ExistingText>
       <_NewLifeCore_CopilotInstructions_ShouldCopy Condition="!Exists('$(_NewLifeCore_CopilotInstructions_DestFile)')">true</_NewLifeCore_CopilotInstructions_ShouldCopy>
-      <_NewLifeCore_CopilotInstructions_ShouldCopy Condition="Exists('$(_NewLifeCore_CopilotInstructions_DestFile)') and $([System.String]::Copy('$(_NewLifeCore_CopilotInstructions_ExistingText)').Contains('新生命团队'))">true</_NewLifeCore_CopilotInstructions_ShouldCopy>
+      <_NewLifeCore_CopilotInstructions_ShouldCopy Condition="Exists('$(_NewLifeCore_CopilotInstructions_DestFile)') and $([System.String]::Copy('$(_NewLifeCore_CopilotInstructions_ExistingText)').Contains('湖北登灏科技有限公司'))">true</_NewLifeCore_CopilotInstructions_ShouldCopy>
     </PropertyGroup>
 
     <MakeDir Directories="$(_NewLifeCore_CopilotInstructions_DestDir)" Condition="'$(_NewLifeCore_CopilotInstructions_ShouldCopy)'=='true' and !Exists('$(_NewLifeCore_CopilotInstructions_DestDir)')" />
