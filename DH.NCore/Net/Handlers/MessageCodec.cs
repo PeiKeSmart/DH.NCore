@@ -183,11 +183,16 @@ public class MessageCodec<T> : Handler
 
             // 调试日志：记录收到的消息
             if (SocketSetting.Current.Debug)
-                XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | rawMsg={1} | Reply={2} | QueueCount={3}",
+            {
+                var isReply = rawMsg?.Reply ?? false;
+                XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | msg.Type={1} | rawMsg={2} | Reply={3} | isReplyMsg={4} | QueueCount={5}",
                     context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
+                    msg?.GetType().Name,
                     msg,
                     rawMsg?.Reply,
+                    isReply,
                     queue?.Count);
+            }
 
             // 匹配请求队列（仅响应消息）
             if (rawMsg != null && rawMsg.Reply && queue != null)
