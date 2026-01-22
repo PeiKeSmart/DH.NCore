@@ -1,5 +1,6 @@
 ﻿using NewLife.Buffers;
 using NewLife.Data;
+using NewLife.Log;
 using NewLife.Messaging;
 using NewLife.Model;
 
@@ -61,6 +62,13 @@ public class MessageCodec<T> : Handler
         IPacket? owner = null;
         if (message is T msg)
         {
+            // 调试日志：记录发送的消息（编码前）
+            if (SocketSetting.Current.Debug)
+                XTrace.WriteLine("[MessageCodec.Write] 发送消息 | owner={0} | msg={1} | Timeout={2}",
+                    context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
+                    msg,
+                    Timeout);
+
             var rs = Encode(context, msg);
             if (rs == null) return null;
 
@@ -160,6 +168,14 @@ public class MessageCodec<T> : Handler
                 rs = msg;
             }
 
+            // 调试日志：记录收到的消息
+            if (SocketSetting.Current.Debug)
+                XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | rawMsg={1} | Reply={2} | QueueCount={3}",
+                    context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
+                    msg,
+                    rawMsg?.Reply,
+                    queue?.Count);
+
             // 匹配请求队列（仅响应消息）
             if (rawMsg != null && rawMsg.Reply && queue != null)
             {
@@ -168,12 +184,21 @@ public class MessageCodec<T> : Handler
                 if (rs is IMessage msg4 && msg4.Payload != null && msg4.Payload == rawMsg.Payload)
                     msg4.Payload = msg4.Payload.Clone();
 
+                if (SocketSetting.Current.Debug)
+                    XTrace.WriteLine("[MessageCodec.Read] 尝试匹配响应 | msg={0}", msg);
+
                 queue.Match(context.Owner, msg, rs ?? msg, IsMatch);
             }
             else if (rs != null && queue != null && msg is not IMessage)
             {
                 // 其它消息不考虑响应
                 queue.Match(context.Owner, msg, rs, IsMatch);
+            }
+            else if (rawMsg != null && !rawMsg.Reply && queue != null && queue.Count > 0)
+            {
+                // 调试：收到非响应消息但队列中有等待的请求
+                if (SocketSetting.Current.Debug)
+                    XTrace.WriteLine("[MessageCodec.Read] 警告：收到非响应消息但队列有 {0} 个等待请求 | msg={1}", queue.Count, msg);
             }
 
             // 匹配输入回调，让上层事件收到分包信息

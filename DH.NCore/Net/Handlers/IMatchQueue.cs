@@ -7,6 +7,9 @@ namespace NewLife.Net.Handlers;
 /// <summary>消息匹配队列接口。用于把响应数据包配对到请求包</summary>
 public interface IMatchQueue
 {
+    /// <summary>当前队列中的请求数量</summary>
+    Int32 Count { get; }
+
     /// <summary>加入请求队列</summary>
     /// <param name="owner">拥有者</param>
     /// <param name="request">请求消息</param>
@@ -50,6 +53,9 @@ public class DefaultMatchQueue : IMatchQueue
 
     // 追加一个游标，减少每次从0开始扫描导致的热点
     private Int32 _cursor;
+
+    /// <summary>当前队列中的请求数量</summary>
+    public Int32 Count => Volatile.Read(ref _Count);
 
     /// <summary>按指定大小来初始化队列</summary>
     /// <param name="size">队列大小</param>
