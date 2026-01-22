@@ -97,12 +97,35 @@ public class StandardCodec : MessageCodec<IMessage>
 #pragma warning restore CS0618 // 类型或成员已过时
         }
 
+        // 调试日志：记录原始数据包
+        if (SocketSetting.Current.Debug)
+        {
+            var span = pk.GetSpan();
+            var hexHeader = span.Length >= 4 ? $"0x{span[0]:X2} 0x{span[1]:X2} 0x{span[2]:X2} 0x{span[3]:X2}" : "数据不足";
+            XTrace.WriteLine("[StandardCodec.Decode] 收到原始数据 | owner={0} | 长度={1} | 头4字节={2}",
+                context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
+                pk.Total,
+                hexHeader);
+        }
+
         var pks = pc.Parse(pk);
         var list = new List<IMessage>(pks.Count);
         foreach (var item in pks)
         {
             var msg = new DefaultMessage();
-            if (msg.Read(item)) list.Add(msg);
+            if (msg.Read(item))
+            {
+                // 调试日志：记录解析后的消息
+                if (SocketSetting.Current.Debug)
+                {
+                    var span = item.GetSpan();
+                    var firstByte = span.Length > 0 ? span[0] : 0;
+                    var mode = firstByte >> 6;
+                    XTrace.WriteLine("[StandardCodec.Decode] 解析消息 | FirstByte=0x{0:X2} | Mode={1} | Reply={2} | Flag={3} | Seq={4}",
+                        firstByte, mode, msg.Reply, msg.Flag, msg.Sequence);
+                }
+                list.Add(msg);
+            }
         }
 
         return list;

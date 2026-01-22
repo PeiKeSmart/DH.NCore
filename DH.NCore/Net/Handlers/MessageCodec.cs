@@ -64,28 +64,13 @@ public class MessageCodec<T> : Handler
         {
             // 调试日志：记录发送的消息（编码前）
             if (SocketSetting.Current.Debug)
-            {
-                var replyFlag = msg is IMessage imsg ? imsg.Reply : false;
-                XTrace.WriteLine("[MessageCodec.Write] 发送消息 | owner={0} | msg={1} | Reply={2} | Timeout={3}",
+                XTrace.WriteLine("[MessageCodec.Write] 发送消息 | owner={0} | msg={1} | Timeout={2}",
                     context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
                     msg,
-                    replyFlag,
                     Timeout);
-            }
 
             var rs = Encode(context, msg);
             if (rs == null) return null;
-
-            // 调试日志：记录编码后的数据包
-            if (SocketSetting.Current.Debug && rs is IPacket rspk)
-            {
-                var span = rspk.GetSpan();
-                var firstByte = span.Length > 0 ? span[0] : (byte)0;
-                XTrace.WriteLine("[MessageCodec.Write] 编码后 | FirstByte=0x{0:X2} | Reply(bit7)={1} | Length={2}",
-                    firstByte,
-                    (firstByte & 0x80) != 0,
-                    rspk.Total);
-            }
 
             message = rs;
             owner = rs as IPacket;
@@ -157,6 +142,19 @@ public class MessageCodec<T> : Handler
     {
         if (message is not IPacket pk) return base.Read(context, message);
 
+        // 调试日志：记录收到的原始数据（在任何解析之前）
+        if (SocketSetting.Current.Debug)
+        {
+            var span = pk.GetSpan();
+            var len = Math.Min(span.Length, 16);
+            var hex = BitConverter.ToString(span[..len].ToArray()).Replace("-", " ");
+            XTrace.WriteLine("[MessageCodec.Read.RAW] 收到原始数据 | owner={0} | 总长度={1} | 前{2}字节={3}",
+                context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
+                pk.Total,
+                len,
+                hex);
+        }
+
         // 解码得到多个消息
         var list = Decode(context, pk);
         if (list == null) return null;
@@ -185,17 +183,11 @@ public class MessageCodec<T> : Handler
 
             // 调试日志：记录收到的消息
             if (SocketSetting.Current.Debug)
-            {
-                // 获取原始数据包首字节用于验证Reply位
-                var rawFirstByte = rawMsg is DefaultMessage dm && dm.Payload != null ? 
-                    (dm.Flag | (dm.Reply ? 0x80 : 0) | (dm.Error || dm.OneWay ? 0x40 : 0)) : 0;
-                XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | rawMsg={1} | Reply={2} | ReconstructedByte=0x{3:X2} | QueueCount={4}",
+                XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | rawMsg={1} | Reply={2} | QueueCount={3}",
                     context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
                     msg,
                     rawMsg?.Reply,
-                    rawFirstByte,
                     queue?.Count);
-            }
 
             // 匹配请求队列（仅响应消息）
             if (rawMsg != null && rawMsg.Reply && queue != null)
