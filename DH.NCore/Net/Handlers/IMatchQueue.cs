@@ -146,12 +146,33 @@ public class DefaultMatchQueue : IMatchQueue
         var len = items.Length;
         var start = Volatile.Read(ref _cursor);
 
+        // 调试日志：记录匹配尝试
+        if (SocketSetting.Current.Debug)
+            XTrace.WriteLine("[MatchQueue.Match] 开始匹配 | owner={0} | response={1} | Count={2} | cursor={3}", 
+                owner?.GetType().Name + "@" + owner?.GetHashCode(), 
+                response, 
+                _Count, 
+                start);
+
         // 先从游标往前搜索（最近添加的请求更可能匹配）
         for (var offset = 1; offset <= len; ++offset)
         {
             var i = (start - offset + len) % len;
             var qi = Volatile.Read(ref items[i].Value);
             if (qi == null) continue;
+
+            // 调试：记录每个非空槽位的比较
+            if (SocketSetting.Current.Debug)
+            {
+                var ownerMatch = qi.Owner == owner;
+                var reqMatch = callback(qi.Request, response);
+                XTrace.WriteLine("[MatchQueue.Match] 槽位[{0}] | qi.Owner={1} | ownerMatch={2} | request={3} | callback={4}", 
+                    i, 
+                    qi.Owner?.GetType().Name + "@" + qi.Owner?.GetHashCode(),
+                    ownerMatch, 
+                    qi.Request, 
+                    reqMatch);
+            }
 
             if (qi.Owner == owner && callback(qi.Request, response))
             {
