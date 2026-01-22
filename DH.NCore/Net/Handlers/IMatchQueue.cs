@@ -77,6 +77,15 @@ public class DefaultMatchQueue : IMatchQueue
             Span = ext?["Span"] as ISpan,
         };
 
+        // 调试日志
+        if (SocketSetting.Current.Debug)
+            XTrace.WriteLine("[MatchQueue.Add] 加入队列 | owner={0} | request={1} | msTimeout={2} | EndTime={3} | now={4}",
+                owner?.GetType().Name + "@" + owner?.GetHashCode(),
+                request,
+                msTimeout,
+                qi.EndTime,
+                now);
+
         var items = Items;
         var len = items.Length;
 
@@ -221,6 +230,11 @@ public class DefaultMatchQueue : IMatchQueue
             // 过期取消
             if (qi.EndTime <= now)
             {
+                // 调试日志
+                if (SocketSetting.Current.Debug)
+                    XTrace.WriteLine("[MatchQueue.Check] 超时取消 | request={0} | EndTime={1} | now={2} | 差值={3}ms",
+                        qi.Request, qi.EndTime, now, now - qi.EndTime);
+
                 if (Interlocked.CompareExchange(ref items[i].Value, null, qi) != qi) continue;
 
                 Interlocked.Decrement(ref _Count);
