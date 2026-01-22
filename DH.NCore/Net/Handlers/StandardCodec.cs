@@ -1,4 +1,5 @@
 ﻿using NewLife.Data;
+using NewLife.Log;
 using NewLife.Messaging;
 using NewLife.Model;
 using NewLife.Reflection;
@@ -52,6 +53,11 @@ public class StandardCodec : MessageCodec<IMessage>
             // 从上下文中获取标记位
             if (context is IExtend ext && ext["Flag"] is DataKinds dk)
                 response.Flag = (Byte)dk;
+
+            // 调试日志
+            if (SocketSetting.Current.Debug)
+                XTrace.WriteLine("[StandardCodec.Write] 构建响应 | request={0} | request.Reply={1} | response.Reply={2} | response.Seq={3}",
+                    request, request?.Reply, response.Reply, response.Sequence);
         }
 
         // 为请求消息分配序列号
