@@ -184,14 +184,25 @@ public class MessageCodec<T> : Handler
             // 调试日志：记录收到的消息
             if (SocketSetting.Current.Debug)
             {
-                var isReply = rawMsg?.Reply ?? false;
-                XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | msg.Type={1} | rawMsg={2} | Reply={3} | isReplyMsg={4} | QueueCount={5}",
-                    context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
-                    msg?.GetType().Name,
-                    msg,
-                    rawMsg?.Reply,
-                    isReply,
-                    queue?.Count);
+                // 详细打印 rawMsg 的各个属性
+                if (rawMsg != null)
+                {
+                    XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | userPacket={1} | rawMsg.Type={2} | rawMsg.Reply={3} | rawMsg.Payload={4} | QueueCount={5}",
+                        context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
+                        userPacket,
+                        rawMsg.GetType().Name,
+                        rawMsg.Reply,
+                        rawMsg.Payload,
+                        queue?.Count);
+                }
+                else
+                {
+                    XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | userPacket={1} | msg.Type={2} | rawMsg=null | QueueCount={3}",
+                        context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
+                        userPacket,
+                        msg?.GetType().Name,
+                        queue?.Count);
+                }
             }
 
             // 匹配请求队列（仅响应消息）
