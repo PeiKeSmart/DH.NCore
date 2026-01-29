@@ -232,13 +232,13 @@
       <PackagePath>content\.github\</PackagePath>
     </None>
 
-    <None Include="build\NewLife.Core.targets">
+    <None Include="build\DH.NCore.targets">
       <Pack>True</Pack>
-      <PackagePath>build\NewLife.Core.targets</PackagePath>
+      <PackagePath>build\DH.NCore.targets</PackagePath>
     </None>
-    <None Include="build\NewLife.Core.targets">
+    <None Include="build\DH.NCore.targets">
       <Pack>True</Pack>
-      <PackagePath>buildTransitive\NewLife.Core.targets</PackagePath>
+      <PackagePath>buildTransitive\DH.NCore.targets</PackagePath>
     </None>
   </ItemGroup>
 
