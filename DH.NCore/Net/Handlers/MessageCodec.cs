@@ -1,6 +1,5 @@
 ﻿using NewLife.Buffers;
 using NewLife.Data;
-using NewLife.Log;
 using NewLife.Messaging;
 using NewLife.Model;
 
@@ -62,13 +61,6 @@ public class MessageCodec<T> : Handler
         IPacket? owner = null;
         if (message is T msg)
         {
-            // 调试日志：记录发送的消息（编码前）
-            if (SocketSetting.Current.Debug)
-                XTrace.WriteLine("[MessageCodec.Write] 发送消息 | owner={0} | msg={1} | Timeout={2}",
-                    context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
-                    msg,
-                    Timeout);
-
             var rs = Encode(context, msg);
             if (rs == null) return null;
 
@@ -142,19 +134,6 @@ public class MessageCodec<T> : Handler
     {
         if (message is not IPacket pk) return base.Read(context, message);
 
-        // 调试日志：记录收到的原始数据（在任何解析之前）
-        if (SocketSetting.Current.Debug)
-        {
-            var span = pk.GetSpan();
-            var len = Math.Min(span.Length, 16);
-            var hex = BitConverter.ToString(span[..len].ToArray()).Replace("-", " ");
-            XTrace.WriteLine("[MessageCodec.Read.RAW] 收到原始数据 | owner={0} | 总长度={1} | 前{2}字节={3}",
-                context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
-                pk.Total,
-                len,
-                hex);
-        }
-
         // 解码得到多个消息
         var list = Decode(context, pk);
         if (list == null) return null;
@@ -166,50 +145,15 @@ public class MessageCodec<T> : Handler
         {
             if (msg == null) continue;
 
-            Object? rs = null;
+            Object? rs = msg;
             IMessage? rawMsg = null;
 
             // 提取消息负载
-            if (userPacket && msg is IMessage msg2)
+            if (msg is IMessage imsg)
             {
-                rawMsg = msg2;
-                if (context is IExtend ext) ext["_raw_message"] = msg2;
-                rs = msg2.Payload;
-            }
-            else if (msg is IMessage msg3)
-            {
-                // UserPacket=false 时，msg 本身就是 IMessage，需要正确设置 rawMsg 以便匹配响应
-                rawMsg = msg3;
-                if (context is IExtend ext) ext["_raw_message"] = msg3;
-                rs = msg;
-            }
-            else
-            {
-                rs = msg;
-            }
-
-            // 调试日志：记录收到的消息
-            if (SocketSetting.Current.Debug)
-            {
-                // 详细打印 rawMsg 的各个属性
-                if (rawMsg != null)
-                {
-                    XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | userPacket={1} | rawMsg.Type={2} | rawMsg.Reply={3} | rawMsg.Payload={4} | QueueCount={5}",
-                        context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
-                        userPacket,
-                        rawMsg.GetType().Name,
-                        rawMsg.Reply,
-                        rawMsg.Payload,
-                        queue?.Count);
-                }
-                else
-                {
-                    XTrace.WriteLine("[MessageCodec.Read] 收到消息 | owner={0} | userPacket={1} | msg.Type={2} | rawMsg=null | QueueCount={3}",
-                        context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
-                        userPacket,
-                        msg?.GetType().Name,
-                        queue?.Count);
-                }
+                rawMsg = imsg;
+                if (context is IExtend ext) ext["_raw_message"] = imsg;
+                if (userPacket) rs = imsg.Payload;
             }
 
             // 匹配请求队列（仅响应消息）
@@ -220,21 +164,12 @@ public class MessageCodec<T> : Handler
                 if (rs is IMessage msg4 && msg4.Payload != null && msg4.Payload == rawMsg.Payload)
                     msg4.Payload = msg4.Payload.Clone();
 
-                if (SocketSetting.Current.Debug)
-                    XTrace.WriteLine("[MessageCodec.Read] 尝试匹配响应 | msg={0}", msg);
-
                 queue.Match(context.Owner, msg, rs ?? msg, IsMatch);
             }
             else if (rs != null && queue != null && msg is not IMessage)
             {
                 // 其它消息不考虑响应
                 queue.Match(context.Owner, msg, rs, IsMatch);
-            }
-            else if (rawMsg != null && !rawMsg.Reply && queue != null && queue.Count > 0)
-            {
-                // 调试：收到非响应消息但队列中有等待的请求
-                if (SocketSetting.Current.Debug)
-                    XTrace.WriteLine("[MessageCodec.Read] 警告：收到非响应消息但队列有 {0} 个等待请求 | msg={1}", queue.Count, msg);
             }
 
             // 匹配输入回调，让上层事件收到分包信息
