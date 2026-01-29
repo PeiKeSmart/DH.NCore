@@ -11,6 +11,7 @@
     <File Path=".github/workflows/publish.yml" />
     <File Path=".github/workflows/test.yml" />
     <File Path=".gitignore" />
+    <File Path="DH.NCore/build/DH.NCore.targets" />
     <File Path="global.json" />
     <File Path="NuGet.config" />
     <File Path="Readme.MD" />
