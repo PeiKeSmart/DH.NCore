@@ -26,9 +26,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DH.NRemoting" Version="4.17.2026.130-beta0826" />
-    <PackageReference Include="DH.NStardust" Version="4.17.2026.130-beta0900" />
-    <PackageReference Include="System.Speech" Version="10.0.0" />
+    <PackageReference Include="DH.NRemoting" Version="4.18.2026.210" />
+    <PackageReference Include="DH.NStardust" Version="4.18.2026.210" />
+    <PackageReference Include="System.Speech" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
