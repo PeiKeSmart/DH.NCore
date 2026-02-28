@@ -25,6 +25,7 @@
   <Folder Name="/UnitTest/">
     <Project Path="XUnitTest.Core/XUnitTest.Core.csproj" />
   </Folder>
+  <Project Path="Benchmark/Benchmark.csproj" />
   <Project Path="DH.NCore/DH.NCore.csproj" />
   <Project Path="DH.NSecurity/DH.NSecurity.csproj" />
   <Project Path="Test/Test.csproj" />
