@@ -1,5 +1,4 @@
 ﻿using NewLife.Data;
-using NewLife.Log;
 using NewLife.Messaging;
 using NewLife.Model;
 using NewLife.Reflection;
@@ -43,8 +42,8 @@ public class StandardCodec : MessageCodec<IMessage>
             // 优先复用请求消息创建响应
             var request = GetRequest(context);
             var response = (request != null && !request.Reply)
-                ? request.CreateReply() as DefaultMessage ?? new DefaultMessage()
-                : new DefaultMessage();
+                ? request.CreateReply() as DefaultMessage ?? DefaultMessage.Rent()
+                : DefaultMessage.Rent();
 
             response.Flag = (Byte)(kind ?? DataKinds.Packet);
             response.Payload = pk;
@@ -53,11 +52,6 @@ public class StandardCodec : MessageCodec<IMessage>
             // 从上下文中获取标记位
             if (context is IExtend ext && ext["Flag"] is DataKinds dk)
                 response.Flag = (Byte)dk;
-
-            // 调试日志
-            if (SocketSetting.Current.Debug)
-                XTrace.WriteLine("[StandardCodec.Write] 构建响应 | request={0} | request.Reply={1} | response.Reply={2} | response.Seq={3}",
-                    request, request?.Reply, response.Reply, response.Sequence);
         }
 
         // 为请求消息分配序列号
@@ -80,9 +74,9 @@ public class StandardCodec : MessageCodec<IMessage>
     /// <param name="context">处理器上下文</param>
     /// <param name="pk">数据包</param>
     /// <returns>解码后的消息列表</returns>
-    protected override IList<IMessage>? Decode(IHandlerContext context, IPacket pk)
+    protected override IEnumerable<IMessage>? Decode(IHandlerContext context, IPacket pk)
     {
-        if (context.Owner is not IExtend ss) return null;
+        if (context.Owner is not IExtend ss) yield break;
 
         if (ss["Codec"] is not PacketCodec pc)
         {
@@ -97,38 +91,16 @@ public class StandardCodec : MessageCodec<IMessage>
 #pragma warning restore CS0618 // 类型或成员已过时
         }
 
-        // 调试日志：记录原始数据包
-        if (SocketSetting.Current.Debug)
-        {
-            var span = pk.GetSpan();
-            var hexHeader = span.Length >= 4 ? $"0x{span[0]:X2} 0x{span[1]:X2} 0x{span[2]:X2} 0x{span[3]:X2}" : "数据不足";
-            XTrace.WriteLine("[StandardCodec.Decode] 收到原始数据 | owner={0} | 长度={1} | 头4字节={2}",
-                context.Owner?.GetType().Name + "@" + context.Owner?.GetHashCode(),
-                pk.Total,
-                hexHeader);
-        }
-
         var pks = pc.Parse(pk);
-        var list = new List<IMessage>(pks.Count);
+        //var list = new List<IMessage>(pks.Count);
         foreach (var item in pks)
         {
-            var msg = new DefaultMessage();
-            if (msg.Read(item))
-            {
-                // 调试日志：记录解析后的消息
-                if (SocketSetting.Current.Debug)
-                {
-                    var span = item.GetSpan();
-                    var firstByte = span.Length > 0 ? span[0] : 0;
-                    var mode = firstByte >> 6;
-                    XTrace.WriteLine("[StandardCodec.Decode] 解析消息 | FirstByte=0x{0:X2} | Mode={1} | Reply={2} | Flag={3} | Seq={4}",
-                        firstByte, mode, msg.Reply, msg.Flag, msg.Sequence);
-                }
-                list.Add(msg);
-            }
+            var msg = DefaultMessage.Rent();
+            //if (msg.Read(item)) list.Add(msg);
+            if (msg.Read(item)) yield return msg;
         }
 
-        return list;
+        //return list;
     }
 
     /// <summary>是否匹配响应</summary>

@@ -7,15 +7,12 @@ namespace NewLife.Net.Handlers;
 /// <summary>消息匹配队列接口。用于把响应数据包配对到请求包</summary>
 public interface IMatchQueue
 {
-    /// <summary>当前队列中的请求数量</summary>
-    Int32 Count { get; }
-
     /// <summary>加入请求队列</summary>
     /// <param name="owner">拥有者</param>
     /// <param name="request">请求消息</param>
     /// <param name="msTimeout">超时取消时间</param>
-    /// <param name="source">任务源</param>
-    Task<Object> Add(Object? owner, Object request, Int32 msTimeout, TaskCompletionSource<Object> source);
+    /// <param name="source">任务源。TaskCompletionSource 或 PooledValueTaskSource</param>
+    void Add(Object? owner, Object request, Int32 msTimeout, Object source);
 
     /// <summary>检查请求队列是否有匹配该响应的请求</summary>
     /// <param name="owner">拥有者</param>
@@ -42,7 +39,7 @@ public class DefaultMatchQueue : IMatchQueue
         public Object? Owner { get; set; }
         public Object? Request { get; set; }
         public Int64 EndTime { get; set; }
-        public TaskCompletionSource<Object>? Source { get; set; }
+        public Object? Source { get; set; }
         public ISpan? Span { get; set; }
     }
 
@@ -54,9 +51,6 @@ public class DefaultMatchQueue : IMatchQueue
     // 追加一个游标，减少每次从0开始扫描导致的热点
     private Int32 _cursor;
 
-    /// <summary>当前队列中的请求数量</summary>
-    public Int32 Count => Volatile.Read(ref _Count);
-
     /// <summary>按指定大小来初始化队列</summary>
     /// <param name="size">队列大小</param>
     public DefaultMatchQueue(Int32 size = 256) => Items = new ItemWrap[size];
@@ -65,8 +59,8 @@ public class DefaultMatchQueue : IMatchQueue
     /// <param name="owner">拥有者</param>
     /// <param name="request">请求的数据</param>
     /// <param name="msTimeout">超时取消时间</param>
-    /// <param name="source">任务源</param>
-    public virtual Task<Object> Add(Object? owner, Object request, Int32 msTimeout, TaskCompletionSource<Object> source)
+    /// <param name="source">任务源。TaskCompletionSource 或 PooledValueTaskSource</param>
+    public virtual void Add(Object? owner, Object request, Int32 msTimeout, Object source)
     {
         var now = Runtime.TickCount64;
 
@@ -82,15 +76,6 @@ public class DefaultMatchQueue : IMatchQueue
             Source = source,
             Span = ext?["Span"] as ISpan,
         };
-
-        // 调试日志
-        if (SocketSetting.Current.Debug)
-            XTrace.WriteLine("[MatchQueue.Add] 加入队列 | owner={0} | request={1} | msTimeout={2} | EndTime={3} | now={4}",
-                owner?.GetType().Name + "@" + owner?.GetHashCode(),
-                request,
-                msTimeout,
-                qi.EndTime,
-                now);
 
         var items = Items;
         var len = items.Length;
@@ -111,7 +96,7 @@ public class DefaultMatchQueue : IMatchQueue
                 Volatile.Write(ref _cursor, (i + 1) % len);
 
                 StartTimer();
-                return source.Task;
+                return;
             }
         }
 
@@ -129,7 +114,7 @@ public class DefaultMatchQueue : IMatchQueue
                 Volatile.Write(ref _cursor, (i + 1) % len);
 
                 StartTimer();
-                return source.Task;
+                return;
             }
         }
 
@@ -161,33 +146,12 @@ public class DefaultMatchQueue : IMatchQueue
         var len = items.Length;
         var start = Volatile.Read(ref _cursor);
 
-        // 调试日志：记录匹配尝试
-        if (SocketSetting.Current.Debug)
-            XTrace.WriteLine("[MatchQueue.Match] 开始匹配 | owner={0} | response={1} | Count={2} | cursor={3}", 
-                owner?.GetType().Name + "@" + owner?.GetHashCode(), 
-                response, 
-                _Count, 
-                start);
-
         // 先从游标往前搜索（最近添加的请求更可能匹配）
         for (var offset = 1; offset <= len; ++offset)
         {
             var i = (start - offset + len) % len;
             var qi = Volatile.Read(ref items[i].Value);
             if (qi == null) continue;
-
-            // 调试：记录每个非空槽位的比较
-            if (SocketSetting.Current.Debug)
-            {
-                var ownerMatch = qi.Owner == owner;
-                var reqMatch = callback(qi.Request, response);
-                XTrace.WriteLine("[MatchQueue.Match] 槽位[{0}] | qi.Owner={1} | ownerMatch={2} | request={3} | callback={4}", 
-                    i, 
-                    qi.Owner?.GetType().Name + "@" + qi.Owner?.GetHashCode(),
-                    ownerMatch, 
-                    qi.Request, 
-                    reqMatch);
-            }
 
             if (qi.Owner == owner && callback(qi.Request, response))
             {
@@ -198,15 +162,7 @@ public class DefaultMatchQueue : IMatchQueue
 
                 // 设置完成结果，TaskCreationOptions.RunContinuationsAsynchronously确保不会阻塞当前线程
                 var src = qi.Source;
-                if (src != null && !src.Task.IsCompleted)
-                {
-                    qi.Span?.AppendTag($"{Runtime.TickCount64} MatchQueue.SetResult(Matched)");
-#if NET45
-                    Task.Factory.StartNew(() => src.TrySetResult(result));
-#else
-                    src.TrySetResult(result);
-#endif
-                }
+                if (src != null) SetResult(src, result);
 
                 return true;
             }
@@ -236,27 +192,12 @@ public class DefaultMatchQueue : IMatchQueue
             // 过期取消
             if (qi.EndTime <= now)
             {
-                // 调试日志
-                if (SocketSetting.Current.Debug)
-                    XTrace.WriteLine("[MatchQueue.Check] 超时取消 | request={0} | EndTime={1} | now={2} | 差值={3}ms",
-                        qi.Request, qi.EndTime, now, now - qi.EndTime);
-
                 if (Interlocked.CompareExchange(ref items[i].Value, null, qi) != qi) continue;
 
                 Interlocked.Decrement(ref _Count);
 
-                // 异步取消任务
                 var src = qi.Source;
-                if (src != null && !src.Task.IsCompleted)
-                {
-                    qi.Span?.AppendTag($"{Runtime.TickCount64} MatchQueue.Expired({qi.EndTime}<={now})");
-
-#if NET45
-                    Task.Factory.StartNew(() => src.TrySetCanceled());
-#else
-                    src.TrySetCanceled();
-#endif
-                }
+                if (src != null) SetCanceled(src);
             }
         }
     }
@@ -272,19 +213,49 @@ public class DefaultMatchQueue : IMatchQueue
 
             Interlocked.Decrement(ref _Count);
 
-            // 异步取消任务
             var src = qi.Source;
-            if (src != null && !src.Task.IsCompleted)
-            {
-                qi.Span?.AppendTag("MatchQueue.Clear()");
-
-#if NET45
-                Task.Factory.StartNew(() => src.TrySetCanceled());
-#else
-                src.TrySetCanceled();
-#endif
-            }
+            if (src != null) SetCanceled(src);
         }
         _Count = 0;
+    }
+
+    /// <summary>设置完成结果（兼容 TCS 和 PooledValueTaskSource）</summary>
+    private static void SetResult(Object source, Object result)
+    {
+#if NET5_0_OR_GREATER
+        if (source is PooledValueTaskSource pvts)
+        {
+            pvts.TrySetResult(result);
+            return;
+        }
+#endif
+        if (source is TaskCompletionSource<Object> tcs && !tcs.Task.IsCompleted)
+        {
+#if NET45
+            Task.Factory.StartNew(() => tcs.TrySetResult(result));
+#else
+            tcs.TrySetResult(result);
+#endif
+        }
+    }
+
+    /// <summary>设置取消（兼容 TCS 和 PooledValueTaskSource）</summary>
+    private static void SetCanceled(Object source)
+    {
+#if NET5_0_OR_GREATER
+        if (source is PooledValueTaskSource pvts)
+        {
+            pvts.TrySetCanceled();
+            return;
+        }
+#endif
+        if (source is TaskCompletionSource<Object> tcs && !tcs.Task.IsCompleted)
+        {
+#if NET45
+            Task.Factory.StartNew(() => tcs.TrySetCanceled());
+#else
+            tcs.TrySetCanceled();
+#endif
+        }
     }
 }
