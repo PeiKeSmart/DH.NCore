@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NewLife.Core\NewLife.Core.csproj" />
+    <ProjectReference Include="..\DH.NCore\DH.NCore.csproj" />
   </ItemGroup>
 
 </Project>
