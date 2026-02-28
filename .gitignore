@@ -2,21 +2,43 @@
 # 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
 ################################################################################
 
-/.vs/DH.NCore
-/Bin
-/.vs/ProjectEvaluation
-/DH.NCore/obj
-/XUnitTest.Core/obj
-/DH.NSecurity/obj
-/Samples/Zero.HttpServer/obj
-/Samples/Zero.Server/obj
-/Test/obj
-/Test2/obj
+# Visual Studio
+/.vs
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# NuGet
+/packages
+*.nuspec
+*.nupkg
+
+# User-specific files
+*.user
+
+# Data and Logs
+/Data
+/Log
+*.log
+[Ll]og/
+
+# HTML files
+*.htm
+
+# Config
+[Cc]onfig/
+
+# Benchmark
+BenchmarkDotNet.Artifacts/
+
+# Project-specific
 /DH.NCore/X组件.txt
-/Samples/Zero.EchoServer/obj
-/Samples/Zero.Desktop/obj
-/.vs/CopilotSnapshots/4D0DE5E930D577458F3804BCE193A610
-/.vs/DH.NCore.slnx/v18
-/.vs/DH.NCore.slnx
 
 .codeartsdoer
