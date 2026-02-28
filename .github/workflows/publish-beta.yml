@@ -26,7 +26,10 @@ jobs:
           8.x
           9.x
           10.x
+          11.x
         include-prerelease: true
+    - name: Install Windows Desktop Workload
+      run: dotnet workload install windowsdesktop --include-previews
     - name: Get Version
       run: echo "VERSION=$(date '+%Y.%m%d-beta%H%M')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
     - name: Build
