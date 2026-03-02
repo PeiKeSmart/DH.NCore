@@ -22,7 +22,7 @@
 
 | 触发信号 | 指令文件 |
 |---------|---------|
-| XCode/Cube/魔方/实体生成/Model.xml/数据库 CRUD/`DH.NCode` 引用/`*.xcode.xml`/项目名含 `.Data`/`XCode.*` 命名空间/**用户提及修改任意 `.xml` 文件** | `xcode.instructions.md` |
+| XCode/NCube/魔方/实体生成/Model.xml/数据库 CRUD/`DH.NCode` 引用/`*.xcode.xml`/项目名含 `.Data`/`XCode.*` 命名空间/**用户提及修改任意 `.xml` 文件** | `xcode.instructions.md` |
 | 性能测试/基准测试/压力测试/BenchmarkDotNet/吞吐量评估 | `benchmark.instructions.md` |
 
 ---
