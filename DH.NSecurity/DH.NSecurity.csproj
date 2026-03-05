@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <AssemblyTitle>DH加密库</AssemblyTitle>
-    <Description>扩展加密算法</Description>
+    <AssemblyTitle>DH加密扩展库</AssemblyTitle>
+    <Description>Extended cryptographic algorithms for NewLife framework. Provides advanced encryption capabilities including ECC (Elliptic Curve Cryptography), ECDSA digital signature, and more. 扩展加密算法库，提供椭圆曲线加密（ECC）、ECDSA数字签名等高级加密能力。基于.NET CNG平台的安全扩展组件。</Description>
     <Company>湖北登灏科技有限公司</Company>
     <Copyright>©2020-2026 湖北登灏科技有限公司</Copyright>
     <VersionPrefix>4.21</VersionPrefix>
