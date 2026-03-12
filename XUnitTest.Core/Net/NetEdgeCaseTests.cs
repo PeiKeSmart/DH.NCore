@@ -484,7 +484,7 @@ public class NetEdgeCaseTests
                 var userId = ns.Session["UserId"];
                 var userName = ns.Session["UserName"];
 
-                if (userId is Int32 id && id == 12345 &&
+                if (userId is Int32 id && id == 12345 && 
                     userName is String name && name == "TestUser")
                 {
                     verified.Set();

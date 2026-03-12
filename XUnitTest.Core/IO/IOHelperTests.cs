@@ -211,7 +211,7 @@ public class IOHelperTests
         buf = BitConverter.GetBytes(v);
 
         //buf = buf.Reverse().ToArray();
-        buf = Enumerable.Reverse(buf).ToArray();
+        buf=Enumerable.Reverse(buf).ToArray();
         value = buf.ToSingle(0, false);
         Assert.Equal(v, value);
 

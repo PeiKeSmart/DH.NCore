@@ -210,7 +210,7 @@ public class OwnerPacketTests
     public void Indexer_NormalAccess_ShouldWorkCorrectly()
     {
         using var packet = new OwnerPacket(100);
-
+        
         packet[50] = (Byte)'X';
         Assert.Equal((Byte)'X', packet[50]);
     }

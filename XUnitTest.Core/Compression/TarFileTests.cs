@@ -13,7 +13,7 @@ namespace XUnitTest.Compression;
 //}
 
 //[Collection("TarArchiver")]
-[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "DH.UnitTest")]
+[TestCaseOrderer("NewLife.UnitTest.DefaultOrderer", "NewLife.UnitTest")]
 public class TarFileTests
 {
     private static String _testDir;

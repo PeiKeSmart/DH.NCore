@@ -685,7 +685,7 @@ public class BinaryTests
     public void PacketEncoderSpanSerializable()
     {
         var encoder = new DefaultPacketEncoder();
-
+        
         // 测试 Encode
         var dt = new DbTable
         {

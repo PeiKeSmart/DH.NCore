@@ -2,12 +2,10 @@
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-
 using NewLife;
 using NewLife.Http;
 using NewLife.Log;
 using NewLife.Net;
-
 using Xunit;
 
 namespace XUnitTest.Net;

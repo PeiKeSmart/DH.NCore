@@ -138,7 +138,7 @@ public class PacketHelperTests
         var data = new Byte[] { 0x01, 0xAB, 0x10, 0xFF };
         IPacket pk = new ArrayPacket(data);
 
-        var hex = pk.ToHex(-1, "-", 0); // groupSize=0 => 每字节
+        var hex = pk.ToHex( -1, "-", 0); // groupSize=0 => 每字节
         var expected = data.ToHex("-", 0, -1); // 使用 Byte[] 扩展生成基准
         Assert.Equal(expected, hex);
     }

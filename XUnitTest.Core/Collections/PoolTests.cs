@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
-
 using NewLife.Collections;
-
 using Xunit;
 
 namespace XUnitTest.Collections;

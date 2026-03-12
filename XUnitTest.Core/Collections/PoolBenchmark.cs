@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-
 using NewLife.Collections;
 
 namespace XUnitTest.Collections;

@@ -510,7 +510,7 @@ public class UriInfoTests
         var uri = new UriInfo("http://[::1]:8080/api");
         uri.Append("key", "value")
            .Append("id", 123);
-
+        
         Assert.Equal("http://[::1]:8080/api?key=value&id=123", uri.ToString());
     }
 
@@ -591,7 +591,7 @@ public class UriInfoTests
                .Append("name", "test");
 
         var uri = uriInfo.ToUri();
-
+        
         Assert.NotNull(uri);
         Assert.Equal("http://localhost/api?page=1&size=20&name=test", uri.ToString());
         Assert.Equal("?page=1&size=20&name=test", uri.Query);
