@@ -1,4 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Attributes;
 using NewLife.Compression;
 
 namespace Benchmark.CompressionBenchmarks;
