@@ -1,6 +1,6 @@
 # 高性能缓冲区操作类库文档
 
-本文档库包含了 NewLife.Core 中四个核心的高性能缓冲区操作类的详细说明和使用指南。
+本文档库包含了 DH.NCore 中四个核心的高性能缓冲区操作类的详细说明和使用指南。
 
 ## 类库概述
 
@@ -177,7 +177,7 @@ finally
 
 ## 相关资源
 
-- [NewLife.Core 官方文档](https://newlifex.com/core)
+- [DH.NCore 仓库](https://github.com/PeiKeSmart/DH.NCore)
 - [.NET Span<T> 官方文档](https://docs.microsoft.com/en-us/dotnet/api/system.span-1)
 - [IBufferWriter<T> 接口文档](https://docs.microsoft.com/en-us/dotnet/api/system.buffers.ibufferwriter-1)
 
@@ -185,4 +185,4 @@ finally
 
 ?? **文档版本**: 1.0  
 ?? **更新时间**: 2024年12月  
-?? **维护团队**: NewLife 开发团队
+?? **维护团队**: PeiKeSmart 开发团队

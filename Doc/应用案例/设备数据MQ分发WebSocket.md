@@ -248,7 +248,7 @@ public class DeviceDataController(DataConsumer consumer) : ControllerBase, IEven
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// 注册 Redis（NewLife.Redis 扩展包）
+// 注册 Redis（DH.NRedis 扩展包）
 builder.Services.AddRedis("127.0.0.1:6379");
 
 // 单例 + 托管服务，整个进程只占一条 Redis 长连接

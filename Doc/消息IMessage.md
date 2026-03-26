@@ -1,6 +1,6 @@
 # IMessage 消息帮助手册
 
-本文档基于源码 `NewLife.Core/Messaging/IMessage.cs`，说明 `IMessage` 接口及其基类 `Message`、`DefaultMessage` 的设计、用法与注意事项。
+本文档基于源码 `DH.NCore/Messaging/IMessage.cs`，说明 `IMessage` 接口及其基类 `Message`、`DefaultMessage` 的设计、用法与注意事项。
 
 > 关键词：请求-响应模式、Dispose 释放链、IOwnerPacket 池化内存、RPC 消息生命周期。
 

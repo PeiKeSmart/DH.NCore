@@ -2,7 +2,7 @@
 
 ## 概述
 
-`TokenProvider` 是 NewLife.Core 提供的轻量级分布式身份令牌方案，采用 **DSA 非对称签名**（由 `DSAHelper` 封装），无需共享密钥即可在多节点间验证令牌。签名节点持有私钥（`.prvkey`），验证节点只需持有对应公钥（`.pubkey`），适合微服务内部 API 鉴权和设备注册令牌场景。
+`TokenProvider` 是 DH.NCore 提供的轻量级分布式身份令牌方案，采用 **DSA 非对称签名**（由 `DSAHelper` 封装），无需共享密钥即可在多节点间验证令牌。签名节点持有私钥（`.prvkey`），验证节点只需持有对应公钥（`.pubkey`），适合微服务内部 API 鉴权和设备注册令牌场景。
 
 **命名空间**：`NewLife.Security`  
 **文档地址**：/core/token_provider

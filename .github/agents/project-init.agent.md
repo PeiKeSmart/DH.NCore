@@ -35,7 +35,7 @@ MyService/
 └── appsettings.json        # 可选
 ```
 
-**依赖**：`DH.NCore`（必选），`DH.NAgent`（Windows 服务），`Stardust`（微服务治理）
+**依赖**：`DH.NCore`（必选），`DH.NAgent`（Windows 服务），`DH.NStardust`（微服务治理）
 
 ### Web API 服务
 
@@ -82,7 +82,7 @@ MyGateway/
 - 项目类型（Web API / 后台服务 / 网络服务 / 混合）
 - 是否需要数据库（推荐 XCode）
 - 是否需要缓存（MemoryCache / Redis）
-- 是否需要微服务治理（Stardust）
+- 是否需要微服务治理（DH.NStardust / Stardust）
 - 是否需要后台定时任务（TimerX）
 - 目标框架版本
 
@@ -98,6 +98,7 @@ dotnet add package DH.NCore
 
 ```csharp
 // Program.cs 标准模板
+// 注意：当前 DH.NCore 包内不少基础 API 仍使用兼容命名空间 NewLife.*
 using NewLife;
 using NewLife.Log;
 using NewLife.Model;

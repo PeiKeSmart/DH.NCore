@@ -2,7 +2,7 @@
 
 ## 概述
 
-NewLife.Core 支持 WebSocket 协议的客户端与服务端实现，基于原有的管道（Pipeline）和 TCP 连接层进行封装。`WebSocketClient` 继承自 `TcpSession`，内置 `WebSocketCodec` 编解码器，自动完成握手、心跳（Ping/Pong）、帧编解码等底层细节，应用层只需处理消息收发。
+DH.NCore 支持 WebSocket 协议的客户端与服务端实现，基于原有的管道（Pipeline）和 TCP 连接层进行封装。`WebSocketClient` 继承自 `TcpSession`，内置 `WebSocketCodec` 编解码器，自动完成握手、心跳（Ping/Pong）、帧编解码等底层细节，应用层只需处理消息收发。
 
 **命名空间**：`NewLife.Net`（客户端）、`NewLife.Http`（消息类型）  
 **文档地址**：/core/websocket

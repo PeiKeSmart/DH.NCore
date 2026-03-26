@@ -1,9 +1,11 @@
 ---
 name: logging-tracing
-description: 使用 NewLife 日志框架和分布式链路追踪 APM，实现结构化日志、多输出和性能追踪
+description: 使用 PeiKeSmart / DH.NCore 日志框架和分布式链路追踪 APM，实现结构化日志、多输出和性能追踪，源码命名空间兼容 NewLife.Log
 ---
 
-# NewLife 日志与链路追踪使用指南
+# DH.NCore 日志与链路追踪使用指南
+
+当前 NuGet 包为 `DH.NCore`，日志与追踪相关源码 API 仍主要位于 `NewLife.Log`、`NewLife.Trace` 等命名空间。
 
 ## 适用场景
 
@@ -118,8 +120,8 @@ var tracer = new DefaultTracer
 };
 DefaultTracer.Instance = tracer;
 
-// 星尘追踪器（需要 Stardust 包）
-// var tracer = new StarTracer("http://star.newlifex.com:6600") { ... };
+// 星尘追踪器（需要 DH.NStardust 或对应扩展包）
+// var tracer = new StarTracer("http://stardust-server:6600") { ... };
 ```
 
 ### Span 嵌套

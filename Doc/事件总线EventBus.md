@@ -1,8 +1,8 @@
 # EventBus 使用手册
 
-本文档面向 NewLife.Core 的事件总线能力，涵盖接口模型、默认实现 `EventBus<TEvent>` 的进程内分发、基于主题的 `EventHub<TEvent>` 路由，以及基于队列的 `QueueEventBus<TEvent>`。
+本文档面向 DH.NCore 的事件总线能力，涵盖接口模型、默认实现 `EventBus<TEvent>` 的进程内分发、基于主题的 `EventHub<TEvent>` 路由，以及基于队列的 `QueueEventBus<TEvent>`。
 
-> 代码位置：`NewLife.Core\Messaging\IEventBus.cs`、`NewLife.Core\Messaging\EventHub.cs`、`NewLife.Core\Caching\QueueEventBus.cs`
+> 代码位置：`DH.NCore\Messaging\IEventBus.cs`、`DH.NCore\Messaging\EventHub.cs`、`DH.NCore\Caching\QueueEventBus.cs`
 
 ---
 

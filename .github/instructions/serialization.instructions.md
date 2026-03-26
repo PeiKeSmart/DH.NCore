@@ -4,7 +4,7 @@ applyTo: "**/Serialization/**"
 
 # 序列化模块开发指令
 
-适用于 `NewLife.Serialization` 命名空间下的序列化开发。
+适用于 PeiKeSmart / `DH.NCore` 序列化开发。当前源码相关 API 主要位于 `NewLife.Serialization` 命名空间。
 
 ---
 
@@ -40,7 +40,7 @@ obj.ToJson(indented: true, nullValue: false, camelCase: true);
 
 ### 2.3 IJsonHost 切换
 
-- `JsonHelper.Default` 默认为 `FastJson`（NewLife 内置高性能实现）
+- `JsonHelper.Default` 默认为 `FastJson`（DH.NCore 内置高性能实现，源码命名空间仍兼容 `NewLife.Serialization`）
 - 需要 `System.Text.Json` 兼容性时可切换 `SystemJson`
 - 自定义时实现 `IJsonHost` 接口并赋值给 `JsonHelper.Default`
 

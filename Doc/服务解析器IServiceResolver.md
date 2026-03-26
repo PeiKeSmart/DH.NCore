@@ -2,9 +2,9 @@
 
 ## 概述
 
-`IServiceResolver` 是 NewLife 体系中的**服务发现抽象接口**，定义在 `NewLife.Core` 核心库中。它允许业务代码通过服务名获取通信客户端（`IApiClient`），无需关心服务地址的来源和管理方式。
+`IServiceResolver` 是 DH.NCore 体系中的**服务发现抽象接口**。当前源码 API 定义仍位于 `NewLife.Remoting` / `NewLife.*` 兼容命名空间中。它允许业务代码通过服务名获取通信客户端（`IApiClient`），无需关心服务地址的来源和管理方式。
 
-核心价值：**类库项目仅引用 NewLife.Core 即可通过 DI 获取该接口，由上层应用提供具体实现**。
+核心价值：**类库项目仅引用 DH.NCore 即可通过 DI 获取该接口，由上层应用提供具体实现**。
 
 ## 三层架构
 
@@ -16,13 +16,13 @@
 │  · 支持权重、多地址、自动更新                          │
 │  · 服务变更时自动通知并更新客户端地址                    │
 ├─────────────────────────────────────────────────────┤
-│  NewLife.Remoting                                    │
+│  DH.NCore Remoting 子模块                            │
 │  RemotingServiceResolver : ConfigServiceResolver     │
 │  · 扩展支持 tcp/udp/ws/wss 长连接协议                 │
 │  · tcp/udp → ApiClient (SRMP 长连接)                 │
 │  · ws/wss → WsClient (WebSocket 长连接)              │
 ├─────────────────────────────────────────────────────┤
-│  NewLife.Core                                        │
+│  DH.NCore                                             │
 │  IServiceResolver (接口)                              │
 │  ConfigServiceResolver (默认实现)                     │
 │  · 从配置文件/配置中心读取地址                         │

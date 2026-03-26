@@ -17,13 +17,13 @@
 | XCode/实体生成/Model.xml/数据库 CRUD/`DH.NCode` 引用/`*.xcode.xml`/项目名含 `.Data`/`XCode.*` 命名空间/用户提及修改任意 `.xml` 文件 | `xcode.instructions.md` |
 | Cube/魔方/Web开发/`Pek.NCube` 引用/`Pek.NCube.*` 命名空间 | `cube.instructions.md` |
 | 性能测试/基准测试/压力测试/压测/BenchmarkDotNet/Benchmark/benchmark/吞吐量评估/性能分析/性能对比/性能报告/速度对比/速度测试/内存分配/perf/性能优化测试/做性能/跑分/测试报告 | `benchmark.instructions.md` |
-| NetServer/NetSession/网络服务器/网络客户端/Socket服务/TCP服务/UDP服务/`DH.NNet` 引用/`NewLife.Net.*` 命名空间/ISocketClient/ISocketRemote/CreateRemote/StandardCodec/LengthFieldCodec/管道编解码/网络编程/Echo服务/网络会话/长连接/粘包拆包 | `net.instructions.md` |
+| NetServer/NetSession/网络服务器/网络客户端/Socket服务/TCP服务/UDP服务/`DH.NCore` 引用/`NewLife.Net.*` 命名空间/ISocketClient/ISocketRemote/CreateRemote/StandardCodec/LengthFieldCodec/管道编解码/网络编程/Echo服务/网络会话/长连接/粘包拆包 | `net.instructions.md` |
 | 新建系统/新建项目/新增模块/需求整理/需求文档/需求分析/架构设计/技术方案/功能清单/功能拆分/任务分解/迭代开发/迭代计划/验收/PRD/用户故事/做一个系统/做一个平台/开发流程/全部搞完/批量开发/自治模式/一次性做完/继续处理/接着做 | `development.instructions.md` |
-| 缓存/ICache/MemoryCache/Redis缓存/ICacheProvider/缓存设计/`NewLife.Caching` 命名空间 | `caching.instructions.md` |
-| 序列化/JSON/Binary/JsonHelper/序列化设计/SpanSerializer/CSV导出/`NewLife.Serialization` 命名空间 | `serialization.instructions.md` |
-| 加密/安全/Hash/MD5/SHA/AES/SM4/RSA/JWT/SecurityHelper/TokenProvider/`NewLife.Security` 命名空间 | `security.instructions.md` |
-| 远程调用/ApiHttpClient/ApiClient/ApiServer/负载均衡/LoadBalancer/RPC/HTTP客户端/`NewLife.Remoting` 命名空间 | `remoting.instructions.md` |
-| 配置/Config/IConfigProvider/HttpConfigProvider/CommandParser/配置中心/`NewLife.Configuration` 命名空间 | `configuration.instructions.md` |
+| 缓存/ICache/MemoryCache/Redis缓存/ICacheProvider/缓存设计/`DH.NCore` 或 `DH.NRedis` 引用/`NewLife.Caching` 命名空间 | `caching.instructions.md` |
+| 序列化/JSON/Binary/JsonHelper/序列化设计/SpanSerializer/CSV导出/`DH.NCore` 引用/`NewLife.Serialization` 命名空间 | `serialization.instructions.md` |
+| 加密/安全/Hash/MD5/SHA/AES/SM4/RSA/JWT/SecurityHelper/TokenProvider/`DH.NCore` 或 `DH.NSecurity` 引用/`NewLife.Security` 命名空间 | `security.instructions.md` |
+| 远程调用/ApiHttpClient/ApiClient/ApiServer/负载均衡/LoadBalancer/RPC/HTTP客户端/`DH.NCore` 引用/`NewLife.Remoting` 命名空间 | `remoting.instructions.md` |
+| 配置/Config/IConfigProvider/HttpConfigProvider/CommandParser/配置中心/`DH.NCore` 引用/`NewLife.Configuration` 命名空间 | `configuration.instructions.md` |
 
 **自动匹配指令**（无需触发，按 `applyTo` 路径自动生效）：`caching`、`serialization`、`security`、`remoting`、`configuration` 这 5 个指令文件同时配置了 `applyTo` 模式，编辑对应目录下的文件时 VS Code 会自动加载。
 
@@ -40,6 +40,8 @@
 ## 3. 兼容性约束（极重要）
 
 PeiKeSmart 核心库支持 `.NET 4.5` 至最新版本（`net45` → `net10`）。
+
+**命名空间兼容性提醒**：当前仓库的 NuGet 包、仓库名和组织归属已迁移到 `DH.NCore` / PeiKeSmart，但大量源码 API 仍保留 `NewLife.*` 命名空间以维持兼容性。分析、生成示例和编写说明时，必须以仓库中的实际源码签名为准，禁止仅凭品牌迁移机械替换命名空间。
 
 - **语言版本**：`<LangVersion>latest</LangVersion>`，最大化使用最新 C# 语法糖（switch 表达式、集合表达式 `[]`、`?.`/`??`、模式匹配、目标类型 `new`、record 等）
 - **禁止高版本专属 BCL API**：❌ `ArgumentNullException.ThrowIfNull()` → ✅ `if (x == null) throw new ArgumentNullException(nameof(x));`

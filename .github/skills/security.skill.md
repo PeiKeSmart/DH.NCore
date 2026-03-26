@@ -1,9 +1,11 @@
 ---
 name: security
-description: 使用 NewLife 安全模块进行哈希、AES/SM4 加密、RSA 签名和 JWT 令牌操作
+description: 使用 PeiKeSmart / DH.NCore 安全模块进行哈希、AES/SM4 加密、RSA 签名和 JWT 令牌操作，源码命名空间兼容 NewLife.Security
 ---
 
-# NewLife 安全加密使用指南
+# DH.NCore 安全加密使用指南
+
+当前 NuGet 包为 `DH.NCore` / `DH.NSecurity`，安全相关源码 API 仍主要位于 `NewLife.Security` 命名空间。
 
 ## 适用场景
 

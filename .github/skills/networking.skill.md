@@ -1,9 +1,11 @@
 ---
 name: networking
-description: 使用 NewLife.Net 构建高性能 TCP/UDP/WebSocket 网络服务和客户端
+description: 使用 PeiKeSmart / DH.NCore 构建高性能 TCP/UDP/WebSocket 网络服务和客户端，源码命名空间兼容 NewLife.Net
 ---
 
-# NewLife 网络编程使用指南
+# DH.NCore 网络编程使用指南
+
+当前 NuGet 包为 `DH.NCore`，网络相关源码 API 仍主要位于 `NewLife.Net.*` 命名空间。
 
 ## 适用场景
 

@@ -4,7 +4,7 @@ applyTo: "**/Caching/**"
 
 # 缓存模块开发指令
 
-适用于 `NewLife.Caching` 命名空间下的缓存系统开发。
+适用于 PeiKeSmart / `DH.NCore` 缓存模块开发。当前源码相关 API 主要位于 `NewLife.Caching` 命名空间，分布式 Redis 能力通常由 `DH.NRedis` 提供。
 
 ---
 
@@ -14,7 +14,7 @@ applyTo: "**/Caching/**"
 |------|---------|------|
 | 统一接口 | `ICache` | 全部缓存操作的标准契约 |
 | 内存实现 | `MemoryCache` | 单机内存缓存，LRU 淘汰 |
-| 分布式实现 | `Redis`（独立包 NewLife.Redis） | 跨进程/跨机器缓存 |
+| 分布式实现 | `Redis`（独立包 `DH.NRedis`） | 跨进程/跨机器缓存 |
 | 提供者 | `ICacheProvider` / `CacheProvider` | 管理全局缓存 + 本地缓存 + 队列 + 分布式锁 |
 
 **重要原则**：所有缓存操作面向 `ICache` 接口编程，禁止直接依赖具体实现类。

@@ -1,9 +1,11 @@
 ---
 name: serialization
-description: 使用 NewLife 进行 JSON/XML/Binary/CSV 多格式序列化和反序列化
+description: 使用 PeiKeSmart / DH.NCore 进行 JSON/XML/Binary/CSV 多格式序列化和反序列化，源码命名空间兼容 NewLife.Serialization
 ---
 
-# NewLife 序列化使用指南
+# DH.NCore 序列化使用指南
+
+当前 NuGet 包为 `DH.NCore`，序列化相关源码 API 仍主要位于 `NewLife.Serialization` 命名空间。
 
 ## 适用场景
 
@@ -51,7 +53,7 @@ var json = user.ToJson(options);
 ### 切换 JSON 引擎
 
 ```csharp
-// 默认使用 FastJson（NewLife 内置）
+// 默认使用 FastJson（DH.NCore 内置，源码命名空间仍兼容 NewLife.Serialization）
 // 切换为 System.Text.Json
 JsonHelper.Default = new SystemJson();
 ```

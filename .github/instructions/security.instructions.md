@@ -4,7 +4,7 @@ applyTo: "**/Security/**"
 
 # 安全加密模块开发指令
 
-适用于 `NewLife.Security` 命名空间下的安全加密开发。
+适用于 PeiKeSmart / `DH.NCore`、`DH.NSecurity` 相关的安全加密开发。当前源码相关 API 主要位于 `NewLife.Security` 命名空间。
 
 ---
 

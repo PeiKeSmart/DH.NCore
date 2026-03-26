@@ -1,9 +1,11 @@
 ---
 name: dependency-injection
-description: 使用 NewLife ObjectContainer 实现轻量级依赖注入和应用主机托管
+description: 使用 PeiKeSmart / DH.NCore 的 ObjectContainer 实现轻量级依赖注入和应用主机托管，源码命名空间兼容 NewLife 与 NewLife.Model
 ---
 
-# NewLife 依赖注入与应用主机使用指南
+# DH.NCore 依赖注入与应用主机使用指南
+
+当前 NuGet 包为 `DH.NCore`，容器与主机相关源码 API 仍主要位于 `NewLife`、`NewLife.Model` 等命名空间。
 
 ## 适用场景
 
@@ -52,11 +54,11 @@ var cache = ObjectContainer.Provider.GetService<ICache>();
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices(services =>
 {
-    // NewLife 的 ObjectContainer 可与 Microsoft DI 共存
+    // DH.NCore 当前兼容的 ObjectContainer 可与 Microsoft DI 共存
     var container = ObjectContainer.Current;
     container.AddSingleton<ICache, MemoryCache>();
 
-    // 将 NewLife 注册桥接到 Microsoft DI
+    // 将 DH.NCore / ObjectContainer 注册桥接到 Microsoft DI
     ObjectContainer.SetInnerProvider(services.BuildServiceProvider());
 });
 ```

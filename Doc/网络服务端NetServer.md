@@ -1,4 +1,4 @@
-# NewLife.Net 网络库使用手册
+# NetServer 网络服务端使用手册
 
 ## 目录
 
@@ -15,7 +15,7 @@
 
 ## 概述
 
-NewLife.Net 是新生命团队开发的高性能网络通信库，支持 TCP/UDP 协议，同时兼容 IPv4 和 IPv6。该库设计精良，久经生产环境考验，适用于构建各种网络应用服务器。
+`NetServer` 是 DH.NCore 网络模块中的高性能服务端能力，相关源码 API 当前仍主要位于 `NewLife.Net` 命名空间。它支持 TCP/UDP 协议，同时兼容 IPv4 和 IPv6，适用于构建各种网络应用服务器。
 
 ### 特性
 
@@ -1047,7 +1047,7 @@ server.SendAllMessage(message, s => s["RoomId"]?.ToString() == "room1");
 
 ### 标准网络封包协议
 
-新生命团队标准网络封包协议（DefaultMessage）：
+DH.NCore 当前沿用的标准网络封包协议（DefaultMessage）：
 
 ```
 | 1 Flag | 1 Sequence | 2 Length | N Payload |
@@ -1077,9 +1077,9 @@ server.SendAllMessage(message, s => s["RoomId"]?.ToString() == "room1");
 
 ### 相关链接
 
-- GitHub: https://github.com/NewLifeX/X
-- Gitee: https://gitee.com/NewLifeX/X
-- 文档: https://newlifex.com
+- GitHub: https://github.com/PeiKeSmart/DH.NCore
+- Gitee: 请按当前组织镜像仓库配置填写
+- 文档: 当前文档站点或仓库 Doc 目录
 
 ---
 

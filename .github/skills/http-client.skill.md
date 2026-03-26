@@ -1,9 +1,11 @@
 ---
 name: http-client
-description: 使用 NewLife ApiHttpClient 进行 HTTP API 调用，支持负载均衡、故障转移和过滤器
+description: 使用 PeiKeSmart / DH.NCore 的 ApiHttpClient 进行 HTTP API 调用，支持负载均衡、故障转移和过滤器，源码命名空间兼容 NewLife.Remoting
 ---
 
-# NewLife HTTP 客户端使用指南
+# DH.NCore HTTP 客户端使用指南
+
+当前 NuGet 包为 `DH.NCore`，相关源码 API 仍主要位于 `NewLife.Remoting` 命名空间。
 
 ## 适用场景
 

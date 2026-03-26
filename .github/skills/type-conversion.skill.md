@@ -1,9 +1,11 @@
 ---
 name: type-conversion
-description: 使用 NewLife 类型转换扩展方法进行安全高效的类型转换
+description: 使用 PeiKeSmart / DH.NCore 类型转换扩展方法进行安全高效的类型转换，源码命名空间兼容 NewLife
 ---
 
-# NewLife 类型转换与基础工具使用指南
+# DH.NCore 类型转换与基础工具使用指南
+
+当前 NuGet 包为 `DH.NCore`，这些基础扩展方法在源码中仍主要定义于 `NewLife` 命名空间。
 
 ## 适用场景
 
@@ -59,7 +61,7 @@ var level = "Info".ToEnum<LogLevel>();
 
 ### 与标准库对比
 
-| NewLife | 标准库 | 区别 |
+| DH.NCore / 兼容 API | 标准库 | 区别 |
 | ------ | ------ | ---- |
 | `"123".ToInt()` | `Int32.Parse("123")` | 不抛异常，返回默认值 |
 | `"abc".ToInt(0)` | `Int32.TryParse(...)` | 更简洁 |
@@ -97,7 +99,7 @@ var safe = str.HtmlEncode();
 ## Pool.StringBuilder
 
 ```csharp
-// NewLife 池化 StringBuilder（替代 new StringBuilder()）
+// DH.NCore 池化 StringBuilder（替代 new StringBuilder()）
 var sb = Pool.StringBuilder.Get();
 sb.Append("Hello ");
 sb.Append("World");
@@ -154,4 +156,4 @@ Runtime.CachePath   // 缓存目录
 - `ToInt()` / `ToLong()` / `ToDouble()` 第一个参数为失败时的默认值
 - `Pool.StringBuilder.Get()` 获取的 StringBuilder 必须调用 `Put()` 归还
 - `Runtime.TickCount64` 在所有 .NET 版本可用，`Environment.TickCount64` 仅 .NET 5+
-- 这些扩展方法定义在 `NewLife` 命名空间，引用 NewLife.Core 后自动可用
+- 这些扩展方法当前仍定义在 `NewLife` 命名空间，引用 `DH.NCore` 包后即可使用

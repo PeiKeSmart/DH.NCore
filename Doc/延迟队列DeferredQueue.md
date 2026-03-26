@@ -2,10 +2,10 @@
 
 ## 概述
 
-`DeferredQueue` 是 NewLife.Core 提供的高性能延迟批处理队列，通过"先聚合后批量处理"模式大幅降低高频写操作对外部系统（数据库、消息队列、外部 API）的压力。其核心思路是用 `ConcurrentDictionary` 缓存待处理对象，通过 `TimerX` 定时触发批量处理，相同键的多次写入在同一周期内自动合并为一条。
+`DeferredQueue` 是 DH.NCore 提供的高性能延迟批处理队列，通过"先聚合后批量处理"模式大幅降低高频写操作对外部系统（数据库、消息队列、外部 API）的压力。其核心思路是用 `ConcurrentDictionary` 缓存待处理对象，通过 `TimerX` 定时触发批量处理，相同键的多次写入在同一周期内自动合并为一条。
 
 **命名空间**：`NewLife.Model`  
-**文档地址**：https://newlifex.com/core/deferred_queue
+**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
 
 ## 核心特性
 

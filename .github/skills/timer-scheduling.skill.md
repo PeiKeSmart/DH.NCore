@@ -1,9 +1,11 @@
 ---
 name: timer-scheduling
-description: 使用 NewLife TimerX 和 Cron 实现高精度定时任务和 Cron 调度
+description: 使用 PeiKeSmart / DH.NCore 的 TimerX 和 Cron 实现高精度定时任务和 Cron 调度，源码命名空间兼容 NewLife.Threading
 ---
 
-# NewLife 定时任务与调度使用指南
+# DH.NCore 定时任务与调度使用指南
+
+当前 NuGet 包为 `DH.NCore`，定时调度相关源码 API 仍主要位于 `NewLife.Threading` 命名空间。
 
 ## 适用场景
 

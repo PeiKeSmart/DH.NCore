@@ -23,10 +23,10 @@
               ┌───────────────┼───────────────┐
               │               │               │
               ▼               ▼               ▼
-    ┌─────────────┐ ┌──────────────┐ ┌──────────────┐
-    │ newlifex.com │ │ llms.txt     │ │ copilot 文件  │
-    │ 人类文章展示  │ │ LLM 检索索引  │ │ instructions │
-    │ + 全文搜索   │ │ + llms-full  │ │ skills/agents│
+    ┌────────────────┐ ┌──────────────┐ ┌──────────────┐
+    │ PeiKeSmart 文档站 │ │ llms.txt     │ │ copilot 文件  │
+    │ 人类文章展示     │ │ LLM 检索索引  │ │ instructions │
+    │ + 全文搜索      │ │ + llms-full  │ │ skills/agents│
     └─────────────┘ └──────────────┘ └──────────────┘
               │               │               │
               ▼               ▼               ▼
@@ -85,12 +85,12 @@ Doc/{专题名}.md — 跨模块的专题（如"高级二进制序列化"、"Web
 
 ```json
 {
-  "$schema": "https://newlifex.com/schemas/doc-index-v1.json",
+  "$schema": "{doc-site}/schemas/doc-index-v1.json",
   "project": "DH.NCore",
   "nuget": "DH.NCore",
   "version": "11.10.2026.0319",
-  "repository": "https://github.com/NewLifeX/X",
-  "description": "新生命核心库，涵盖缓存、网络、序列化、日志追踪等基础组件",
+  "repository": "https://github.com/PeiKeSmart/DH.NCore",
+  "description": "DH.NCore 核心库，涵盖缓存、网络、序列化、日志追踪等基础组件",
   "updated": "2026-03-19",
   "modules": [
     {
@@ -98,14 +98,14 @@ Doc/{专题名}.md — 跨模块的专题（如"高级二进制序列化"、"Web
       "name": "缓存系统",
       "summary": "统一缓存接口，内存缓存和 Redis 客户端",
       "doc": "缓存系统ICache.md",
-      "url": "https://newlifex.com/core/icache",
+      "url": "{doc-site}/dh.ncore/icache",
       "types": [
         {
           "name": "ICache",
           "kind": "interface",
           "summary": "标准缓存操作接口，Get/Set/Remove/GetAll 等",
           "doc": "缓存系统ICache.md",
-          "url": "https://newlifex.com/core/icache",
+          "url": "{doc-site}/dh.ncore/icache",
           "keyMethods": [
             "Set(key, value, expire)",
             "Get<T>(key)",
@@ -118,7 +118,7 @@ Doc/{专题名}.md — 跨模块的专题（如"高级二进制序列化"、"Web
           "kind": "class",
           "summary": "高性能单机内存缓存，支持过期和容量策略",
           "doc": "缓存系统ICache.md",
-          "url": "https://newlifex.com/core/memory_cache"
+          "url": "{doc-site}/dh.ncore/memory_cache"
         }
       ]
     }
@@ -145,7 +145,7 @@ Doc/{专题名}.md — 跨模块的专题（如"高级二进制序列化"、"Web
 
 ## 4. llms.txt 规范
 
-遵循 [llms.txt 标准](https://llmstxt.org/)，在 `newlifex.com` 根目录放置两个文件：
+遵循 [llms.txt 标准](https://llmstxt.org/)，在文档站点根目录放置两个文件：
 
 ### 4.1 `/llms.txt` — 精简索引
 
@@ -176,7 +176,7 @@ Doc/{专题名}.md — 跨模块的专题（如"高级二进制序列化"、"Web
 
 ---
 
-## NewLife.XCode
+## DH.NCode
 
 {XCode 各模块文档}
 
@@ -195,23 +195,23 @@ Doc/{专题名}.md — 跨模块的专题（如"高级二进制序列化"、"Web
 
 ### 5.1 工具形态
 
-`NewLife.DocPublisher` — dotnet tool 或独立控制台程序
+`DH.DocPublisher` — dotnet tool 或独立控制台程序
 
 ```shell
 # 安装
-dotnet tool install NewLife.DocPublisher -g
+dotnet tool install DH.DocPublisher -g
 
 # 扫描当前项目并生成索引
 doc-publisher index
 
 # 推送到官网
-doc-publisher push --site https://newlifex.com --token {api-token}
+doc-publisher push --site {doc-site} --token {api-token}
 
 # 生成 llms.txt
 doc-publisher llms --output ./llms-full.txt
 
 # 全流程：索引 → 推送 → llms
-doc-publisher publish --site https://newlifex.com
+doc-publisher publish --site {doc-site}
 ```
 
 ### 5.2 核心功能
@@ -234,13 +234,13 @@ Content-Type: application/json
 Authorization: Bearer {token}
 
 {
-  "project": "NewLife.Core",
+  "project": "DH.NCore",
   "version": "11.10.2026.0319",
   "articles": [
     {
-      "slug": "core/icache",
+      "slug": "dh.ncore/icache",
       "title": "统一缓存接口ICache",
-      "category": "NewLife.Core/缓存系统",
+      "category": "DH.NCore/缓存系统",
       "content": "... markdown 全文 ...",
       "summary": "标准缓存操作接口",
       "updated": "2026-03-19"
@@ -256,8 +256,8 @@ Authorization: Bearer {token}
 - name: Publish docs
   if: github.ref == 'refs/heads/master'
   run: |
-    dotnet tool install NewLife.DocPublisher -g
-    doc-publisher publish --site https://newlifex.com --token ${{ secrets.DOC_TOKEN }}
+    dotnet tool install DH.DocPublisher -g
+    doc-publisher publish --site ${DOC_SITE} --token ${{ secrets.DOC_TOKEN }}
 ```
 
 ---
@@ -269,7 +269,7 @@ Authorization: Bearer {token}
 ```
 Doc/*.md (标准源)
     │
-    ├──→ newlifex.com 文章    (push 命令，Markdown → CMS)
+  ├──→ 文档站点文章         (push 命令，Markdown → CMS)
     ├──→ llms.txt             (llms 命令，精简索引)
     ├──→ llms-full.txt        (llms 命令，全文拼接)
     ├──→ instructions/*.md    (extract 命令，提取规则)
@@ -321,7 +321,7 @@ Doc/*.md (标准源)
 
 ---
 
-## 8. NewLife.Core 文档覆盖度现状
+## 8. DH.NCore 文档覆盖度现状
 
 当前覆盖率：**73%**（146/200 个公共类型有文档）
 
@@ -351,16 +351,18 @@ Doc/*.md (标准源)
 
 ### 阶段一：文档补全（当前）
 
-- [ ] 为 NewLife.Core 54 个缺失文档的类型逐批生成文档
+- [ ] 为 DH.NCore 54 个缺失文档的类型逐批生成文档
 - [ ] 建立 Doc/索引.json 标准索引
 - [ ] 统一现有文档格式（添加 YAML frontmatter）
 
 ### 阶段二：推送工具
 
-- [ ] 开发 NewLife.DocPublisher 工具
+- [ ] 开发 DH.DocPublisher 工具
 - [ ] 实现 `index` / `push` / `llms` / `validate` 命令
 - [ ] 官网 API 对接
-- [ ] 在 newlifex.com 放置 llms.txt 和 llms-full.txt
+- [ ] 在文档站点放置 llms.txt 和 llms-full.txt
+
+> 注：当前源码大量 API 仍保留 `NewLife.*` 命名空间，相关字段与示例应以真实源码签名为准；历史文档域名如仍沿用旧站点，可在落地实施时通过 `doc-site` 配置统一注入。
 
 ### 阶段三：其它项目推广
 

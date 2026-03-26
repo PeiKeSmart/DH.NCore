@@ -1,9 +1,11 @@
 ---
 name: caching
-description: 使用 NewLife 统一缓存接口实现内存缓存、分布式缓存、缓存锁和队列
+description: 使用 PeiKeSmart / DH.NCore 统一缓存接口实现内存缓存、分布式缓存、缓存锁和队列，源码命名空间兼容 NewLife.Caching
 ---
 
-# NewLife 缓存系统使用指南
+# DH.NCore 缓存系统使用指南
+
+当前仓库的缓存能力由 `DH.NCore` / `DH.NRedis` 提供，源码 API 仍以 `NewLife.Caching` 命名空间为主。
 
 ## 适用场景
 
@@ -114,7 +116,7 @@ public class OrderService(ICacheProvider cacheProvider)
 ## 切换到 Redis
 
 ```csharp
-// 安装 NewLife.Redis 包后
+// 安装 DH.NRedis 包后
 var redis = new FullRedis("server=127.0.0.1:6379;password=pass;db=0");
 
 // ICache 接口完全兼容，业务代码无需修改
@@ -127,4 +129,4 @@ cache.Set("key", "value", 60);
 - `MemoryCache.Instance` 是全局单例，整个应用共享
 - `expire = -1` 使用缓存的默认过期时间，`expire = 0` 表示立即过期
 - `Remove` 支持 `*` 通配符，但大量 key 时性能较差
-- Redis 实现在独立包 `NewLife.Redis`，接口完全兼容
+- Redis 实现在独立包 `DH.NRedis`，接口完全兼容

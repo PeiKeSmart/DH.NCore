@@ -4,7 +4,7 @@ applyTo: "**/Remoting/**"
 
 # RPC 远程调用模块开发指令
 
-适用于 `NewLife.Remoting` 命名空间下的 RPC 框架开发。
+适用于 PeiKeSmart / `DH.NCore` 的 RPC 与远程调用开发。当前源码相关 API 主要位于 `NewLife.Remoting` 命名空间。
 
 ---
 

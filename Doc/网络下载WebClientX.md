@@ -2,7 +2,7 @@
 
 ## 概述
 
-`WebClientX` 是 NewLife.Core 提供的高级 HTTP 客户端，面向文件下载和网页抓取场景。相比 `HttpClient`，它封装了常用的一次性操作（下载整个文件、抓取全文、解析链接列表），并内置了 CDN 签名认证、断点恢复友好设计、临时文件+原子替换的双阶段写盘策略。
+`WebClientX` 是 DH.NCore 提供的高级 HTTP 客户端，面向文件下载和网页抓取场景。相比 `HttpClient`，它封装了常用的一次性操作（下载整个文件、抓取全文、解析链接列表），并内置了 CDN 签名认证、断点恢复友好设计、临时文件+原子替换的双阶段写盘策略。
 
 **命名空间**：`NewLife.Web`  
 **文档地址**：/core/web_client_x
@@ -134,7 +134,7 @@ public String? DownloadLink(String url, String? name, String? destdir)
 
 **参数**：
 - `url`：目录页 URL
-- `name`：文件名或通配符（如 `"NewLife.Core*.zip"`）
+- `name`：文件名或通配符（如 `"DH.NCore*.zip"`）
 - `destdir`：保存目录
 
 在目录页中找到匹配 `name` 的最新版本文件（按 `Version` 或 `Time` 排序），下载到 `destdir`，返回本地路径。

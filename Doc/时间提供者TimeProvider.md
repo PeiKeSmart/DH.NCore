@@ -2,7 +2,7 @@
 
 ## 概述
 
-`TimeProvider` 是 NewLife.Core 对 .NET 系统时钟的统一封装与扩展，面向"可替换时钟"场景。在 .NET 8+ 上它直接适配官方接口 `System.TimeProvider`，在低版本上使用等效的内部实现，保证跨框架行为一致。通过将 `TimeProvider.System` 替换为测试用假时钟（`FakeTimeProvider`），可以在单元测试中精确控制时间推进，无需修改业务代码。
+`TimeProvider` 是 DH.NCore 对 .NET 系统时钟的统一封装与扩展，面向"可替换时钟"场景。在 .NET 8+ 上它直接适配官方接口 `System.TimeProvider`，在低版本上使用等效的内部实现，保证跨框架行为一致。通过将 `TimeProvider.System` 替换为测试用假时钟（`FakeTimeProvider`），可以在单元测试中精确控制时间推进，无需修改业务代码。
 
 **命名空间**：`NewLife`  
 **文档地址**：/core/time_provider

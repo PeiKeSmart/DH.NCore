@@ -1,6 +1,8 @@
-# NewLife 系列项目 AI 协作开发指南
+# PeiKeSmart 系列项目 AI 协作开发指南
 
-本文档指导 NewLife 生态中依赖 `NewLife.Core` 的开源项目（如 XCode、Cube、Redis、MQTT、Agent 等）如何配置 VS Code Copilot 的 instructions / skills / agents 文件，实现项目级 AI 协作。
+本文档指导 PeiKeSmart 生态中依赖 `DH.NCore` 的开源项目（如 DH.NCode、Pek.NCube、DH.NRedis、DH.NMQTT、DH.NAgent 等）如何配置 VS Code Copilot 的 instructions / skills / agents 文件，实现项目级 AI 协作。
+
+> 兼容性说明：当前不少源码、命名空间和历史文档仍保留 `NewLife.*` 标识。编写 instructions / skills / agents 时，项目主体应以 PeiKeSmart / DH.* 为准，API 示例则必须遵循真实源码签名。
 
 ---
 
@@ -39,7 +41,7 @@
 # {项目名} Copilot 协作指令
 
 适用于 {项目名} 全部代码。简体中文回复。
-本项目依赖 NewLife.Core，核心编码规范继承 NewLife 主仓库 copilot-instructions.md。
+本项目依赖 DH.NCore，核心编码规范继承当前仓库 `.github/copilot-instructions.md`；若源码仍使用 `NewLife.*` 命名空间，示例中保持真实 using。
 
 ---
 
@@ -57,7 +59,7 @@
 
 - 项目名：{NuGet 包名}
 - 核心功能：一句话描述
-- 依赖：NewLife.Core {最低版本}+
+- 依赖：DH.NCore {最低版本}+
 - 目标框架：{net45/net6.0/net8.0 等}
 
 ---
@@ -70,7 +72,7 @@
 
 ## 4. 编码规范补充
 
-（在 NewLife 核心规范基础上，项目特有的补充规则）
+（在 DH.NCore 核心规范基础上，项目特有的补充规则）
 
 ---
 
@@ -91,7 +93,7 @@
 
 ### 2.2 要点
 
-- **继承而非重复**：NewLife 核心规范（类型名 `String`/`Int32`、`Pool.StringBuilder` 等）无需重复声明，只写项目专属规则
+- **继承而非重复**：DH.NCore 核心规范（类型名 `String`/`Int32`、`Pool.StringBuilder` 等）无需重复声明，只写项目专属规则
 - **触发信号表**：关键词覆盖项目核心概念，用 `/` 分隔多个关键词
 - **applyTo 联动**：触发信号表中的指令文件应与 instructions 目录中的文件一一对应
 
@@ -215,9 +217,9 @@ dotnet add package {NuGet包名}
 4. **覆盖核心场景**：3-5 个最常见使用场景，不追求全覆盖
 5. **篇幅适中**：150-300 行，过长 AI 上下文利用率下降
 
-### 4.3 从 NewLife.Core 继承的技能
+### 4.3 从 DH.NCore 继承的技能
 
-你的项目无需重复 NewLife.Core 已提供的技能文件。以下技能由 NewLife.Core 仓库维护：
+你的项目无需重复 DH.NCore 已提供的技能文件。以下技能由 DH.NCore 仓库维护：
 
 | 技能 | 覆盖内容 |
 |------|---------|
@@ -283,13 +285,13 @@ tools:
 | 项目初始化 | 框架类项目 | 引导创建新项目 |
 | 数据模型专家 | XCode | 实体设计与 CRUD 生成 |
 | API 设计专家 | Remoting/Cube | 接口设计与文档生成 |
-| 运维诊断 | Stardust/Agent | 排查部署与运行问题 |
+| 运维诊断 | DH.NStardust/DH.NAgent | 排查部署与运行问题 |
 
 ---
 
 ## 6. 各项目实施参考
 
-### 6.1 NewLife.XCode（数据中间件）
+### 6.1 DH.NCode / XCode（数据中间件）
 
 ```
 .github/
@@ -312,7 +314,7 @@ tools:
 - 字段命名遵循 XCode 规范（PascalCase 属性名、数据库字段名可不同）
 - 索引和关系在 Model.xml 中声明
 
-### 6.2 NewLife.Cube（Web 管理平台）
+### 6.2 DH.NCube / Pek.NCube（Web 管理平台）
 
 ```
 .github/
@@ -335,7 +337,7 @@ tools:
 - 菜单通过 `MenuAttribute` 声明
 - 权限模型：角色 → 菜单 → 按钮级
 
-### 6.3 NewLife.Redis（Redis 客户端）
+### 6.3 DH.NRedis（Redis 客户端）
 
 ```
 .github/
@@ -349,7 +351,7 @@ tools:
     └── redis-expert.agent.md
 ```
 
-### 6.4 NewLife.MQTT（MQTT 客户端/服务端）
+### 6.4 DH.NMQTT（MQTT 客户端/服务端）
 
 ```
 .github/
@@ -363,7 +365,7 @@ tools:
     └── mqtt-expert.agent.md
 ```
 
-### 6.5 Stardust（微服务平台）
+### 6.5 DH.NStardust / Stardust（微服务平台）
 
 ```
 .github/
@@ -388,7 +390,7 @@ tools:
 
 1. 复制第 2 节模板到 `.github/copilot-instructions.md`
 2. 填写项目概述、架构约束、编码规范补充
-3. 不要重复 NewLife 核心规范，只写增量规则
+3. 不要重复 DH.NCore 核心规范，只写增量规则
 
 ### 步骤 2：识别模块边界
 
@@ -404,7 +406,7 @@ tools:
 
 ### 步骤 4：定义代理
 
-1. 代码审查代理：所有项目都应有，复用 NewLife.Core 的审查维度
+1. 代码审查代理：所有项目都应有，复用 DH.NCore 的审查维度
 2. 项目专家代理：回答"怎么用"类问题
 3. 按需添加专用代理（初始化、运维等）
 
@@ -425,7 +427,7 @@ tools:
 - [ ] 每个 instructions 文件有正确的 `applyTo` 模式
 - [ ] 每个 skills 文件有 `description` 字段
 - [ ] 代码示例从源码提取，非虚构
-- [ ] 没有重复 NewLife 核心规范内容
+- [ ] 没有重复 DH.NCore 核心规范内容
 - [ ] 文件编码为 UTF-8 无 BOM
 - [ ] 文件名使用英文小写加连字符
 
@@ -443,7 +445,7 @@ A：instructions 写"必须/禁止"规则，skills 写"怎么用"指南。前者
 A：在 VS Code 中打开项目，Copilot Chat 中问一个相关问题，观察回复是否遵循了自定义规则。对于 instructions 可编辑匹配 `applyTo` 的文件触发加载。
 
 **Q：多个项目有相同规则，如何复用？**
-A：将通用规则放在 NewLife.Core 的 copilot-instructions.md 中，各项目继承。项目级文件只写增量。
+A：将通用规则放在 DH.NCore 当前仓库的 `.github/copilot-instructions.md` 中，各项目继承。项目级文件只写增量。
 
 ---
 

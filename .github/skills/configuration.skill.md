@@ -1,9 +1,11 @@
 ---
 name: configuration
-description: 使用 NewLife 配置系统管理应用配置，支持本地文件、配置中心和命令行参数
+description: 使用 PeiKeSmart / DH.NCore 配置系统管理应用配置，支持本地文件、配置中心和命令行参数，源码命名空间兼容 NewLife.Configuration
 ---
 
-# NewLife 配置系统使用指南
+# DH.NCore 配置系统使用指南
+
+当前 NuGet 包为 `DH.NCore`，配置相关源码 API 仍主要位于 `NewLife.Configuration` 命名空间。
 
 ## 适用场景
 
@@ -93,7 +95,7 @@ var provider = new IniConfigProvider { FileName = "config.ini" };
 ```csharp
 var provider = new HttpConfigProvider
 {
-    Server = "http://star.newlifex.com:6600",
+    Server = "http://stardust-server:6600",
     AppId = "MyApp",
     Secret = "xxx",
     Scope = "production",    // 环境标识

@@ -1,6 +1,6 @@
 ﻿# IPacket 数据包帮助手册
 
-本文档基于源码 `NewLife.Core/Data/IPacket.cs`，用于说明 `IPacket` 接口及其实现类型（`ArrayPacket` / `OwnerPacket` / `MemoryPacket` / `ReadOnlyPacket`）的设计、用法与注意事项。
+本文档基于源码 `DH.NCore/Data/IPacket.cs`，用于说明 `IPacket` 接口及其实现类型（`ArrayPacket` / `OwnerPacket` / `MemoryPacket` / `ReadOnlyPacket`）的设计、用法与注意事项。
 
 > 关键词：零/少拷贝切片、链式包（`Next`）、所有权（Owner）转移、Span/Memory 短生命周期。
 
@@ -8,7 +8,7 @@
 
 ## 1. 设计目标与适用场景
 
-`IPacket` 是 NewLife.Core 的通用数据包抽象，面向网络收发、协议解析、二进制拼装等高频场景。
+`IPacket` 是 DH.NCore 的通用数据包抽象，面向网络收发、协议解析、二进制拼装等高频场景。
 
 核心目标：
 

@@ -441,7 +441,7 @@ public override void WriteLog(String format, params Object?[] args)
 ### APM 链路追踪
 
 ```csharp
-// 接入 NewLife.Stardust 或其他 ITracer 实现
+// 接入 DH.NStardust（源码扩展命名空间可能仍为 NewLife.Stardust）或其他 ITracer 实现
 client.Tracer = DefaultTracer.Instance;
 
 // NetClient 将 Tracer 传递给底层 ISocketClient，由管道自动创建追踪 Span

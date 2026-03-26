@@ -4,7 +4,7 @@ applyTo: "**/Configuration/**"
 
 # 配置系统模块开发指令
 
-适用于 `NewLife.Configuration` 命名空间下的配置系统开发。
+适用于 PeiKeSmart / `DH.NCore` 配置系统开发。当前源码相关 API 主要位于 `NewLife.Configuration` 命名空间。
 
 ---
 
