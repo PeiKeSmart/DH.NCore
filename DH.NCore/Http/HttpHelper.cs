@@ -41,11 +41,21 @@ public static class HttpHelper
         {
             var aname = asm.GetName();
             var os = Environment.OSVersion?.ToString().TrimStart("Microsoft ");
+            var name = aname.Name;
+
+            // 检查 name 是否只包含 ASCII 字符（纯 UTF8 单字节），如果包含非 ASCII 则进行 URL 编码保留中文
+            var hasNonAscii = !name.IsNullOrEmpty() && Encoding.UTF8.GetByteCount(name) != name.Length;
+            if (hasNonAscii)
+            {
+                // URL 编码非 ASCII 字符，如"测试" -> "%E6%B5%8B%E8%AF%95"
+                name = Uri.EscapeDataString(name);
+            }
+
             // 仅当 OS 字符串为纯 UTF8 单字节（ASCII 子集）时附加，避免非 ASCII 引起的某些网关解析问题
             if (!os.IsNullOrEmpty() && Encoding.UTF8.GetByteCount(os) == os.Length)
-                DefaultUserAgent = $"{aname.Name}/{aname.Version} ({os})";
+                DefaultUserAgent = $"{name}/{aname.Version} ({os})";
             else
-                DefaultUserAgent = $"{aname.Name}/{aname.Version}";
+                DefaultUserAgent = $"{name}/{aname.Version}";
         }
     }
 
@@ -835,39 +845,32 @@ public static class HttpHelper
     /// <returns></returns>
     public static async Task WaitForClose(this System.Net.WebSockets.WebSocket socket, Action<String?>? onReceive, CancellationTokenSource source)
     {
-        var buf = Pool.Shared.Rent(4096);
-        try
+        var buf = new Byte[4 * 1024];
+        while (!source.IsCancellationRequested && socket.State == WebSocketState.Open)
         {
-            while (!source.IsCancellationRequested && socket.State == WebSocketState.Open)
+            try
             {
-                try
+                var data = await socket.ReceiveAsync(new ArraySegment<Byte>(buf), source.Token).ConfigureAwait(false);
+                if (data.MessageType == System.Net.WebSockets.WebSocketMessageType.Close) break;
+                if (data.MessageType == System.Net.WebSockets.WebSocketMessageType.Text)
                 {
-                    var data = await socket.ReceiveAsync(new ArraySegment<Byte>(buf), source.Token).ConfigureAwait(false);
-                    if (data.MessageType == System.Net.WebSockets.WebSocketMessageType.Close) break;
-                    if (data.MessageType == System.Net.WebSockets.WebSocketMessageType.Text)
-                    {
-                        var str = buf.ToStr(null, 0, data.Count);
-                        if (!str.IsNullOrEmpty()) onReceive?.Invoke(str);
-                    }
-                }
-                catch (ThreadAbortException) { break; }
-                catch (ThreadInterruptedException) { break; }
-                catch (TaskCanceledException) { }
-                catch (OperationCanceledException) { }
-                catch (WebSocketException ex)
-                {
-                    XTrace.WriteLine("WebSocket异常 {0}", ex.Message);
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    XTrace.WriteException(ex);
+                    var str = buf.ToStr(null, 0, data.Count);
+                    if (!str.IsNullOrEmpty()) onReceive?.Invoke(str);
                 }
             }
-        }
-        finally
-        {
-            Pool.Shared.Return(buf);
+            catch (ThreadAbortException) { break; }
+            catch (ThreadInterruptedException) { break; }
+            catch (TaskCanceledException) { }
+            catch (OperationCanceledException) { }
+            catch (WebSocketException ex)
+            {
+                XTrace.WriteLine("WebSocket异常 {0}", ex.Message);
+                break;
+            }
+            catch (Exception ex)
+            {
+                XTrace.WriteException(ex);
+            }
         }
 
         // 通知取消
