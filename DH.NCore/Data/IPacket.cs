@@ -291,7 +291,7 @@ public static class PacketHelper
 
         encoding ??= Encoding.UTF8;
 
-#if NETCOREAPP || NETSTANDARD2_1
+        #if NETCOREAPP || NETSTANDARD2_1
         // 栈缓冲区在循环外分配一次，避免每次迭代累积栈空间
         const Int32 MaxStackAllocChars = 1024;
         Span<Char> stackChars = stackalloc Char[MaxStackAllocChars];
