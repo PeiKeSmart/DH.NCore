@@ -231,9 +231,6 @@
       <Pack>True</Pack>
       <PackagePath>content\.github\instructions\</PackagePath>
     </None>
-    <None Remove="..\.github\instructions\benchmark.instructions.md" />
-    <None Remove="..\.github\instructions\development.instructions.md" />
-    <None Remove="..\.github\instructions\net.instructions.md" />
     <None Remove="..\.github\instructions\xcode.instructions.md" />
 
     <None Include="build\DH.NCore.targets">
