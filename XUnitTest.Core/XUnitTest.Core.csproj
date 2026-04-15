@@ -70,7 +70,7 @@
     <PackageReference Include="DH.NModbus" Version="3.91.2024.1109-beta0313" />
     <PackageReference Include="DH.NRemoting" Version="4.21.2026.326-beta0825" />
     <PackageReference Include="DH.UnitTest" Version="4.21.2026.304-beta0007" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
@@ -82,7 +82,7 @@
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="10.0.6" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net9.0'">
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.9" />
