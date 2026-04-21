@@ -255,7 +255,14 @@ public class MessageCodec<T> : Handler
             case 0:
                 // 计算变长的头部长度
                 var p = reader.Position;
-                len = reader.ReadEncodedInt() + reader.Position - p;
+                try
+                {
+                    len = reader.ReadEncodedInt() + reader.Position - p;
+                }
+                catch (InvalidOperationException)
+                {
+                    return 0;
+                }
                 break;
             case 1:
                 len = reader.ReadByte();
