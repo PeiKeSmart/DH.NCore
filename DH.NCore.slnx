@@ -9,6 +9,7 @@
     <File Path=".github/copilot-instructions.md" />
     <File Path=".github/instructions/benchmark.instructions.md" />
     <File Path=".github/instructions/development.instructions.md" />
+    <File Path=".github/instructions/xcode.instructions.md" />
     <File Path=".github/workflows/publish-beta.yml" />
     <File Path=".github/workflows/publish.yml" />
     <File Path=".github/workflows/test.yml" />
