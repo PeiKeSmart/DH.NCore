@@ -28,4 +28,8 @@
     <ProjectReference Include="..\..\DH.NCore\DH.NCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\Doc\DH.png" Link="DH.png" PackagePath="\" />
+  </ItemGroup>
+
 </Project>
