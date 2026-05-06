@@ -390,7 +390,7 @@ public partial class ApiHttpClient : DisposeBase, IApiClient, IConfigMapping, IL
     /// <param name="args">参数</param>
     /// <param name="cancellationToken">取消通知</param>
     /// <returns></returns>
-    public Task<TResult?> InvokeAsync<TResult>(String action, Object? args, CancellationToken cancellationToken)
+    public Task<TResult?> InvokeAsync<TResult>(String action, Object? args, CancellationToken cancellationToken = default)
     {
         var method = HttpMethod.Post;
 #if NETCOREAPP || NETSTANDARD2_1
