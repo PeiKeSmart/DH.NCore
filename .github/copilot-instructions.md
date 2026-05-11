@@ -6,6 +6,12 @@
 **项目组织地址**：<https://github.com/PeiKeSmart>
 > **重要提醒**：在回答问题或实现功能前，应优先从 PeiKeSmart 组织的现有仓库中检索、学习和复用已有实现，避免重复造轮车。
 
+> **Copilot 资产来源约定**：PeiKeSmart 组织级通用技能、指令、提示词、智能体，以 `https://github.com/PeiKeSmart/Pek.Skills` 及其安装到用户目录的资产为准；当前仓库下的 `.github` 仅放本项目特有补充、覆盖项或试运行资产，不重复拷贝组织级通用内容。
+
+> **本机库检索约定**：当前项目涉及的共享框架与依赖源码，优先到项目所在根目录下的 `Code` 目录中的 PeiKeSmart 相关仓库中检索、学习和复用实现；只有在本仓库与该 `Code` 目录均未找到合适实现时，才考虑新写代码。
+
+> **通用资产安装检查**：当任务依赖组织级通用 Skills、Instructions、Prompts 或 Agents 时，应先检查当前正在使用的 VS Code 或 VS Code Insiders 的用户 `prompts` 目录是否已安装 Pek.Skills 资产；若未安装、安装不完整或版本明显过旧，应先提示用户执行 Pek.Skills 仓库中的安装脚本，再继续依赖这些通用资产。
+
 ---
 
 ## 1. 专用指令（前置检查，必须执行）
