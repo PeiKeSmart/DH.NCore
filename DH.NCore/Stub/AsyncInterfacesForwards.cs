@@ -1,4 +1,4 @@
-﻿#if !NETFRAMEWORK && !NETSTANDARD2_0
+#if !NETFRAMEWORK && !NETSTANDARD2_0
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;

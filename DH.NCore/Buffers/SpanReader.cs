@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-
 using NewLife.Data;
 using NewLife.Reflection;
 using NewLife.Serialization;
