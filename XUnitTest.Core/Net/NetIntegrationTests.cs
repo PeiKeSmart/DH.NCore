@@ -543,11 +543,11 @@ public class NetIntegrationTests
         for (var round = 0; round < 10; round++)
         {
             var payload = Encoding.UTF8.GetBytes($"Round-{round:D2}-{Guid.NewGuid():N}");
-
+            
             // 通过 StandardCodec 与服务端配合验证（手动实现回显验证）
             var pkSent = new ArrayPacket(payload);
             var received = await client.SendMessageAsync(pkSent, CancellationToken.None);
-
+            
             Assert.NotNull(received);
         }
     }

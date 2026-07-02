@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using NewLife;
 using NewLife.Buffers;
 using NewLife.Data;
