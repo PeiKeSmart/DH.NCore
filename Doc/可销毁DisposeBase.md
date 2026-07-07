@@ -1,26 +1,26 @@
-# ������ DisposeBase
+# 可销毁 DisposeBase
 
-## ����
+## 概述
 
-`DisposeBase` �� DH.NCore ��ʵ�� `IDisposable` ģʽ�ĳ�����࣬�ṩ��׼����Դ�ͷ�ģʽ����Ч��ֹ�ڴ����Դй©����ȷ���ͷ��߼�ִֻ��һ�Σ���֧�������¼�֪ͨ��
+`DisposeBase` 是 NewLife.Core 中实现 `IDisposable` 模式的抽象基类，提供标准的资源释放模式，有效防止内存和资源泄漏。它确保释放逻辑只执行一次，并支持销毁事件通知。
 
-**�����ռ�**��`NewLife`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife`  
+**文档地址**：https://newlifex.com/core/disposebase
 
-## ��������
+## 核心特性
 
-- **��׼ Dispose ģʽ**����ȷʵ�� `IDisposable` �ӿ�
-- **�����ͷű�֤**��ͨ��ԭ�Ӳ���ȷ���ͷ��߼�ִֻ��һ��
-- **�ս���֧��**�������ǵ��� `Dispose` ʱ�ṩ�����ͷ�
-- **�����¼�**��֧���ڶ�������ʱ�����¼�֪ͨ
-- **��������**���ṩ `ThrowIfDisposed` �� `TryDispose` �ȸ�������
+- **标准 Dispose 模式**：正确实现 `IDisposable` 接口
+- **单次释放保证**：通过原子操作确保释放逻辑只执行一次
+- **终结器支持**：在忘记调用 `Dispose` 时提供兜底释放
+- **销毁事件**：支持在对象销毁时触发事件通知
+- **辅助方法**：提供 `ThrowIfDisposed` 和 `TryDispose` 等辅助方法
 
-## ���ٿ�ʼ
+## 快速开始
 
 ```csharp
 using NewLife;
 
-// �̳� DisposeBase ʵ����Դ����
+// 继承 DisposeBase 实现资源管理
 public class MyResource : DisposeBase
 {
     private Stream _stream;
@@ -36,20 +36,20 @@ public class MyResource : DisposeBase
         
         if (disposing)
         {
-            // �ͷ��й���Դ
+            // 释放托管资源
             _stream?.Dispose();
             _stream = null;
         }
     }
 }
 
-// ʹ�� using ����Զ��ͷ�
+// 使用 using 语句自动释放
 using var resource = new MyResource("data.txt");
 ```
 
-## API �ο�
+## API 参考
 
-### IDisposable2 �ӿ�
+### IDisposable2 接口
 
 ```csharp
 public interface IDisposable2 : IDisposable
@@ -59,11 +59,11 @@ public interface IDisposable2 : IDisposable
 }
 ```
 
-��չ�Ŀ����ٽӿڣ������� `Disposed` ״̬���Ժ������¼���
+扩展的可销毁接口，增加了 `Disposed` 状态属性和销毁事件。
 
-### DisposeBase ��
+### DisposeBase 类
 
-#### ����
+#### 属性
 
 ##### Disposed
 
@@ -71,9 +71,9 @@ public interface IDisposable2 : IDisposable
 public Boolean Disposed { get; }
 ```
 
-��ʾ�����Ƿ��ѱ��ͷš�
+表示对象是否已被释放。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var resource = new MyResource();
 Console.WriteLine(resource.Disposed);  // False
@@ -82,7 +82,7 @@ resource.Dispose();
 Console.WriteLine(resource.Disposed);  // True
 ```
 
-#### ����
+#### 方法
 
 ##### Dispose
 
@@ -90,7 +90,7 @@ Console.WriteLine(resource.Disposed);  // True
 public void Dispose()
 ```
 
-�ͷ���Դ�����ú�ᴥ�� `OnDisposed` �¼�����֪ͨ GC ���ٵ����ս�����
+释放资源。调用后会触发 `OnDisposed` 事件，并通知 GC 不再调用终结器。
 
 ##### Dispose(Boolean)
 
@@ -98,26 +98,26 @@ public void Dispose()
 protected virtual void Dispose(Boolean disposing)
 ```
 
-ʵ�ʵ���Դ�ͷŷ������������ش˷���ʵ�־�����ͷ��߼���
+实际的资源释放方法，子类重载此方法实现具体的释放逻辑。
 
-**����˵��**��
-- `disposing`��`true` ��ʾ�� `Dispose()` �������ã�Ӧ�ͷ�������Դ��`false` ��ʾ���ս������ã�ֻӦ�ͷŷ��й���Դ
+**参数说明**：
+- `disposing`：`true` 表示从 `Dispose()` 方法调用，应释放所有资源；`false` 表示从终结器调用，只应释放非托管资源
 
-**����ʾ��**��
+**重载示例**：
 ```csharp
 protected override void Dispose(Boolean disposing)
 {
-    // 1. ���ȵ��û��෽��
+    // 1. 首先调用基类方法
     base.Dispose(disposing);
     
-    // 2. �ͷ��й���Դ�������� Dispose() ����ʱ��
+    // 2. 释放托管资源（仅当从 Dispose() 调用时）
     if (disposing)
     {
         _managedResource?.Dispose();
         _managedResource = null;
     }
     
-    // 3. �ͷŷ��й���Դ������·����ִ�У�
+    // 3. 释放非托管资源（两种路径都执行）
     if (_handle != IntPtr.Zero)
     {
         CloseHandle(_handle);
@@ -132,22 +132,22 @@ protected override void Dispose(Boolean disposing)
 protected void ThrowIfDisposed()
 ```
 
-�ڹ��������е��ã����������ͷ����׳� `ObjectDisposedException`��
+在公开方法中调用，若对象已释放则抛出 `ObjectDisposedException`。
 
-**ʾ��**��
+**示例**：
 ```csharp
 public class MyResource : DisposeBase
 {
     public void DoWork()
     {
-        ThrowIfDisposed();  // ���ͷ�ʱ�׳��쳣
+        ThrowIfDisposed();  // 已释放时抛出异常
         
-        // ִ��ʵ�ʹ���...
+        // 执行实际工作...
     }
 }
 ```
 
-#### �¼�
+#### 事件
 
 ##### OnDisposed
 
@@ -155,22 +155,22 @@ public class MyResource : DisposeBase
 public event EventHandler? OnDisposed
 ```
 
-��������ʱ�������¼���
+对象被销毁时触发的事件。
 
-**ע��**���¼��������ս����߳��д��������ķ�Ӧ���������ض��߳������ġ�
+**注意**：事件可能在终结器线程中触发，订阅方应避免依赖特定线程上下文。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var resource = new MyResource();
 resource.OnDisposed += (sender, e) =>
 {
-    Console.WriteLine("��Դ���ͷ�");
+    Console.WriteLine("资源已释放");
 };
 
-resource.Dispose();  // �������Դ���ͷ�
+resource.Dispose();  // 输出：资源已释放
 ```
 
-### DisposeHelper ������
+### DisposeHelper 辅助类
 
 #### TryDispose
 
@@ -178,27 +178,27 @@ resource.Dispose();  // �������Դ���ͷ�
 public static Object? TryDispose(this Object? obj)
 ```
 
-�������ٶ����������ʵ���� `IDisposable` ������� `Dispose` ������֧�ּ������ͣ��������������Ԫ�ء�
+尝试销毁对象，如果对象实现了 `IDisposable` 则调用其 `Dispose` 方法。支持集合类型，会遍历销毁所有元素。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ���ٵ�������
+// 销毁单个对象
 var stream = File.OpenRead("test.txt");
 stream.TryDispose();
 
-// ���ټ����е����ж���
+// 销毁集合中的所有对象
 var streams = new List<Stream>
 {
     File.OpenRead("a.txt"),
     File.OpenRead("b.txt"),
     File.OpenRead("c.txt")
 };
-streams.TryDispose();  // ����������
+streams.TryDispose();  // 销毁所有流
 ```
 
-## ʹ�ó���
+## 使用场景
 
-### 1. �����ļ����
+### 1. 管理文件句柄
 
 ```csharp
 public class FileProcessor : DisposeBase
@@ -233,7 +233,7 @@ public class FileProcessor : DisposeBase
 }
 ```
 
-### 2. ������������
+### 2. 管理网络连接
 
 ```csharp
 public class TcpConnection : DisposeBase
@@ -269,7 +269,7 @@ public class TcpConnection : DisposeBase
 }
 ```
 
-### 3. ��Դ�ع���
+### 3. 资源池管理
 
 ```csharp
 public class ResourcePool<T> : DisposeBase where T : IDisposable
@@ -313,7 +313,7 @@ public class ResourcePool<T> : DisposeBase where T : IDisposable
 }
 ```
 
-### 4. ���������¼�
+### 4. 监听销毁事件
 
 ```csharp
 public class ResourceMonitor
@@ -323,45 +323,45 @@ public class ResourceMonitor
         resource.OnDisposed += (sender, e) =>
         {
             var name = sender?.GetType().Name;
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {name} ���ͷ�");
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {name} 已释放");
         };
     }
 }
 
-// ʹ��
+// 使用
 var monitor = new ResourceMonitor();
 var resource = new MyResource();
 monitor.Monitor(resource);
 
-resource.Dispose();  // �����[12:30:45] MyResource ���ͷ�
+resource.Dispose();  // 输出：[12:30:45] MyResource 已释放
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ���ǵ��û��෽��
+### 1. 总是调用基类方法
 
 ```csharp
 protected override void Dispose(Boolean disposing)
 {
-    // ? ���ȵ��û��෽��
+    // ? 首先调用基类方法
     base.Dispose(disposing);
     
-    // Ȼ���ͷ��Լ�����Դ
+    // 然后释放自己的资源
     if (disposing) { /* ... */ }
 }
 ```
 
-### 2. ʹ�� using ���
+### 2. 使用 using 语句
 
 ```csharp
-// ? �Ƽ���ʹ�� using ���ȷ���ͷ�
+// ? 推荐：使用 using 语句确保释放
 using var resource = new MyResource();
 
-// ? ���Ƽ����ֶ����� Dispose����������
+// ? 不推荐：手动调用 Dispose，容易遗忘
 var resource = new MyResource();
 try
 {
-    // ʹ����Դ
+    // 使用资源
 }
 finally
 {
@@ -369,35 +369,35 @@ finally
 }
 ```
 
-### 3. �ڹ��������м��״̬
+### 3. 在公开方法中检查状态
 
 ```csharp
 public class MyResource : DisposeBase
 {
     public void DoWork()
     {
-        // ? �ڷ�����ʼʱ����Ƿ����ͷ�
+        // ? 在方法开始时检查是否已释放
         ThrowIfDisposed();
         
-        // ִ��ʵ�ʹ���
+        // 执行实际工作
     }
 }
 ```
 
-### 4. ��ȷ�����йܺͷ��й���Դ
+### 4. 正确处理托管和非托管资源
 
 ```csharp
 protected override void Dispose(Boolean disposing)
 {
     base.Dispose(disposing);
     
-    // �й���Դ������ disposing=true ʱ�ͷ�
+    // 托管资源：仅在 disposing=true 时释放
     if (disposing)
     {
         _managedObject?.Dispose();
     }
     
-    // ���й���Դ�����������Ҫ�ͷ�
+    // 非托管资源：两种情况都要释放
     if (_nativeHandle != IntPtr.Zero)
     {
         NativeMethods.CloseHandle(_nativeHandle);
@@ -406,57 +406,57 @@ protected override void Dispose(Boolean disposing)
 }
 ```
 
-### 5. �������ս������׳��쳣
+### 5. 避免在终结器中抛出异常
 
 ```csharp
-// DisposeBase �Ѿ��������ս����е��쳣
-// ����� Dispose(Boolean) ����ҲӦ�ò�����ܵ��쳣
+// DisposeBase 已经处理了终结器中的异常
+// 子类的 Dispose(Boolean) 方法也应该捕获可能的异常
 protected override void Dispose(Boolean disposing)
 {
     base.Dispose(disposing);
     
     try
     {
-        // �ͷ���Դ
+        // 释放资源
     }
     catch (Exception ex)
     {
-        // ��¼�����׳�
+        // 记录但不抛出
         XTrace.WriteException(ex);
     }
 }
 ```
 
-## Dispose ģʽ���
+## Dispose 模式详解
 
 ```
-���� Dispose()
-       ��
-       ��
+调用 Dispose()
+       │
+       ▼
   Dispose(true)
-       ��
-       ������? �ͷ��й���Դ
-       ��
-       ������? �ͷŷ��й���Դ
-       ��
-       ������? ���� OnDisposed �¼�
-       ��
-       ������? GC.SuppressFinalize(this)
-              ��
-              ������? �ս������ٱ�����
+       │
+       ├──? 释放托管资源
+       │
+       ├──? 释放非托管资源
+       │
+       ├──? 触发 OnDisposed 事件
+       │
+       └──? GC.SuppressFinalize(this)
+              │
+              └──? 终结器不再被调用
 
 
-�ս��� ~DisposeBase()  (������ǵ��� Dispose)
-       ��
-       ��
+终结器 ~DisposeBase()  (如果忘记调用 Dispose)
+       │
+       ▼
   Dispose(false)
-       ��
-       ������? �ͷŷ��й���Դ
-       ��
-       ������? ���� OnDisposed �¼�
+       │
+       ├──? 释放非托管资源
+       │
+       └──? 触发 OnDisposed 事件
 ```
 
-## �������
+## 相关链接
 
-- [����� ObjectPool](object_pool-�����ObjectPool.md)
-- [�������� ObjectContainer](object_container-��������ObjectContainer.md)
+- [对象池 ObjectPool](object_pool-对象池ObjectPool.md)
+- [对象容器 ObjectContainer](object_container-对象容器ObjectContainer.md)
