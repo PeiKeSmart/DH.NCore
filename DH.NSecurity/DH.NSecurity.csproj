@@ -45,12 +45,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\DH.NCore\Security\AlgorithmKeyBlob.cs" Link="AlgorithmKeyBlob.cs" />
-    <Compile Include="..\DH.NCore\Security\ECDsaHelper.cs" Link="ECDsaHelper.cs" />
-    <Compile Include="..\DH.NCore\Security\ECKey.cs" Link="ECKey.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.Cng">
       <Version>5.0.0</Version>
     </PackageReference>

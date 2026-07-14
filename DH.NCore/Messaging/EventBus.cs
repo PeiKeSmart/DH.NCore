@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using NewLife.Collections;
 using NewLife.Data;
 using NewLife.Log;

@@ -1,4 +1,4 @@
-﻿using NewLife;
+using NewLife;
 using NewLife.Data;
 using NewLife.Messaging;
 using Xunit;

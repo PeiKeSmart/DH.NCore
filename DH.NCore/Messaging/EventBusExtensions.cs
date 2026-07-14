@@ -1,4 +1,4 @@
-﻿namespace NewLife.Messaging;
+namespace NewLife.Messaging;
 
 /// <summary>事件总线扩展。提供同步 Subscribe/Unsubscribe 与委托订阅、ReceiveAsync 等便利方法</summary>
 public static class EventBusExtensions

@@ -1,4 +1,4 @@
-﻿namespace NewLife.Http;
+namespace NewLife.Http;
 
 /// <summary>Http控制器接口</summary>
 /// <remarks>

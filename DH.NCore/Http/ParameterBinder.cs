@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using NewLife.Reflection;
 using NewLife.Serialization;
 

@@ -7,9 +7,7 @@ using NewLife.Http;
 using NewLife.Log;
 using NewLife.Net;
 using NewLife.Remoting;
-
 using Xunit;
-
 using ClientWebSocket = System.Net.WebSockets.ClientWebSocket;
 
 namespace XUnitTest.Integration;

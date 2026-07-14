@@ -586,7 +586,7 @@ public class SystemJson : IJsonHost
         }
     }
 #endif
-#endregion
+    #endregion
 
     #region IJsonHost 成员
     /// <summary>写入对象，得到Json字符串。以 <see cref="Options"/> 为基准，再叠加指定参数</summary>

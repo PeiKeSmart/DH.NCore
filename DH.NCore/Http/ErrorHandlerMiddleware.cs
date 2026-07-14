@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.Mail;
 using NewLife.Data;
 using NewLife.Serialization;
 

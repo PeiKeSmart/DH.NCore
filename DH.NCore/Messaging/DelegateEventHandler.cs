@@ -1,4 +1,4 @@
-﻿namespace NewLife.Messaging;
+namespace NewLife.Messaging;
 
 /// <summary>委托事件处理器。将 Action/Func 委托封装为 <see cref="IEventHandler{TEvent}"/></summary>
 /// <typeparam name="TEvent">事件类型</typeparam>
