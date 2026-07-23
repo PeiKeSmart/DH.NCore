@@ -28,6 +28,7 @@ bld/
 /Log
 *.log
 [Ll]og/
+!XUnitTest.Core/Log/
 
 # HTML files
 *.htm
