@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Primitives;
+﻿using System.Globalization;
+using System.Text.Json;
+using Microsoft.Extensions.Primitives;
 using NewLife;
 using NewLife.Log;
-using System.Globalization;
-using System.Text.Json;
 using Xunit;
 
 namespace XUnitTest.Common;
@@ -540,7 +540,8 @@ public class UtilityTests
         Assert.Equal(123456m, "1 234,56".ToDecimal());
     }
 
-    [Fact]    public void JsonElement_ToInt()
+    [Fact]
+    public void JsonElement_ToInt()
     {
         // 整数小数 -> 整数
         Assert.Equal(42, JsonDocument.Parse("42").RootElement.ToInt());
@@ -560,7 +561,8 @@ public class UtilityTests
         Assert.Equal(-5, JsonDocument.Parse("-5").RootElement.ToInt());
     }
 
-    [Fact]    public void JsonElement_ToLong()
+    [Fact]
+    public void JsonElement_ToLong()
     {
         Assert.Equal(9876543210L, JsonDocument.Parse("9876543210").RootElement.ToLong());
         Assert.Equal(42L, JsonDocument.Parse("\"42\"").RootElement.ToLong());
@@ -568,7 +570,8 @@ public class UtilityTests
         Assert.Equal(-99L, JsonDocument.Parse("-99").RootElement.ToLong());
     }
 
-    [Fact]    public void JsonElement_ToDouble()
+    [Fact]
+    public void JsonElement_ToDouble()
     {
         Assert.Equal(3.14, JsonDocument.Parse("3.14").RootElement.ToDouble());
         Assert.Equal(100d, JsonDocument.Parse("100").RootElement.ToDouble());
@@ -577,7 +580,8 @@ public class UtilityTests
         Assert.Equal(-2.5, JsonDocument.Parse("-2.5").RootElement.ToDouble());
     }
 
-    [Fact]    public void JsonElement_ToDecimal()
+    [Fact]
+    public void JsonElement_ToDecimal()
     {
         Assert.Equal(12345.67m, JsonDocument.Parse("12345.67").RootElement.ToDecimal());
         Assert.Equal(999m, JsonDocument.Parse("999").RootElement.ToDecimal());
@@ -585,7 +589,8 @@ public class UtilityTests
         Assert.Equal(0m, JsonDocument.Parse("null").RootElement.ToDecimal());
     }
 
-    [Fact]    public void JsonElement_ToBoolean()
+    [Fact]
+    public void JsonElement_ToBoolean()
     {
         // JSON true/false 小写关键字
         Assert.True(JsonDocument.Parse("true").RootElement.ToBoolean());
@@ -604,7 +609,8 @@ public class UtilityTests
         Assert.True(JsonDocument.Parse("null").RootElement.ToBoolean(true));
     }
 
-    [Fact]    public void JsonElement_ToDateTime()
+    [Fact]
+    public void JsonElement_ToDateTime()
     {
         // 字符串日期
         var expected = new DateTime(2024, 6, 15, 12, 30, 0);
@@ -623,7 +629,8 @@ public class UtilityTests
         Assert.Equal(DateTime.MinValue, JsonDocument.Parse("null").RootElement.ToDateTime());
     }
 
-    [Fact]    public void JsonElement_ToDateTimeOffset()
+    [Fact]
+    public void JsonElement_ToDateTimeOffset()
     {
         // 带时区的字符串
         var expected = new DateTimeOffset(2024, 6, 15, 12, 30, 0, TimeSpan.FromHours(8));

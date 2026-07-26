@@ -1412,13 +1412,16 @@ public class MachineInfo : IExtend
 
     private SystemTime? _systemTime;
 
-    /// <summary>获取WMI信息。内部自动选择 ManagementObjectSearcher (NETFX) 或 COM (NET5+Windows) 或 wmic</summary>
+    /// <summary>获取WMI信息。NETFX直接用ManagementObjectSearcher；net*-windows反射System.Management并回退COM；其它运行时用COM并回退wmic</summary>
     /// <param name="path">WMI路径</param>
     /// <param name="property">属性名</param>
     /// <param name="nameSpace">命名空间，默认 root\cimv2</param>
     /// <returns>查询结果</returns>
     public static String GetInfo(String path, String property, String? nameSpace = null)
     {
+        // 规范化命名空间：WMI 要求反斜杠分隔，调用者可能传入 root/wmi 等正斜杠格式
+        if (nameSpace != null) nameSpace = nameSpace.Replace("/", "\\");
+
 #if NETFRAMEWORK
         // Linux Mono不支持WMI
         if (Runtime.Mono) return "";
@@ -1449,112 +1452,187 @@ public class MachineInfo : IExtend
 
         return bbs.Distinct().Join();
 #else
-        // 非 NETFRAMEWORK：优先 COM，失败回退 wmic
+        var ns = nameSpace ?? "root\\cimv2";
+
+#if __WIN__
+        // net*-windows：优先反射 System.Management 走标准 WMI，失败回退 COM；两者均失败降级 wmic 兜底
+        {
+            var value = QueryWmiSystemManagement(path, property, ns);
+            if (value != null) return value;
+
+            value = QueryWmiCom(path, property, ns);
+            if (value != null) return value;
+
+            // 两种 WMI 路径均失败（如 WMI 服务异常），降级到 wmic 进程兜底
+            if (XTrace.Log.Level <= LogLevel.Debug)
+                XTrace.WriteLine("WMI 均失败，回退 wmic: {0}.{1}", path, property);
+        }
+#else
+        // 其它运行时（netstandard/net*非windows）：优先 COM，失败回退 wmic
 #if NET5_0_OR_GREATER
         if (OperatingSystem.IsWindows())
 #else
         if (Runtime.Windows)
 #endif
         {
-            var value = QueryWmiCom(path, property, nameSpace ?? "root\\cimv2");
+            var value = QueryWmiCom(path, property, ns);
             if (value != null) return value;
         }
+#endif
 
-        // 回退 wmic。不带命名空间时也要用 path 前缀以支持完整类名
-        var ns = nameSpace;
-        if (ns != null) ns = ns.Replace("/", "\\");
-        var type = ns != null ? $"/namespace:\\\\{ns} path {path}" : $"path {path}";
+        // wmic 兜底（__WIN__ 降级 + 其它运行时）。不带命名空间时也要用 path 前缀以支持完整类名
+        var type = !ns.EqualIgnoreCase("root\\cimv2") ? $"/namespace:\\\\{ns} path {path}" : $"path {path}";
         var dic = ReadWmic(type, property);
         return dic.TryGetValue(property, out var v) ? v : "";
 #endif
     }
 
 #if !NETFRAMEWORK
-    /// <summary>通过 COM 查询 WMI 属性。使用 Windows 内置 WbemScripting.SWbemLocator，不开进程</summary>
+    /// <summary>通过反射 System.Management 查询 WMI 属性。用于 net*-windows，不新增编译期依赖，不开进程</summary>
+    /// <remarks>
+    /// System.Management.dll 随 Windows 桌面运行时提供（net*-windows），通过反射调用避免核心库直接引用该程序集。
+    /// 内部使用 ManagementObjectSearcher(nameSpace, wql).Get() 枚举结果并读取属性。
+    /// </remarks>
+    /// <param name="wmiClass">WMI 类名，如 Win32_OperatingSystem</param>
+    /// <param name="property">属性名</param>
+    /// <param name="nameSpace">命名空间，如 root\cimv2</param>
+    /// <param name="throwOnError">失败时是否抛出异常，默认false吞掉异常返回null</param>
+    /// <returns>查询结果，失败返回null</returns>
 #if NET5_0_OR_GREATER
     [SupportedOSPlatform("windows")]
 #endif
-    private static String? QueryWmiCom(String wmiClass, String property, String nameSpace)
+    internal static String? QueryWmiSystemManagement(String wmiClass, String property, String nameSpace, Boolean throwOnError = false)
     {
         try
         {
-            var locatorType = Type.GetTypeFromProgID("WbemScripting.SWbemLocator");
-            if (locatorType == null) return null;
+            // 反射加载 System.Management（Windows桌面运行时内置，无编译期引用）
+            var asm = Assembly.Load("System.Management");
+            var searcherType = asm.GetType("System.Management.ManagementObjectSearcher")!;
+            var moType = asm.GetType("System.Management.ManagementObject")!;
+            var enumType = asm.GetType("System.Management.ManagementObjectCollection")!;
 
-            var locator = Activator.CreateInstance(locatorType);
-            if (locator == null) return null;
+            // new ManagementObjectSearcher(nameSpace, wql)
+            var wql = $"SELECT {property} FROM {wmiClass}";
+            var searcher = Activator.CreateInstance(searcherType, nameSpace, wql);
+            if (searcher == null) return null;
 
-            var services = locatorType.InvokeMember("ConnectServer",
-                BindingFlags.InvokeMethod, null, locator,
-                [".", nameSpace, null, null, null, null, 0, null]);
-            if (services == null) return null;
+            // .Get() → ManagementObjectCollection
+            var getMethod = searcherType.GetMethod("Get", Type.EmptyTypes)!;
+            var results = getMethod.Invoke(searcher, null);
+            if (results == null) return null;
 
-            try
+            // foreach (ManagementObject obj in results)
+            var bbs = new List<String>();
+            var getEnumeratorMethod = enumType.GetMethod("GetEnumerator")!;
+            var enumerator = getEnumeratorMethod.Invoke(results, null);
+            var moveNextMethod = enumerator!.GetType().GetMethod("MoveNext")!;
+            var currentProperty = enumerator.GetType().GetProperty("Current")!;
+
+            var itemProp = moType.GetProperty("Item", [typeof(String)])!;
+            var getValueMethod = itemProp.GetGetMethod()!;
+
+            while ((Boolean)moveNextMethod.Invoke(enumerator, null)!)
             {
-                var wql = $"SELECT {property} FROM {wmiClass}";
-                var results = services.GetType().InvokeMember("ExecQuery",
-                    BindingFlags.InvokeMethod, null, services, [wql, "WQL", 0, null]);
-                if (results == null) return null;
+                var obj = currentProperty.GetValue(enumerator);
+                if (obj == null) continue;
 
-                try
+                var val = getValueMethod.Invoke(obj, [property]);
+                if (val != null)
                 {
-                    var resultsType = results.GetType();
-                    var count = (Int32)(resultsType.InvokeMember("Count",
-                        BindingFlags.GetProperty, null, results, null) ?? 0);
-
-                    var bbs = new List<String>();
-                    for (var i = 0; i < count; i++)
-                    {
-                        var item = resultsType.InvokeMember("Item",
-                            BindingFlags.GetProperty, null, results, [i]);
-                        if (item == null) continue;
-
-                        try
-                        {
-                            var props = item.GetType().InvokeMember("Properties_",
-                                BindingFlags.GetProperty, null, item, null);
-                            if (props == null) continue;
-
-                            try
-                            {
-                                var prop = props.GetType().InvokeMember("Item",
-                                    BindingFlags.GetProperty, null, props, [property]);
-                                if (prop == null) continue;
-
-                                try
-                                {
-                                    var val = prop.GetType().InvokeMember("Value",
-                                        BindingFlags.GetProperty, null, prop, null);
-                                    if (val != null)
-                                    {
-                                        var v = val.ToString()?.TrimInvisible()?.Trim();
-                                        if (!v.IsNullOrEmpty()) bbs.Add(v);
-                                    }
-                                }
-                                finally { try { Marshal.FinalReleaseComObject(prop); } catch { } }
-                            }
-                            finally { try { Marshal.FinalReleaseComObject(props); } catch { } }
-                        }
-                        finally { try { Marshal.FinalReleaseComObject(item); } catch { } }
-                    }
-
-                    if (bbs.Count > 0)
-                    {
-                        bbs.Sort();
-                        return bbs.Distinct().Join();
-                    }
+                    var v = val.ToString()?.TrimInvisible()?.Trim();
+                    if (!v.IsNullOrEmpty()) bbs.Add(v);
                 }
-                finally { try { Marshal.FinalReleaseComObject(results); } catch { } }
             }
-            finally
+
+            // 清理 COM 引用
+            if (results is IDisposable d1) d1.Dispose();
+            if (searcher is IDisposable d2) d2.Dispose();
+
+            if (bbs.Count > 0)
             {
-                try { Marshal.FinalReleaseComObject(services); } catch { }
-                try { Marshal.FinalReleaseComObject(locator); } catch { }
+                bbs.Sort();
+                return bbs.Distinct().Join();
             }
         }
         catch (Exception ex)
         {
-            if (XTrace.Log.Level <= LogLevel.Debug) XTrace.WriteException(ex);
+            if (throwOnError) throw;
+            if (XTrace.Log.Level <= LogLevel.Debug)
+            {
+                XTrace.WriteLine("QueryWmiSystemManagement 失败: {0}.{1} @ {2}", wmiClass, property, nameSpace);
+                XTrace.WriteException(ex is TargetInvocationException tie ? tie.InnerException! : ex);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>通过 COM 查询 WMI 属性。使用 Windows 内置 winmgmts 组件，不新增依赖，不开进程</summary>
+    /// <remarks>
+    /// 通过 winmgmts moniker 绑定 SWbemServices，执行 WQL 查询并枚举结果，SWbemObject 按名暴露 WMI 属性。
+    /// 相比 System.Management 无需该程序集，适用于 netstandard/net*非windows 运行时下的 Windows 主机。
+    /// COM 查询在部分环境可能失败，此时调用方应回退 wmic。
+    /// </remarks>
+    /// <param name="wmiClass">WMI 类名，如 Win32_OperatingSystem</param>
+    /// <param name="property">属性名</param>
+    /// <param name="nameSpace">命名空间，如 root\cimv2</param>
+    /// <param name="throwOnError">失败时是否抛出异常，默认false吞掉异常返回null</param>
+    /// <returns>查询结果，失败返回null</returns>
+#if NET5_0_OR_GREATER
+    [SupportedOSPlatform("windows")]
+#endif
+    internal static String? QueryWmiCom(String wmiClass, String property, String nameSpace, Boolean throwOnError = false)
+    {
+        Object? services = null;
+        Object? results = null;
+        try
+        {
+            // 通过 winmgmts moniker 绑定 WMI 服务，规避 SWbemLocator.ConnectServer 的 IDispatch 参数编组问题
+            var moniker = $"winmgmts:\\\\.\\{nameSpace}";
+            services = Marshal.BindToMoniker(moniker);
+            if (services == null) return null;
+
+            // ExecQuery 执行 WQL 查询，返回 SWbemObjectSet
+            var wql = $"SELECT {property} FROM {wmiClass}";
+            results = services.GetType().InvokeMember("ExecQuery", BindingFlags.InvokeMethod, null, services, new Object[] { wql });
+            if (results == null) return null;
+
+            // SWbemObjectSet 实现 IEnumVARIANT，可直接 foreach；SWbemObject 通过 IDispatch 按名暴露 WMI 属性
+            var bbs = new List<String>();
+            foreach (var obj in (System.Collections.IEnumerable)results)
+            {
+                if (obj == null) continue;
+                try
+                {
+                    var val = obj.GetType().InvokeMember(property, BindingFlags.GetProperty, null, obj, null);
+                    if (val != null)
+                    {
+                        var v = val.ToString()?.TrimInvisible()?.Trim();
+                        if (!v.IsNullOrEmpty()) bbs.Add(v);
+                    }
+                }
+                finally { try { Marshal.FinalReleaseComObject(obj); } catch { } }
+            }
+
+            if (bbs.Count > 0)
+            {
+                bbs.Sort();
+                return bbs.Distinct().Join();
+            }
+        }
+        catch (Exception ex)
+        {
+            if (throwOnError) throw;
+            if (XTrace.Log.Level <= LogLevel.Debug)
+            {
+                XTrace.WriteLine("QueryWmiCom 失败: {0}.{1} @ {2}", wmiClass, property, nameSpace);
+                XTrace.WriteException(ex is TargetInvocationException tie ? tie.InnerException! : ex);
+            }
+        }
+        finally
+        {
+            if (results != null) try { Marshal.FinalReleaseComObject(results); } catch { }
+            if (services != null) try { Marshal.FinalReleaseComObject(services); } catch { }
         }
 
         return null;

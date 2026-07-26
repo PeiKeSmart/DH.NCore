@@ -69,6 +69,11 @@
     <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" IsImplicitlyDefined="true" TargetingPackVersion="10.0.0" />
   </ItemGroup>
 
+  <!-- net*-windows 使用 System.Management 进行标准 WMI 查询（反射调用，避免核心库直接暴露该类型） -->
+  <ItemGroup Condition="'$(TargetFramework)'=='net5.0-windows' or '$(TargetFramework)'=='net6.0-windows' or '$(TargetFramework)'=='net7.0-windows' or '$(TargetFramework)'=='net8.0-windows' or '$(TargetFramework)'=='net9.0-windows' or '$(TargetFramework)'=='net10.0-windows'">
+    <PackageReference Include="System.Management" Version="9.0.5" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
   </ItemGroup>

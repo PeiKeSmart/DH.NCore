@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0;net8.0-windows;net10.0-windows</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <RootNamespace>XUnitTest</RootNamespace>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="$(TargetFramework.Contains('-windows'))">$(DefineConstants);__WIN__</DefineConstants>
     <OutputPath>..\Bin\UnitTest</OutputPath>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -53,8 +54,8 @@
     <EmbeddedResource Include="IO\excel.xlsx" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="10.0.10" />
     <PackageReference Include="DH.NModbus" Version="3.91.2024.1109-beta0313" />
     <PackageReference Include="DH.NRemoting" Version="4.24.2026.714-beta1306" />
     <PackageReference Include="DH.UnitTest" Version="4.24.2026.714-beta1254" />
@@ -65,6 +66,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <!-- System.Management 仅 net*-windows TFM 需要，用于测试 WMI 查询直接引用 -->
+  <ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
+    <PackageReference Include="System.Management" Version="9.0.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DH.NCore\DH.NCore.csproj" />

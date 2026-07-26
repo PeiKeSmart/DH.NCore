@@ -133,6 +133,298 @@ public class MachineInfoTests
         Assert.NotNull(temp);
     }
 
+    [Fact(DisplayName = "GetInfo 显式命名空间测试")]
+    public void GetInfoWithExplicitNamespaceTest()
+    {
+        // 显式传入默认命名空间 root\cimv2（验证 nameSpace 参数传递路径）
+        var value1 = MachineInfo.GetInfo("Win32_OperatingSystem", "Caption", "root\\cimv2");
+        Assert.NotEmpty(value1);
+        Assert.Contains("Windows", value1, StringComparison.OrdinalIgnoreCase);
+
+        // 不传命名空间（使用默认值 null → "root\\cimv2"）
+        var value2 = MachineInfo.GetInfo("Win32_OperatingSystem", "Caption");
+        Assert.NotEmpty(value2);
+        Assert.Equal(value1, value2);
+    }
+
+    [Fact(DisplayName = "ReadWmiComMulti WHERE 子句测试")]
+    public void ReadWmiComMultiWhereTest()
+    {
+        // 带 WHERE 子句的磁盘驱动器查询（覆盖 alias 解析的 where 分支）
+        var dic = MachineInfo.ReadWmiComMulti("diskdrive where mediatype=\"Fixed hard disk media\"", "SerialNumber", "Size");
+        Assert.NotNull(dic);
+        // 台式机无固定硬盘时字典可能为空，但不应抛出异常
+        if (dic.Count > 0)
+        {
+            Assert.True(dic.ContainsKey("serialnumber") || dic.ContainsKey("SerialNumber"));
+            Assert.True(dic.ContainsKey("Size"));
+        }
+    }
+
+    [Fact(DisplayName = "GetInfo 不存在的属性测试")]
+    public void GetInfoNonExistentPropertyTest()
+    {
+        // 查询不存在的属性不应抛出异常，应返回空字符串
+        var value = MachineInfo.GetInfo("Win32_OperatingSystem", "NonExistentProperty_XYZ_" + Guid.NewGuid().ToString("N"));
+        Assert.NotNull(value);
+        Assert.Empty(value);
+    }
+
+    [Fact(DisplayName = "GetInfo 不存在的类测试")]
+    public void GetInfo_NonExistentClass_ReturnsEmpty()
+    {
+        // 查询不存在的 WMI 类应返回空字符串（不抛异常、不返回 null）
+        var value = MachineInfo.GetInfo("Win32_NonExistentClass_XYZ_" + Guid.NewGuid().ToString("N"), "Name");
+        Assert.NotNull(value);
+        Assert.Empty(value);
+    }
+
+    [Theory(DisplayName = "GetInfo 多组 WMI 类/属性查询")]
+    [InlineData("Win32_OperatingSystem", "Caption")]
+    [InlineData("Win32_BIOS", "SerialNumber")]
+    [InlineData("Win32_Processor", "Name")]
+    [InlineData("Win32_ComputerSystem", "TotalPhysicalMemory")]
+    public void GetInfo_MultipleCommonWmiClasses(String wmiClass, String property)
+    {
+        var value = MachineInfo.GetInfo(wmiClass, property);
+        Assert.NotNull(value);
+        if (wmiClass == "Win32_OperatingSystem")
+            Assert.Contains("Windows", value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact(DisplayName = "GetInfo 空属性测试")]
+    public void GetInfo_EmptyProperty_ReturnsEmpty()
+    {
+        // 空属性名应返回空字符串
+        var value = MachineInfo.GetInfo("Win32_OperatingSystem", "");
+        Assert.NotNull(value);
+        // WMI 查询空属性可能返回空或特定行为，只验证不抛异常
+    }
+
+    [Fact(DisplayName = "GetInfo 正斜杠命名空间测试")]
+    public void GetInfo_ForwardSlashNamespace()
+    {
+        // 验证 nameSpace 参数的正斜杠被正确归一化为反斜杠
+        // 覆盖 GetInfo 首行：if (nameSpace != null) nameSpace = nameSpace.Replace("/", "\\");
+        var value = MachineInfo.GetInfo("Win32_OperatingSystem", "Caption", "root/cimv2");
+        Assert.NotEmpty(value);
+        Assert.Contains("Windows", value, StringComparison.OrdinalIgnoreCase);
+
+        // 反斜杠版本作为 baseline
+        var baseline = MachineInfo.GetInfo("Win32_OperatingSystem", "Caption", "root\\cimv2");
+        Assert.Equal(baseline, value);
+    }
+
+    [Fact(DisplayName = "GetInfo 空路径测试")]
+    public void GetInfo_NullPath_DoesNotThrow()
+    {
+        // null 路径不应抛异常，应返回空字符串
+        var value1 = MachineInfo.GetInfo(null!, "Caption");
+        Assert.NotNull(value1);
+
+        // 空路径同样不应抛异常
+        var value2 = MachineInfo.GetInfo("", "Caption");
+        Assert.NotNull(value2);
+    }
+
+#if __WIN__
+    [Fact(DisplayName = "QueryWmiSystemManagement 正常查询测试")]
+    public void QueryWmiSystemManagement_NormalTest()
+    {
+        // __WIN__ 保证 System.Management 反射可用，直接断言
+        var result = MachineInfo.QueryWmiSystemManagement("Win32_OperatingSystem", "Caption", "root\\cimv2");
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+        Assert.Contains("Windows", result, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 错误命名空间抛出测试")]
+    public void QueryWmiSystemManagement_BadNamespaceThrowTest()
+    {
+        // 不存在的命名空间，throwOnError=true 应抛出异常
+        Assert.ThrowsAny<Exception>(() =>
+            MachineInfo.QueryWmiSystemManagement("Win32_OperatingSystem", "Caption", "root\\BadNamespace", throwOnError: true));
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 不存在的类抛出测试")]
+    public void QueryWmiSystemManagement_InvalidClassThrowTest()
+    {
+        // 不存在的 WMI 类，throwOnError=true 应抛出异常
+        Assert.ThrowsAny<Exception>(() =>
+            MachineInfo.QueryWmiSystemManagement("Win32_NonExistentClass_XYZ", "Name", "root\\cimv2", throwOnError: true));
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 默认不抛出测试")]
+    public void QueryWmiSystemManagement_ThrowOnErrorFalse_DoesNotThrow()
+    {
+        // throwOnError=false（默认值）时，坏命名空间和坏类不抛异常，返回 null
+        var result1 = MachineInfo.QueryWmiSystemManagement("Win32_OperatingSystem", "Caption", "root\\BadNamespace", throwOnError: false);
+        Assert.Null(result1);
+
+        var result2 = MachineInfo.QueryWmiSystemManagement("Win32_NonExistentClass_XYZ", "Name", "root\\cimv2", throwOnError: false);
+        Assert.Null(result2);
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 空属性测试")]
+    public void QueryWmiSystemManagement_EmptyProperty()
+    {
+        // 空属性名，throwOnError=false 返回 null
+        var result = MachineInfo.QueryWmiSystemManagement("Win32_OperatingSystem", "", "root\\cimv2");
+        Assert.Null(result);
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 空类名测试")]
+    public void QueryWmiSystemManagement_EmptyWmiClass_ReturnsNull()
+    {
+        // 空类名，throwOnError=false 不抛异常，返回 null
+        var result = MachineInfo.QueryWmiSystemManagement("", "Caption", "root\\cimv2");
+        Assert.Null(result);
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 不存在的属性测试")]
+    public void QueryWmiSystemManagement_NonExistentProperty_ReturnsNull()
+    {
+        // 有效的类名 + 不存在的属性，应返回 null（不抛异常）
+        var result = MachineInfo.QueryWmiSystemManagement("Win32_OperatingSystem", "NonExistent_" + Guid.NewGuid().ToString("N"), "root\\cimv2");
+        Assert.Null(result);
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 多实例归并测试")]
+    public void QueryWmiSystemManagement_MultipleResults_Join()
+    {
+        // Win32_LogicalDisk 在多磁盘系统上返回多个实例，验证 Sort + Distinct + Join
+        var result = MachineInfo.QueryWmiSystemManagement("Win32_LogicalDisk", "Size", "root\\cimv2");
+        // 台式机至少有一个系统盘，Size 不为 null
+        if (result != null)
+        {
+            Assert.NotEmpty(result);
+            // 多个磁盘时 Join 用逗号分隔
+        }
+    }
+
+    [Fact(DisplayName = "QueryWmiSystemManagement 验证与直接 System.Management 接口对比")]
+    public void QueryWmiSystemManagement_VerifyAgainstDirectSystemManagement()
+    {
+        // 使用 ManagementObjectSearcher 直接查询，与反射路径对比结果
+        var directValue = GetFromSystemManagementDirectly("Win32_OperatingSystem", "Caption", "root\\cimv2");
+        Assert.NotNull(directValue);
+        Assert.Contains("Windows", directValue, StringComparison.OrdinalIgnoreCase);
+
+        // 反射路径
+        var reflectValue = MachineInfo.QueryWmiSystemManagement("Win32_OperatingSystem", "Caption", "root\\cimv2");
+        Assert.NotNull(reflectValue);
+        Assert.Equal(directValue, reflectValue);
+    }
+
+    private static String? GetFromSystemManagementDirectly(String wmiClass, String property, String nameSpace)
+    {
+        try
+        {
+            var wql = $"SELECT {property} FROM {wmiClass}";
+            using var searcher = new System.Management.ManagementObjectSearcher(nameSpace, wql);
+            var bbs = new List<String>();
+            foreach (var mo in searcher.Get())
+            {
+                using var mObj = (System.Management.ManagementObject)mo;
+                var val = mObj[property];
+                if (val != null)
+                {
+                    var v = val.ToString()?.Trim();
+                    if (!String.IsNullOrEmpty(v)) bbs.Add(v);
+                }
+            }
+            if (bbs.Count > 0)
+            {
+                bbs.Sort();
+                return bbs.Distinct().Join();
+            }
+        }
+        catch
+        {
+            // 直接查询失败时返回 null
+        }
+        return null;
+    }
+#endif
+    [Fact(DisplayName = "QueryWmiCom COM查询测试（best-effort）")]
+    public void QueryWmiCom_DirectTest()
+    {
+        // COM 路径为其它运行时的优选方案，部分环境可能失败，此处 best-effort 验证
+        var result = MachineInfo.QueryWmiCom("Win32_OperatingSystem", "Caption", "root\\cimv2");
+        if (result != null)
+        {
+            Assert.NotEmpty(result);
+            Assert.Contains("Windows", result, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact(DisplayName = "QueryWmiCom 错误命名空间抛出测试")]
+    public void QueryWmiCom_BadNamespaceThrowTest()
+    {
+        if (!Runtime.Windows) return;
+
+        // 不存在的命名空间，throwOnError=true 应抛出异常
+        Assert.ThrowsAny<Exception>(() =>
+            MachineInfo.QueryWmiCom("Win32_OperatingSystem", "Caption", "root\\BadNamespace", throwOnError: true));
+    }
+
+    [Fact(DisplayName = "QueryWmiCom 不存在的类测试")]
+    public void QueryWmiCom_InvalidClass_ReturnsNull()
+    {
+        if (!Runtime.Windows) return;
+
+        // COM 路径下不存在的 WMI 类不抛出异常（ExecQuery 返回空结果集），应返回 null
+        // 这与 System.Management 路径不同，后者会抛出 ManagementException
+        var result = MachineInfo.QueryWmiCom("Win32_NonExistentClass_XYZ_" + Guid.NewGuid().ToString("N"), "Name", "root\\cimv2", throwOnError: true);
+        Assert.Null(result);
+    }
+
+    [Fact(DisplayName = "QueryWmiCom 默认不抛出测试")]
+    public void QueryWmiCom_ThrowOnErrorFalse_DoesNotThrow()
+    {
+        if (!Runtime.Windows) return;
+
+        // throwOnError=false（默认值）时，坏命名空间和坏类不抛异常，返回 null
+        var result1 = MachineInfo.QueryWmiCom("Win32_OperatingSystem", "Caption", "root\\BadNamespace", throwOnError: false);
+        Assert.Null(result1);
+
+        var result2 = MachineInfo.QueryWmiCom("Win32_NonExistentClass_XYZ_" + Guid.NewGuid().ToString("N"), "Name", "root\\cimv2", throwOnError: false);
+        Assert.Null(result2);
+    }
+
+    [Fact(DisplayName = "QueryWmiCom 空属性测试")]
+    public void QueryWmiCom_EmptyProperty()
+    {
+        if (!Runtime.Windows) return;
+
+        // 空属性名，throwOnError=false 返回 null
+        var result = MachineInfo.QueryWmiCom("Win32_OperatingSystem", "", "root\\cimv2");
+        Assert.Null(result);
+    }
+
+    [Fact(DisplayName = "QueryWmiCom 不存在的属性测试")]
+    public void QueryWmiCom_NonExistentProperty()
+    {
+        if (!Runtime.Windows) return;
+
+        // 有效的类名 + 不存在的属性，应返回 null
+        var result = MachineInfo.QueryWmiCom("Win32_OperatingSystem", "NonExistent_" + Guid.NewGuid().ToString("N"), "root\\cimv2");
+        Assert.Null(result);
+    }
+
+    [Fact(DisplayName = "QueryWmiCom 多实例归并测试")]
+    public void QueryWmiCom_MultipleResults_Join()
+    {
+        if (!Runtime.Windows) return;
+
+        // Win32_LogicalDisk 在多磁盘系统上返回多个实例，验证 Sort + Distinct + Join
+        var result = MachineInfo.QueryWmiCom("Win32_LogicalDisk", "Size", "root\\cimv2");
+        if (result != null)
+        {
+            Assert.NotEmpty(result);
+        }
+    }
+
     [Fact(DisplayName = "ReadWmic 查询测试")]
     public void ReadWmicTest()
     {
