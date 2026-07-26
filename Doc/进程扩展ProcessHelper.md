@@ -1,45 +1,45 @@
-# ������չ ProcessHelper
+﻿# 进程扩展 ProcessHelper
 
-## ����
+## 概述
 
-`ProcessHelper` �� DH.NCore �еĽ��̹��������࣬�ṩ���̲��ҡ����̿��ơ�������ִ�еȹ��ܡ�֧�� Windows �� Linux ˫ƽ̨���ܹ���ȷʶ�� dotnet/java �������̵���ʵ���ơ�
+`ProcessHelper` 是 NewLife.Core 中的进程管理工具类，提供进程查找、进程控制、命令执行等功能。支持 Windows 和 Linux 双平台，能够准确识别 dotnet/java/node/python/deno/bun 等宿主进程的真实应用名称。
 
-**�����ռ�**��`NewLife`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife`  
+**文档地址**：https://newlifex.com/core/process_helper
 
-## ��������
+## 功能特点
 
-- **��ƽ̨֧��**��ͬʱ֧�� Windows �� Linux ϵͳ
-- **��������ʶ��**����ȷʶ�� dotnet/java �йܽ��̵���ʵ������
-- **��ȫ���̿���**���ṩ�º��˳���ǿ����ֹ���ַ�ʽ
-- **������ִ��**��֧��ͬ��/�첽ִ�С�������񡢳�ʱ����
+- **跨平台支持**：同时支持 Windows 和 Linux 系统
+- **托管进程识别**：准确识别 dotnet/java/node/python/deno/bun 等托管进程的实际应用名称
+- **安全进程控制**：提供温和退出与强制终止两种方式
+- **命令执行**：支持同步/异步执行、超时控制、输出回调
 
-## ���ٿ�ʼ
+## 快速开始
 
 ```csharp
 using NewLife;
 using System.Diagnostics;
 
-// ��ȡ������ʵ���ƣ�֧�� dotnet/java ������
+// 获取进程真实名称，支持 dotnet/java/node/python 等宿主
 var process = Process.GetCurrentProcess();
 var name = process.GetProcessName();
 
-// ִ�������ȡ���
+// 执行命令并获取输出
 var output = "ipconfig".Execute("/all");
 
-// �����ش���ִ������
+// 以隐藏窗口执行命令
 "notepad.exe".Run("test.txt", 0);
 
-// ��ȫ�˳�����
+// 安全退出进程
 process.SafetyKill();
 
-// ǿ����ֹ������
+// 强制终止进程
 process.ForceKill();
 ```
 
-## API �ο�
+## API 参考
 
-### ���̲���
+### 进程查找
 
 #### GetProcessName
 
@@ -47,28 +47,43 @@ process.ForceKill();
 public static String GetProcessName(this Process process)
 ```
 
-��ȡ���̵��߼����ơ����� dotnet/java �������̣�����������Ŀ�����/��� Jar ���ƣ�������չ������
+获取进程的逻辑名称。对于 dotnet/java/node/python/deno/bun 等宿主进程，返回其真实目标程序集/入口脚本名称（不含扩展名）。
 
-**Ӧ�ó���**��
-- ���̼�غ͹���
-- ������
-- ��־��¼��ʶ����ʵӦ����
+**适用场景**：
+- 进程监控和管理
+- 任务管理器
+- 日志记录中标识真实应用
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ��ͨ����
+// 普通进程
 var notepad = Process.GetProcessesByName("notepad")[0];
 notepad.GetProcessName()         // "notepad"
 
-// dotnet �������̣����� MyApp.dll��
-// �����У�dotnet /path/to/MyApp.dll --arg1 value1
+// dotnet 宿主进程，运行 MyApp.dll
+// 命令行：dotnet /path/to/MyApp.dll --arg1 value1
 var dotnetProcess = ...;
 dotnetProcess.GetProcessName()   // "MyApp"
 
-// java �������̣����� app.jar��
-// �����У�java -jar /path/to/app.jar
+// java 宿主进程，运行 app.jar
+// 命令行：java -jar /path/to/app.jar
 var javaProcess = ...;
 javaProcess.GetProcessName()     // "app"
+
+// node 宿主进程，运行 server.js
+// 命令行：node /path/to/server.js
+var nodeProcess = ...;
+nodeProcess.GetProcessName()     // "server"
+
+// deno 宿主进程，运行 app.ts
+// 命令行：deno run /path/to/app.ts
+var denoProcess = ...;
+denoProcess.GetProcessName()     // "app"
+
+// python 宿主进程，运行 script.py
+// 命令行：python /path/to/script.py
+var pythonProcess = ...;
+pythonProcess.GetProcessName()   // "script"
 ```
 
 #### GetCommandLine
@@ -77,13 +92,13 @@ javaProcess.GetProcessName()     // "app"
 public static String? GetCommandLine(Int32 processId)
 ```
 
-��ȡָ�����̵������������ַ�����
+获取指定进程的命令行原始字符串。
 
-**ƽ̨ʵ��**��
-- **Linux**����ȡ `/proc/{pid}/cmdline` �ļ�
-- **Windows**��ͨ�� `NtQueryInformationProcess` ��ȡ���� PEB
+**平台实现**：
+- **Linux**：读取 `/proc/{pid}/cmdline` 文件
+- **Windows**：通过 `NtQueryInformationProcess` 读取进程 PEB
 
-**ʾ��**��
+**示例**：
 ```csharp
 var cmdLine = ProcessHelper.GetCommandLine(1234);
 // Windows: "C:\Program Files\dotnet\dotnet.exe" MyApp.dll --env Production
@@ -96,15 +111,15 @@ var cmdLine = ProcessHelper.GetCommandLine(1234);
 public static String[]? GetCommandLineArgs(Int32 processId)
 ```
 
-��ȡָ�����̵������в������顣
+获取指定进程的命令行参数数组。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var args = ProcessHelper.GetCommandLineArgs(1234);
 // ["dotnet", "MyApp.dll", "--env", "Production"]
 ```
 
-### ���̿���
+### 进程控制
 
 #### SafetyKill
 
@@ -112,28 +127,28 @@ var args = ProcessHelper.GetCommandLineArgs(1234);
 public static Process? SafetyKill(this Process process, Int32 msWait = 5_000, Int32 times = 50, Int32 interval = 200)
 ```
 
-��ȫ�˳����̣��ºͷ�ʽ��������������ֹ�źţ��ý����л���ִ���������롣
+安全退出进程，温和方式。目标进程收到正常终止信号，有机会执行清理代码。
 
-**����˵��**��
-- `msWait`�������źź�ĳ�ʼ�ȴ�ʱ�䣬Ĭ�� 5000 ����
-- `times`����ѯ��������Ĭ�� 50 ��
-- `interval`����ѯ�����Ĭ�� 200 ����
+**参数说明**：
+- `msWait`：发送信号后的初始等待时间，默认 5000 毫秒
+- `times`：轮询检测次数，默认 50 次
+- `interval`：轮询间隔毫秒，默认 200 毫秒
 
-**ƽ̨ʵ��**��
-- **Linux**������ `kill` �źţ�Ĭ�� SIGTERM��
-- **Windows**��ִ�� `taskkill -pid {id}`
+**平台实现**：
+- **Linux**：发送 `kill` 信号，默认 SIGTERM
+- **Windows**：执行 `taskkill -pid {id}`
 
-**ʾ��**��
+**示例**：
 ```csharp
 var process = Process.Start("MyApp.exe");
 
-// �º͹رգ��ȴ���� 10 ��
+// 温和关闭，等待最长 10 秒
 process.SafetyKill(msWait: 10_000);
 
-// ����Ƿ�ɹ��˳�
+// 检查是否成功退出
 if (!process.GetHasExited())
 {
-    // ����δ�ڹ涨ʱ�����˳���������Ҫǿ����ֹ
+    // 仍未在规定时间内退出，需要强制终止
     process.ForceKill();
 }
 ```
@@ -144,19 +159,19 @@ if (!process.GetHasExited())
 public static Process? ForceKill(this Process process, Int32 msWait = 5_000)
 ```
 
-ǿ����ֹ�����������������ӽ��̡�
+强制终止进程树，包含其全部子进程。
 
-**ƽ̨ʵ��**��
-- **Linux**������ `kill -9` �źţ�SIGKILL��
-- **Windows**��ִ�� `taskkill /t /f /pid {id}`
-- **.NET Core 3.0+**��ʹ�� `Process.Kill(true)` ��ֹ������
+**平台实现**：
+- **Linux**：发送 `kill -9` 信号（SIGKILL）
+- **Windows**：执行 `taskkill /t /f /pid {id}`
+- **.NET Core 3.0+**：使用 `Process.Kill(true)` 终止子树
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ǿ����ֹ���̼��������ӽ���
+// 强制终止进程及其子进程
 process.ForceKill();
 
-// ����ָ�������ĵȴ�ʱ��
+// 指定更长的等待时间
 process.ForceKill(msWait: 10_000);
 ```
 
@@ -166,260 +181,144 @@ process.ForceKill(msWait: 10_000);
 public static Boolean GetHasExited(this Process process)
 ```
 
-��ȫ��ȡ�����Ƿ�����ֹ�������̾�����ɷ���ʱ���� `true`����Ϊ���˳�����
+安全获取进程是否已终止。进程句柄不可访问时返回 `true`，视为已退出。
 
-**ʾ��**��
+**示例**：
 ```csharp
 if (process.GetHasExited())
 {
-    Console.WriteLine("�������˳�");
+    Console.WriteLine("进程已退出");
 }
 ```
 
-### ������ִ��
+### 命令执行
 
 #### Run
 
 ```csharp
 public static Int32 Run(
-    this String cmd, 
-    String? arguments = null, 
-    Int32 msWait = 0, 
-    Action<String?>? output = null, 
-    Action<Process>? onExit = null, 
+    this String cmd,
+    String? arguments = null,
+    Int32 msWait = 0,
+    Action<String?>? output = null,
+    Action<Process>? onExit = null,
     String? working = null)
 ```
 
-�����ش���ִ�������С�
+以隐藏窗口执行命令行。
 
-**����˵��**��
-- `cmd`����ִ���ļ�����·��
-- `arguments`�������в���
-- `msWait`���ȴ�ʱ�䣨0=���ȴ���<0=���޵ȴ���>0=��ȴ���������
-- `output`������ص�ί�У��� msWait > 0��
-- `onExit`�������˳��ص�
-- `working`������Ŀ¼
+**参数说明**：
+- `cmd`：可执行文件路径
+- `arguments`：命令行参数
+- `msWait`：等待时间（0=不等待，<0=无限等待，>0=最长等待毫秒数）
+- `output`：输出回调委托（需 msWait > 0）
+- `onExit`：进程退出回调
 
-**����ֵ**�������˳����룻δ�ȴ���ʱ���� -1
-
-**ʾ��**��
+**示例**：
 ```csharp
-// ���ȴ�����ִ̨��
-"notepad.exe".Run("test.txt");
+// 不等待退出
+"notepad.exe".Run("test.txt", 0);
 
-// �ȴ�ִ����ɣ���ȡ�˳���
-var exitCode = "ping".Run("localhost -n 4", 30_000);
+// 等待完成并获取输出
+var code = "ping".Run("127.0.0.1", 10_000, output: s => Console.WriteLine(s));
 
-// �������
-var output = new StringBuilder();
-"ipconfig".Run("/all", 5_000, line => output.AppendLine(line));
-Console.WriteLine(output.ToString());
-
-// ������Ŀ¼
-"npm".Run("install", 60_000, working: @"C:\Projects\MyApp");
-
-// �����˳�ʱ�ص�
-"MyApp.exe".Run(onExit: p => Console.WriteLine($"�˳���: {p.ExitCode}"));
-```
-
-#### ShellExecute
-
-```csharp
-public static Process ShellExecute(
-    this String fileName, 
-    String? arguments = null, 
-    String? workingDirectory = null)
-```
-
-�� Shell ��ִ�����Ŀ����̲��ǵ�ǰ���̵��ӽ��̣������汾�����˳���
-
-**Ӧ�ó���**��
-- ���ļ���ʹ��ϵͳĬ�ϳ���
-- �� URL��ʹ��Ĭ���������
-- ��������Ӧ�ó���
-
-**ʾ��**��
-```csharp
-// ��Ĭ�ϳ�����ļ�
-"document.pdf".ShellExecute();
-
-// ��Ĭ�����������ַ
-"https://github.com/PeiKeSmart/DH.NCore".ShellExecute();
-
-// �Թ���Ա��������
-// ע�⣺��Ҫ�� ProcessStartInfo ������ Verb = "runas"
-"cmd.exe".ShellExecute("/k echo Hello");
-
-// ָ������Ŀ¼
-"MyApp.exe".ShellExecute("--config app.json", @"C:\Apps");
+// 带退出回调
+"dotnet".Run("MyApp.dll", -1, onExit: p => Console.WriteLine($"退出码：{p.ExitCode}"));
 ```
 
 #### Execute
 
 ```csharp
-public static String? Execute(
-    this String cmd, 
-    String? arguments = null, 
-    Int32 msWait = 0, 
-    Boolean returnError = false)
+public static String? Execute(this String cmd, String? arguments = null, Int32 msWait = 0, Boolean returnError = false)
 ```
 
-ִ��������ر�׼������ݡ�
+执行命令并等待返回（读取标准输出）。
 
-**����˵��**��
-- `msWait`���ȴ�ʱ�䣨0=����ֱ���˳���>0=��ʱ��ǿɱ��
-- `returnError`���ޱ�׼���ʱ�Ƿ񷵻ش������
-
-**ʾ��**��
+**示例**：
 ```csharp
-// ��ȡ IP ����
-var ipConfig = "ipconfig".Execute("/all");
+// 简单执行
+var ip = "ipconfig".Execute("/all");
+Console.WriteLine(ip);
 
-// ��ȡ Git �汾
-var gitVersion = "git".Execute("--version");
+// 指定超时
+var result = "ping".Execute("127.0.0.1", 5_000);
+if (result == null) Console.WriteLine("超时");
 
-// ִ�� Linux ����
-var diskUsage = "df".Execute("-h");
-
-// ��ʱ����
-var result = "ping".Execute("localhost", 5_000);
-
-// ʧ��ʱ���ش�����Ϣ
-var output = "invalid_cmd".Execute(returnError: true);
+// 错误输出回退
+var output = "invalid_cmd".Execute("", 5_000, returnError: true);
 ```
 
-## ʹ�ó���
-
-### 1. �������
+#### ShellExecute
 
 ```csharp
-public class ServiceManager
+public static Process ShellExecute(this String fileName, String? arguments = null, String? workingDirectory = null)
+```
+
+在 Shell 上执行命令。目标进程不是当前进程子进程，不会随本进程退出。
+
+**示例**：
+```csharp
+// 打开文档
+ProcessHelper.ShellExecute("document.pdf");
+
+// 打开网址
+ProcessHelper.ShellExecute("https://newlifex.com");
+```
+
+## 辅助方法
+
+### StopService / StartService
+
+停止/启动 Windows 服务。
+
+```csharp
+public static void StopService(String serviceName)
+public static void StartService(String serviceName)
+```
+
+### RunAsync / RunAsync<T>
+
+异步执行命令并捕获输出。
+
+### 进程监控和管理
+
+#### GetProcesses
+
+```csharp
+public static IEnumerable<Process> GetProcesses(String name)
+```
+
+根据名称模糊查找进程（支持宿主进程名匹配）。
+
+```csharp
+foreach (var p in ProcessHelper.GetProcesses("MyApp"))
 {
-    public void StopService(String serviceName)
-    {
-        var processes = Process.GetProcesses()
-            .Where(p => p.GetProcessName().EqualIgnoreCase(serviceName));
-        
-        foreach (var process in processes)
-        {
-            // �ȳ����º͹ر�
-            process.SafetyKill(msWait: 10_000);
-            
-            // �����û�˳���ǿ����ֹ
-            if (!process.GetHasExited())
-            {
-                process.ForceKill();
-            }
-        }
-    }
+    Console.WriteLine($"PID={p.Id}, Name={p.GetProcessName()}");
 }
 ```
 
-### 2. �ű�ִ��
+#### StopProcess
 
 ```csharp
-public class ScriptRunner
-{
-    public String RunPowerShell(String script)
-    {
-        return "powershell".Execute($"-ExecutionPolicy Bypass -Command \"{script}\"", 60_000);
-    }
-    
-    public String RunBash(String script)
-    {
-        return "bash".Execute($"-c \"{script}\"", 60_000);
-    }
-}
+public static Process[]? StopProcess(String processName, Int32 msWait = 5_000)
 ```
 
-### 3. ���̼��
+根据名称停止进程。
 
 ```csharp
-public class ProcessMonitor
-{
-    public void Monitor(String appName)
-    {
-        while (true)
-        {
-            var processes = Process.GetProcesses()
-                .Where(p => p.GetProcessName().EqualIgnoreCase(appName))
-                .ToList();
-            
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {appName} ������: {processes.Count}");
-            
-            foreach (var p in processes)
-            {
-                var cmdLine = ProcessHelper.GetCommandLine(p.Id);
-                Console.WriteLine($"  PID={p.Id}, CommandLine={cmdLine}");
-            }
-            
-            Thread.Sleep(5000);
-        }
-    }
-}
+ProcessHelper.StopProcess("notepad");
 ```
 
-## ���ʵ��
+---
 
-### 1. ���Źر�����
+## 平台兼容性
 
-```csharp
-// �Ƽ������ºͣ���ǿ��
-public void StopProcess(Process process)
-{
-    // �º͹رգ������������Ļ���
-    process.SafetyKill(msWait: 5_000);
-    
-    // �����û�˳���ǿ����ֹ
-    if (!process.GetHasExited())
-    {
-        process.ForceKill();
-    }
-}
-```
-
-### 2. �������ó�ʱ
-
-```csharp
-// ���������ص����ó�ʱ
-var quickResult = "echo".Execute("Hello", msWait: 1_000);      // ��������
-var longResult = "npm".Execute("install", msWait: 300_000);   // ��ʱ����
-```
-
-### 3. ��������ص�
-
-```csharp
-// ʵʱ�����������
-var lines = new List<String>();
-"find".Run("/", 60_000, line =>
-{
-    if (!line.IsNullOrEmpty())
-    {
-        lines.Add(line);
-        if (lines.Count % 1000 == 0)
-            Console.WriteLine($"�Ѵ��� {lines.Count} ��");
-    }
-});
-```
-
-## ƽ̨����
-
-| ���� | Windows | Linux |
-|------|---------|-------|
-| GetCommandLine | NtQueryInformationProcess | /proc/{pid}/cmdline |
-| SafetyKill | taskkill | kill (SIGTERM) |
-| ForceKill | taskkill /f /t | kill -9 (SIGKILL) |
-| ShellExecute | Shell ִ�� | ��Ҫ���� UseShellExecute=true |
-
-## ע������
-
-1. **Ȩ��Ҫ��**�����ֲ���������Ҫ����Ա/root Ȩ��
-2. **��������ֹ**��`ForceKill` ����ֹ�����ӽ��̣������ʹ��
-3. **�����г���**��Windows �����г�������Լ 8191 �ַ�
-4. **��������**��ִ������ʱע��������룬��ͨ�� `Encoding` ����ָ��
-
-## �������
-
-- [����ʱ��Ϣ Runtime](runtime-����ʱ��ϢRuntime.md)
-- [������Ӧ������ Host](host-������Ӧ������Host.md)
-- [������� DH.NAgent](https://github.com/PeiKeSmart)
+| API | Windows | Linux |
+|-----|---------|-------|
+| GetProcessName | ✅ | ✅ |
+| GetCommandLine | ✅ NtQueryInformationProcess | ✅ /proc/{pid}/cmdline |
+| SafetyKill | ✅ taskkill | ✅ kill (SIGTERM) |
+| ForceKill | ✅ taskkill /t /f | ✅ kill -9 (SIGKILL) |
+| Run | ✅ | ✅ |
+| Execute | ✅ | ✅ |
+| ShellExecute | ✅ | ✅ |
