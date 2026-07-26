@@ -1,4 +1,4 @@
-﻿using NewLife;
+using NewLife;
 using NewLife.Serialization;
 using Xunit;
 

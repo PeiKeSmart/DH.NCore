@@ -1,4 +1,4 @@
-﻿using NewLife.Web;
+using NewLife.Web;
 using Xunit;
 
 namespace XUnitTest.Web;

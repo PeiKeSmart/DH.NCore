@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using NewLife.Http;
 using NewLife.Log;
 using Xunit;

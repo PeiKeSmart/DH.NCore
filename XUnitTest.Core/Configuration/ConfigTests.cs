@@ -1,4 +1,4 @@
-﻿using NewLife.Configuration;
+using NewLife.Configuration;
 using Xunit;
 
 namespace XUnitTest.Configuration;

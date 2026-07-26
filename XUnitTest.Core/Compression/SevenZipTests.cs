@@ -1,4 +1,4 @@
-﻿using NewLife;
+using NewLife;
 using NewLife.Compression;
 using NewLife.Log;
 using Xunit;

@@ -1,4 +1,4 @@
-﻿using NewLife.Serialization;
+using NewLife.Serialization;
 using Xunit;
 
 namespace XUnitTest.Serialization;

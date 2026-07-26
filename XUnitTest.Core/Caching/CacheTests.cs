@@ -1,4 +1,4 @@
-﻿using NewLife.Caching;
+using NewLife.Caching;
 using Xunit;
 
 namespace XUnitTest.Caching;
