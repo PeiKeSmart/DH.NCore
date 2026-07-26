@@ -1,42 +1,42 @@
-# �ַ�����չ StringHelper
+# 字符串扩展 StringHelper
 
-## ����
+## 概述
 
-`StringHelper` �� DH.NCore �е��ַ������������࣬�ṩ�˷ḻ���ַ�����չ�����������Ƚϡ���ȡ����֡�ƴ�ӡ��༭���������ȹ��ܣ���������ճ������е��ַ���������
+`StringHelper` 是 NewLife.Core 中的字符串处理工具类，提供了丰富的字符串扩展方法，包括比较、截取、拆分、拼接、编辑距离搜索等功能，极大简化了日常开发中的字符串操作。
 
-**�����ռ�**��`NewLife`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife`  
+**文档地址**：https://newlifex.com/core/string_helper
 
-## ��������
+## 核心特性
 
-- **��ֵ��ȫ**�����з���������ȷ���� null �Ϳ��ַ���
-- **���Դ�Сд**���ṩ���ֺ��Դ�Сд�ıȽϷ���
-- **��Чʵ��**��ʹ�� `StringBuilder` �ػ���`Span<T>` �ȼ����Ż�����
-- **ģ��ƥ��**������ Levenshtein �༭����� LCS ������������㷨
+- **空值安全**：所有方法都能正确处理 null 和空字符串
+- **忽略大小写**：提供多种忽略大小写的比较方法
+- **高效实现**：使用 `StringBuilder` 池化、`Span<T>` 等技术优化性能
+- **模糊匹配**：内置 Levenshtein 编辑距离和 LCS 最长公共子序列算法
 
-## ���ٿ�ʼ
+## 快速开始
 
 ```csharp
 using NewLife;
 
-// ��ֵ�ж�
+// 空值判断
 var isEmpty = "".IsNullOrEmpty();           // true
 var isBlank = "  ".IsNullOrWhiteSpace();    // true
 
-// ���Դ�Сд�Ƚ�
+// 忽略大小写比较
 var equal = "Hello".EqualIgnoreCase("hello");  // true
 
-// �ַ������
+// 字符串拆分
 var arr = "1,2,3".SplitAsInt();             // [1, 2, 3]
 var dic = "a=1;b=2".SplitAsDictionary();    // {a:1, b:2}
 
-// �ַ���ƴ��
+// 字符串拼接
 var str = new[] { 1, 2, 3 }.Join(",");      // "1,2,3"
 ```
 
-## API �ο�
+## API 参考
 
-### ��ֵ�ж�
+### 空值判断
 
 #### IsNullOrEmpty
 
@@ -44,14 +44,14 @@ var str = new[] { 1, 2, 3 }.Join(",");      // "1,2,3"
 public static Boolean IsNullOrEmpty(this String? value)
 ```
 
-�ж��ַ����Ƿ�Ϊ null ����ַ�����
+判断字符串是否为 null 或空字符串。
 
-**ʾ��**��
+**示例**：
 ```csharp
 String? s1 = null;
 s1.IsNullOrEmpty()               // true
 "".IsNullOrEmpty()               // true
-" ".IsNullOrEmpty()              // false���ո���գ�
+" ".IsNullOrEmpty()              // false（空格不算空）
 "hello".IsNullOrEmpty()          // false
 ```
 
@@ -61,9 +61,9 @@ s1.IsNullOrEmpty()               // true
 public static Boolean IsNullOrWhiteSpace(this String? value)
 ```
 
-�ж��ַ����Ƿ�Ϊ null�����ַ�����������հ��ַ���
+判断字符串是否为 null、空字符串或仅包含空白字符。
 
-**ʾ��**��
+**示例**：
 ```csharp
 String? s1 = null;
 s1.IsNullOrWhiteSpace()          // true
@@ -73,7 +73,7 @@ s1.IsNullOrWhiteSpace()          // true
 "hello".IsNullOrWhiteSpace()     // false
 ```
 
-### �ַ����Ƚ�
+### 字符串比较
 
 #### EqualIgnoreCase
 
@@ -81,9 +81,9 @@ s1.IsNullOrWhiteSpace()          // true
 public static Boolean EqualIgnoreCase(this String? value, params String?[] strs)
 ```
 
-���Դ�Сд�Ƚ��ַ����Ƿ�������һ����ѡ�ַ�����ȡ�
+忽略大小写比较字符串是否与任意一个候选字符串相等。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "Hello".EqualIgnoreCase("hello")                    // true
 "Hello".EqualIgnoreCase("HELLO", "World")           // true
@@ -96,9 +96,9 @@ public static Boolean EqualIgnoreCase(this String? value, params String?[] strs)
 public static Boolean StartsWithIgnoreCase(this String? value, params String?[] strs)
 ```
 
-���Դ�Сд�ж��ַ����Ƿ�������һ����ѡǰ׺��ʼ��
+忽略大小写判断字符串是否以任意一个候选前缀开始。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "HelloWorld".StartsWithIgnoreCase("hello")          // true
 "HelloWorld".StartsWithIgnoreCase("HELLO", "Hi")    // true
@@ -110,15 +110,15 @@ public static Boolean StartsWithIgnoreCase(this String? value, params String?[] 
 public static Boolean EndsWithIgnoreCase(this String? value, params String?[] strs)
 ```
 
-���Դ�Сд�ж��ַ����Ƿ�������һ����ѡ��׺������
+忽略大小写判断字符串是否以任意一个候选后缀结束。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "HelloWorld".EndsWithIgnoreCase("world")            // true
 "HelloWorld".EndsWithIgnoreCase("WORLD", "Test")    // true
 ```
 
-### ͨ���ƥ��
+### 通配符匹配
 
 #### IsMatch
 
@@ -126,36 +126,36 @@ public static Boolean EndsWithIgnoreCase(this String? value, params String?[] st
 public static Boolean IsMatch(this String pattern, String input, StringComparison comparisonType = StringComparison.CurrentCulture)
 ```
 
-ʹ��ͨ���ģʽƥ���ַ�����֧�� `*`��ƥ�����ⳤ�ȣ��� `?`��ƥ�䵥���ַ�����
+使用通配符模式匹配字符串，支持 `*`（匹配任意长度）和 `?`（匹配单个字符）。
 
-**�ص�**��
-- ���������ʽ���򵥡�����Ч
-- ʱ�临�Ӷ� O(n) ~ O(n*m)
-- ���蹹���������
+**特点**：
+- 比正则表达式更简单、更高效
+- 时间复杂度 O(n) ~ O(n*m)
+- 无需构造正则对象
 
-**ʾ��**��
+**示例**：
 ```csharp
 "*.txt".IsMatch("document.txt")                     // true
 "*.txt".IsMatch("document.doc")                     // false
 "file?.txt".IsMatch("file1.txt")                    // true
 "file?.txt".IsMatch("file12.txt")                   // false
-"*".IsMatch("anything")                             // true��ƥ�����У�
+"*".IsMatch("anything")                             // true（匹配所有）
 "test*end".IsMatch("test123end")                    // true
 ```
 
-### �ַ������
+### 字符串拆分
 
-#### Split����չ���أ�
+#### Split（扩展重载）
 
 ```csharp
 public static String[] Split(this String? value, params String[] separators)
 ```
 
-��ָ���ָ�������ַ������Զ����˿���Ŀ��
+按指定分隔符拆分字符串，自动过滤空条目。
 
-**ʾ��**��
+**示例**：
 ```csharp
-"a,b,,c".Split(",")              // ["a", "b", "c"]���Զ����˿��
+"a,b,,c".Split(",")              // ["a", "b", "c"]（自动过滤空项）
 "a;b,c".Split(",", ";")          // ["a", "b", "c"]
 ```
 
@@ -165,20 +165,20 @@ public static String[] Split(this String? value, params String[] separators)
 public static Int32[] SplitAsInt(this String? value, params String[] separators)
 ```
 
-����ַ�����ת��Ϊ�������飬Ĭ��ʹ�ö��źͷֺ���Ϊ�ָ�����
+拆分字符串并转换为整数数组，默认使用逗号和分号作为分隔符。
 
-**�ص�**��
-- �Զ����˿ո�
-- �Զ�������Ч����
-- �����ظ���
+**特点**：
+- 自动过滤空格
+- 自动过滤无效数字
+- 保留重复项
 
-**ʾ��**��
+**示例**：
 ```csharp
 "1,2,3".SplitAsInt()             // [1, 2, 3]
-"1, 2, 3".SplitAsInt()           // [1, 2, 3]���Զ�ȥ���ո�
-"1;2;3".SplitAsInt()             // [1, 2, 3]��֧�ַֺţ�
-"1,abc,3".SplitAsInt()           // [1, 3]��������Ч�
-"1,1,2".SplitAsInt()             // [1, 1, 2]�������ظ���
+"1, 2, 3".SplitAsInt()           // [1, 2, 3]（自动去除空格）
+"1;2;3".SplitAsInt()             // [1, 2, 3]（支持分号）
+"1,abc,3".SplitAsInt()           // [1, 3]（过滤无效项）
+"1,1,2".SplitAsInt()             // [1, 1, 2]（保留重复）
 ```
 
 #### SplitAsDictionary
@@ -191,35 +191,35 @@ public static IDictionary<String, String> SplitAsDictionary(
     Boolean trimQuotation = false)
 ```
 
-���ַ������Ϊ��ֵ���ֵ䡣
+将字符串拆分为键值对字典。
 
-**����˵��**��
-- `nameValueSeparator`����ֵ�ָ�����Ĭ�� `=`
-- `separator`����Ŀ�ָ�����Ĭ�� `;`
-- `trimQuotation`���Ƿ�ȥ��ֵ���˵�����
+**参数说明**：
+- `nameValueSeparator`：键值分隔符，默认 `=`
+- `separator`：条目分隔符，默认 `;`
+- `trimQuotation`：是否去除值两端的引号
 
-**ʾ��**��
+**示例**：
 ```csharp
-// �����÷�
+// 基本用法
 "a=1;b=2".SplitAsDictionary()
 // { "a": "1", "b": "2" }
 
-// �Զ���ָ���
+// 自定义分隔符
 "a:1,b:2".SplitAsDictionary(":", ",")
 // { "a": "1", "b": "2" }
 
-// ȥ������
+// 去除引号
 "name='test';value=\"123\"".SplitAsDictionary("=", ";", true)
 // { "name": "test", "value": "123" }
 
-// �޼���ʱʹ�����
+// 无键名时使用序号
 "value1;key=value2".SplitAsDictionary()
 // { "[0]": "value1", "key": "value2" }
 ```
 
-> **��ʾ**�����ص��ֵ䲻���ִ�Сд��`StringComparer.OrdinalIgnoreCase`��
+> **提示**：返回的字典不区分大小写（`StringComparer.OrdinalIgnoreCase`）
 
-### �ַ���ƴ��
+### 字符串拼接
 
 #### Join
 
@@ -228,17 +228,17 @@ public static String Join(this IEnumerable value, String separator = ",")
 public static String Join<T>(this IEnumerable<T> value, String separator = ",", Func<T, Object?>? func = null)
 ```
 
-������Ԫ��ƴ��Ϊ�ַ�����
+将集合元素拼接为字符串。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// �����÷�
+// 基本用法
 new[] { 1, 2, 3 }.Join()         // "1,2,3"
 new[] { 1, 2, 3 }.Join(";")      // "1;2;3"
 
-// ʹ��ת������
-var users = new[] { new { Name = "����" }, new { Name = "����" } };
-users.Join(",", u => u.Name)     // "����,����"
+// 使用转换函数
+var users = new[] { new { Name = "张三" }, new { Name = "李四" } };
+users.Join(",", u => u.Name)     // "张三,李四"
 ```
 
 #### Separate
@@ -247,9 +247,9 @@ users.Join(",", u => u.Name)     // "����,����"
 public static StringBuilder Separate(this StringBuilder sb, String separator)
 ```
 
-�� `StringBuilder` ׷�ӷָ�����������Կ�ͷ����һ�ε��ò�׷�ӣ���
+向 `StringBuilder` 追加分隔符，但会忽略开头（第一次调用不追加）。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var sb = new StringBuilder();
 sb.Separate(",").Append("a");    // "a"
@@ -257,32 +257,32 @@ sb.Separate(",").Append("b");    // "a,b"
 sb.Separate(",").Append("c");    // "a,b,c"
 ```
 
-### �ַ�����ȡ
+### 字符串截取
 
-#### Substring����չ���أ�
+#### Substring（扩展重载）
 
 ```csharp
 public static String Substring(this String str, String? after, String? before = null, Int32 startIndex = 0, Int32[]? positions = null)
 ```
 
-���ַ����н�ȡָ�����֮������ݡ�
+从字符串中截取指定标记之间的内容。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ��ȡ���֮�������
+// 截取标记之后的内容
 "Hello[World]End".Substring("[")            // "World]End"
 
-// ��ȡ�������֮�������
+// 截取两个标记之间的内容
 "Hello[World]End".Substring("[", "]")       // "World"
 
-// ��ȡ���֮ǰ������
+// 截取标记之前的内容
 "Hello[World]End".Substring(null, "[")      // "Hello"
 
-// ��ȡƥ��λ��
+// 获取匹配位置
 var positions = new Int32[2];
 "Hello[World]End".Substring("[", "]", 0, positions);
-// positions[0] = 6��������ʼλ�ã�
-// positions[1] = 11�����ݽ���λ�ã�
+// positions[0] = 6（内容起始位置）
+// positions[1] = 11（内容结束位置）
 ```
 
 #### Cut
@@ -291,13 +291,13 @@ var positions = new Int32[2];
 public static String Cut(this String str, Int32 maxLength, String? pad = null)
 ```
 
-����󳤶Ƚ�ȡ�ַ�������ָ������ַ���
+按最大长度截取字符串，可指定填充字符。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "HelloWorld".Cut(8)              // "HelloWor"
-"HelloWorld".Cut(8, "...")       // "Hello..."���ܳ��Ȳ�����8��
-"Hi".Cut(8)                      // "Hi"�����㳤��ԭ�����أ�
+"HelloWorld".Cut(8, "...")       // "Hello..."（总长度不超过8）
+"Hi".Cut(8)                      // "Hi"（不足长度原样返回）
 ```
 
 #### TrimStart / TrimEnd
@@ -307,11 +307,11 @@ public static String TrimStart(this String str, params String[] starts)
 public static String TrimEnd(this String str, params String[] ends)
 ```
 
-���ַ�����ͷ/��β�Ƴ�ָ�������ַ����������ִ�Сд��֧�ֶ��ƥ�䡣
+从字符串开头/结尾移除指定的子字符串，不区分大小写，支持多次匹配。
 
-**ʾ��**��
+**示例**：
 ```csharp
-"HelloHelloWorld".TrimStart("Hello")     // "World"���Ƴ�����ƥ���ǰ׺��
+"HelloHelloWorld".TrimStart("Hello")     // "World"（移除所有匹配的前缀）
 "WorldEndEnd".TrimEnd("End")             // "World"
 ```
 
@@ -322,9 +322,9 @@ public static String CutStart(this String str, params String[] starts)
 public static String CutEnd(this String str, params String[] ends)
 ```
 
-�Ƴ�ָ�����ַ�������֮ǰ/֮����������ݡ�
+移除指定子字符串及其之前/之后的所有内容。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "path/to/file.txt".CutStart("/")         // "file.txt"
 "path/to/file.txt".CutEnd("/")           // "path/to"
@@ -337,12 +337,12 @@ public static String EnsureStart(this String? str, String start)
 public static String EnsureEnd(this String? str, String end)
 ```
 
-ȷ���ַ�����ָ�����ݿ�ʼ/������
+确保字符串以指定内容开始/结束。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "world".EnsureStart("Hello")     // "Helloworld"
-"Hello".EnsureStart("Hello")     // "Hello"���Ѵ��������ӣ�
+"Hello".EnsureStart("Hello")     // "Hello"（已存在则不添加）
 
 "/api/users".EnsureEnd("/")      // "/api/users/"
 "/api/users/".EnsureEnd("/")     // "/api/users/"
@@ -354,14 +354,14 @@ public static String EnsureEnd(this String? str, String end)
 public static String? TrimInvisible(this String? value)
 ```
 
-�Ƴ��ַ����еĲ��ɼ� ASCII �����ַ���0-31 �� 127����
+移除字符串中的不可见 ASCII 控制字符（0-31 和 127）。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "Hello\x00World\x1F".TrimInvisible()     // "HelloWorld"
 ```
 
-### ����ת��
+### 编码转换
 
 #### GetBytes
 
@@ -369,38 +369,38 @@ public static String? TrimInvisible(this String? value)
 public static Byte[] GetBytes(this String? value, Encoding? encoding = null)
 ```
 
-���ַ���ת��Ϊ�ֽ����飬Ĭ��ʹ�� UTF-8 ���롣
+将字符串转换为字节数组，默认使用 UTF-8 编码。
 
-**ʾ��**��
+**示例**：
 ```csharp
-"Hello".GetBytes()                        // UTF-8 ������ֽ�����
-"Hello".GetBytes(Encoding.ASCII)          // ASCII ����
-"���".GetBytes(Encoding.UTF8)            // UTF-8 ��������
+"Hello".GetBytes()                        // UTF-8 编码的字节数组
+"Hello".GetBytes(Encoding.ASCII)          // ASCII 编码
+"你好".GetBytes(Encoding.UTF8)            // UTF-8 编码中文
 ```
 
-### ģ������
+### 模糊搜索
 
-#### Levenshtein �༭����
+#### Levenshtein 编辑距离
 
 ```csharp
 public static Int32 LevenshteinDistance(String str1, String str2)
 public static String[] LevenshteinSearch(String key, String[] words)
 ```
 
-���������ַ���֮��ı༭���루���롢ɾ�����滻���������ٴ�������
+计算两个字符串之间的编辑距离（插入、删除、替换操作的最少次数）。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ����༭����
+// 计算编辑距离
 StringHelper.LevenshteinDistance("kitten", "sitting")  // 3
 
-// ģ������
+// 模糊搜索
 var words = new[] { "apple", "application", "banana", "apply" };
 StringHelper.LevenshteinSearch("appl", words)
 // ["apple", "application", "apply"]
 ```
 
-#### LCS �����������
+#### LCS 最长公共子序列
 
 ```csharp
 public static Int32 LCSDistance(String word, String[] keys)
@@ -408,78 +408,78 @@ public static String[] LCSSearch(String key, String[] words)
 public static IEnumerable<T> LCSSearch<T>(this IEnumerable<T> list, String keys, Func<T, String> keySelector, Int32 count = -1)
 ```
 
-��������������е�ģ���������ʺ������������顢�Զ���ȫ�ȳ�����
+基于最长公共子序列的模糊搜索，适合用于搜索建议、自动补全等场景。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var words = new[] { "HelloWorld", "HelloKitty", "GoodBye" };
 StringHelper.LCSSearch("Hello", words)
 // ["HelloKitty", "HelloWorld"]
 
-// ��������
+// 泛型搜索
 var users = new[] { 
-    new { Id = 1, Name = "����" },
-    new { Id = 2, Name = "��С��" },
-    new { Id = 3, Name = "����" }
+    new { Id = 1, Name = "张三" },
+    new { Id = 2, Name = "张小三" },
+    new { Id = 3, Name = "李四" }
 };
-users.LCSSearch("��", u => u.Name, 2)
-// ������������С��
+users.LCSSearch("张", u => u.Name, 2)
+// 返回张三、张小三
 ```
 
-#### Match ģ��ƥ��
+#### Match 模糊匹配
 
 ```csharp
 public static IList<KeyValuePair<T, Double>> Match<T>(this IEnumerable<T> list, String keys, Func<T, String> keySelector)
 public static IEnumerable<T> Match<T>(this IEnumerable<T> list, String keys, Func<T, String> keySelector, Int32 count, Double confidence = 0.5)
 ```
 
-���������ʺ������ͷ���ģ��ƥ���㷨��
+基于命中率和跳过惩罚的模糊匹配算法。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var products = new[] { "iPhone 15", "iPhone 15 Pro", "Samsung Galaxy" };
 products.Match("iPhone", s => s, 2, 0.3)
 // ["iPhone 15", "iPhone 15 Pro"]
 ```
 
-### ����ת����
+### 文字转语音
 
 ```csharp
 public static void Speak(this String value)
 public static void SpeakAsync(this String value)
 ```
 
-����ϵͳ���������ʶ��ı����� Windows ƽ̨����
+调用系统语音引擎朗读文本（仅 Windows 平台）。
 
-**ʾ��**��
+**示例**：
 ```csharp
-"��ã�����".Speak();       // ͬ���ʶ�
-"��ã�����".SpeakAsync();  // �첽�ʶ�
+"你好，世界".Speak();       // 同步朗读
+"你好，世界".SpeakAsync();  // 异步朗读
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ʹ�ÿ�ֵ��ȫ�ķ���
+### 1. 使用空值安全的方法
 
 ```csharp
-// �Ƽ���ʹ����չ����
+// 推荐：使用扩展方法
 if (str.IsNullOrEmpty()) return;
 
-// ���Ƽ�����Ҫ���� null
+// 不推荐：需要处理 null
 if (str == null || str.Length == 0) return;
 ```
 
-### 2. ���������ַ���
+### 2. 解析配置字符串
 
 ```csharp
-// �����ַ�������
+// 连接字符串解析
 var connStr = "Server=localhost;Database=test;User=root;Password=123456";
 var dic = connStr.SplitAsDictionary();
 var server = dic["Server"];      // "localhost"
 var database = dic["Database"];  // "test"
 ```
 
-### 3. URL ��������
+### 3. URL 参数解析
 
 ```csharp
 var query = "name=test&age=18&tags=a,b,c";
@@ -488,29 +488,29 @@ var name = dic["name"];          // "test"
 var tags = dic["tags"].Split(",");  // ["a", "b", "c"]
 ```
 
-### 4. ʹ�� StringBuilder ��
+### 4. 使用 StringBuilder 池
 
 ```csharp
 using NewLife.Collections;
 
-// �ӳ��л�ȡ StringBuilder
+// 从池中获取 StringBuilder
 var sb = Pool.StringBuilder.Get();
 sb.Append("Hello");
 sb.Separate(",").Append("World");
 
-// �����ַ������黹����
+// 返回字符串并归还到池
 var result = sb.Return(true);    // "Hello,World"
 ```
 
-## ����˵��
+## 性能说明
 
-- `IsNullOrEmpty` �� `IsNullOrWhiteSpace` ʹ�������Ż�
-- �ַ�����ֺ�ƴ��ʹ�� `StringBuilder` �أ������ڴ����
-- ͨ���ƥ��ʹ�õ�ָ������㷨�������������ʽ����
-- �༭�����㷨��Զ��ַ����Ż�
+- `IsNullOrEmpty` 和 `IsNullOrWhiteSpace` 使用内联优化
+- 字符串拆分和拼接使用 `StringBuilder` 池，减少内存分配
+- 通配符匹配使用单指针回溯算法，避免正则表达式开销
+- 编辑距离算法针对短字符串优化
 
-## �������
+## 相关链接
 
-- [����ת�� Utility](utility-����ת��Utility.md)
-- [������չ IOHelper](io_helper-������չIOHelper.md)
-- [·����չ PathHelper](path_helper-·����չPathHelper.md)
+- [类型转换 Utility](utility-类型转换Utility.md)
+- [数据扩展 IOHelper](io_helper-数据扩展IOHelper.md)
+- [路径扩展 PathHelper](path_helper-路径扩展PathHelper.md)

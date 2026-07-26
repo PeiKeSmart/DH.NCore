@@ -1,23 +1,23 @@
-# XML ���л�
+# XML 序列化
 
-## ����
+## 概述
 
-DH.NCore �ṩ������ XML ���л��ͷ����л����ܣ�ͨ�� `XmlHelper` ��չ�������Է���ؽ��ж����� XML ��ת����֧���Զ�����ע�͡�����ģʽ��������ԣ��ر��ʺ������ļ�������
+NewLife.Core 提供了灵活的 XML 序列化和反序列化功能，通过 `XmlHelper` 扩展方法可以方便地进行对象与 XML 的转换。支持自动添加注释、属性模式输出等特性，特别适合配置文件场景。
 
-**�����ռ�**��`NewLife.Xml`����չ��������`NewLife.Serialization`������ʵ�֣�  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife.Xml`（扩展方法）、`NewLife.Serialization`（核心实现）  
+**文档地址**：https://newlifex.com/core/xml
 
-## ��������
+## 核心特性
 
-- **��� API**��`ToXml()` �� `ToXmlEntity<T>()` ��չ����
-- **ע��֧��**���Զ����� `Description` �� `DisplayName` ������Ϊע��
-- **����ģʽ**����ѡ���������л�Ϊ XML ���Զ���Ԫ��
-- **�������**��֧��ָ�������ʽ
-- **�ļ�����**��ֱ�����л����ļ�����ļ������л�
+- **简洁 API**：`ToXml()` 和 `ToXmlEntity<T>()` 扩展方法
+- **注释支持**：自动附加 `Description` 和 `DisplayName` 特性作为注释
+- **属性模式**：可选择将属性序列化为 XML 属性而非元素
+- **编码控制**：支持指定编码格式
+- **文件操作**：直接序列化到文件或从文件反序列化
 
-## ���ٿ�ʼ
+## 快速开始
 
-### ���л�
+### 序列化
 
 ```csharp
 using NewLife.Xml;
@@ -36,11 +36,11 @@ var config = new AppConfig
     Debug = true
 };
 
-// ���л�Ϊ XML �ַ���
+// 序列化为 XML 字符串
 var xml = config.ToXml();
 ```
 
-**���**��
+**输出**：
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <AppConfig>
@@ -50,7 +50,7 @@ var xml = config.ToXml();
 </AppConfig>
 ```
 
-### �����л�
+### 反序列化
 
 ```csharp
 using NewLife.Xml;
@@ -68,50 +68,50 @@ var config = xml.ToXmlEntity<AppConfig>();
 Console.WriteLine(config.Name);  // MyApp
 ```
 
-## API �ο�
+## API 参考
 
-### ToXml - ���л�
+### ToXml - 序列化
 
 ```csharp
-// �������л�
+// 基础序列化
 public static String ToXml(this Object obj, Encoding? encoding = null, 
     Boolean attachComment = false, Boolean useAttribute = false)
 
-// ��������
+// 完整参数
 public static String ToXml(this Object obj, Encoding encoding, 
     Boolean attachComment, Boolean useAttribute, Boolean omitXmlDeclaration)
 
-// ���л�����
+// 序列化到流
 public static void ToXml(this Object obj, Stream stream, Encoding? encoding = null, 
     Boolean attachComment = false, Boolean useAttribute = false)
 
-// ���л����ļ�
+// 序列化到文件
 public static void ToXmlFile(this Object obj, String file, Encoding? encoding = null, 
     Boolean attachComment = true)
 ```
 
-**����˵��**��
-- `encoding`�������ʽ��Ĭ�� UTF-8
-- `attachComment`���Ƿ񸽼�ע�ͣ�ʹ�� Description/DisplayName��
-- `useAttribute`���Ƿ�ʹ�� XML ����ģʽ
-- `omitXmlDeclaration`���Ƿ�ʡ�� XML ����
+**参数说明**：
+- `encoding`：编码格式，默认 UTF-8
+- `attachComment`：是否附加注释（使用 Description/DisplayName）
+- `useAttribute`：是否使用 XML 属性模式
+- `omitXmlDeclaration`：是否省略 XML 声明
 
-### ToXmlEntity - �����л�
+### ToXmlEntity - 反序列化
 
 ```csharp
-// ���ַ��������л�
+// 从字符串反序列化
 public static TEntity? ToXmlEntity<TEntity>(this String xml) where TEntity : class
 
-// ���������л�
+// 从流反序列化
 public static TEntity? ToXmlEntity<TEntity>(this Stream stream, Encoding? encoding = null)
 
-// ���ļ������л�
+// 从文件反序列化
 public static TEntity? ToXmlFileEntity<TEntity>(this String file, Encoding? encoding = null)
 ```
 
-## ʹ�ó���
+## 使用场景
 
-### 1. �����ļ�
+### 1. 配置文件
 
 ```csharp
 using System.ComponentModel;
@@ -119,48 +119,48 @@ using NewLife.Xml;
 
 public class DatabaseConfig
 {
-    [Description("���ݿ��������ַ")]
+    [Description("数据库服务器地址")]
     public String Server { get; set; } = "localhost";
     
-    [Description("���ݿ�˿�")]
+    [Description("数据库端口")]
     public Int32 Port { get; set; } = 3306;
     
-    [Description("���ݿ�����")]
+    [Description("数据库名称")]
     public String Database { get; set; } = "mydb";
     
-    [Description("�û���")]
+    [Description("用户名")]
     public String User { get; set; } = "root";
     
-    [Description("���ӳ�ʱ���룩")]
+    [Description("连接超时（秒）")]
     public Int32 Timeout { get; set; } = 30;
 }
 
-// �������ã���ע�ͣ�
+// 保存配置（带注释）
 var config = new DatabaseConfig();
 config.ToXmlFile("db.config", attachComment: true);
 
-// ��������
+// 加载配置
 var loaded = "db.config".ToXmlFileEntity<DatabaseConfig>();
 ```
 
-**���ɵ� XML**��
+**生成的 XML**：
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <DatabaseConfig>
-  <!--���ݿ��������ַ-->
+  <!--数据库服务器地址-->
   <Server>localhost</Server>
-  <!--���ݿ�˿�-->
+  <!--数据库端口-->
   <Port>3306</Port>
-  <!--���ݿ�����-->
+  <!--数据库名称-->
   <Database>mydb</Database>
-  <!--�û���-->
+  <!--用户名-->
   <User>root</User>
-  <!--���ӳ�ʱ���룩-->
+  <!--连接超时（秒）-->
   <Timeout>30</Timeout>
 </DatabaseConfig>
 ```
 
-### 2. ����ģʽ���
+### 2. 属性模式输出
 
 ```csharp
 public class Item
@@ -170,18 +170,18 @@ public class Item
     public Decimal Price { get; set; }
 }
 
-var item = new Item { Id = 1, Name = "��ƷA", Price = 99.9M };
+var item = new Item { Id = 1, Name = "商品A", Price = 99.9M };
 
-// Ԫ��ģʽ��Ĭ�ϣ�
+// 元素模式（默认）
 var xml1 = item.ToXml();
-// <Item><Id>1</Id><Name>��ƷA</Name><Price>99.9</Price></Item>
+// <Item><Id>1</Id><Name>商品A</Name><Price>99.9</Price></Item>
 
-// ����ģʽ
+// 属性模式
 var xml2 = item.ToXml(useAttribute: true);
-// <Item Id="1" Name="��ƷA" Price="99.9" />
+// <Item Id="1" Name="商品A" Price="99.9" />
 ```
 
-### 3. ���Ӷ���
+### 3. 复杂对象
 
 ```csharp
 public class Order
@@ -209,28 +209,28 @@ var order = new Order
 {
     Id = 1001,
     CreateTime = DateTime.Now,
-    Customer = new Customer { Name = "����", Phone = "13800138000" },
+    Customer = new Customer { Name = "张三", Phone = "13800138000" },
     Items = new List<OrderItem>
     {
-        new() { ProductName = "��ƷA", Quantity = 2, Price = 50 },
-        new() { ProductName = "��ƷB", Quantity = 1, Price = 100 }
+        new() { ProductName = "商品A", Quantity = 2, Price = 50 },
+        new() { ProductName = "商品B", Quantity = 1, Price = 100 }
     }
 };
 
 var xml = order.ToXml();
 ```
 
-### 4. ʡ�� XML ����
+### 4. 省略 XML 声明
 
 ```csharp
-// ʡ�� <?xml version="1.0" encoding="utf-8"?>
+// 省略 <?xml version="1.0" encoding="utf-8"?>
 var xml = obj.ToXml(Encoding.UTF8, false, false, true);
 ```
 
-### 5. �ֵ����л�
+### 5. 字典序列化
 
 ```csharp
-// �ַ����ֵ����ֱ�����л�
+// 字符串字典可以直接序列化
 var dict = new Dictionary<String, String>
 {
     ["Key1"] = "Value1",
@@ -240,25 +240,25 @@ var dict = new Dictionary<String, String>
 dict.ToXmlFile("settings.xml");
 ```
 
-## Xml �ࣨ�߼��÷���
+## Xml 类（高级用法）
 
-������Ҫ����ϸ���Ƶĳ���������ֱ��ʹ�� `Xml` �ࣺ
+对于需要更精细控制的场景，可以直接使用 `Xml` 类：
 
 ```csharp
 using NewLife.Serialization;
 
-// ���л�
+// 序列化
 var xml = new Xml
 {
     Stream = stream,
     Encoding = Encoding.UTF8,
     UseAttribute = false,
     UseComment = true,
-    EnumString = true  // ö��ʹ���ַ���
+    EnumString = true  // 枚举使用字符串
 };
 xml.Write(obj);
 
-// �����л�
+// 反序列化
 var xml = new Xml
 {
     Stream = stream,
@@ -267,28 +267,28 @@ var xml = new Xml
 var result = xml.Read(typeof(MyClass));
 ```
 
-### Xml ������
+### Xml 类属性
 
 ```csharp
 public class Xml
 {
-    /// <summary>ʹ���������</summary>
+    /// <summary>使用特性输出</summary>
     public Boolean UseAttribute { get; set; }
     
-    /// <summary>ʹ��ע��</summary>
+    /// <summary>使用注释</summary>
     public Boolean UseComment { get; set; }
     
-    /// <summary>ö��ʹ���ַ�����Ĭ��true</summary>
+    /// <summary>枚举使用字符串。默认true</summary>
     public Boolean EnumString { get; set; }
     
-    /// <summary>XMLд������</summary>
+    /// <summary>XML写入设置</summary>
     public XmlWriterSettings Setting { get; set; }
 }
 ```
 
-## ����֧��
+## 特性支持
 
-### XmlRoot - ��Ԫ������
+### XmlRoot - 根元素名称
 
 ```csharp
 [XmlRoot("config")]
@@ -297,10 +297,10 @@ public class AppConfig
     public String Name { get; set; }
 }
 
-// ��� <config><Name>...</Name></config>
+// 输出 <config><Name>...</Name></config>
 ```
 
-### XmlElement - Ԫ������
+### XmlElement - 元素名称
 
 ```csharp
 public class User
@@ -310,7 +310,7 @@ public class User
 }
 ```
 
-### XmlAttribute - ���Ϊ����
+### XmlAttribute - 输出为属性
 
 ```csharp
 public class Item
@@ -321,10 +321,10 @@ public class Item
     public String Name { get; set; }
 }
 
-// ��� <Item Id="1"><Name>...</Name></Item>
+// 输出 <Item Id="1"><Name>...</Name></Item>
 ```
 
-### XmlIgnore - �����ֶ�
+### XmlIgnore - 忽略字段
 
 ```csharp
 public class User
@@ -332,57 +332,57 @@ public class User
     public String Name { get; set; }
     
     [XmlIgnore]
-    public String Password { get; set; }  // �����л�
+    public String Password { get; set; }  // 不序列化
 }
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. �����ļ�ʹ��ע��
+### 1. 配置文件使用注释
 
 ```csharp
-// ����ʱ����ע��
+// 保存时启用注释
 config.ToXmlFile("app.config", attachComment: true);
 
-// ʹ�� Description ��������˵��
-[Description("Ӧ�����ƣ�������־��ʶ")]
+// 使用 Description 特性添加说明
+[Description("应用名称，用于日志标识")]
 public String AppName { get; set; }
 ```
 
-### 2. �ļ�����ע������
+### 2. 文件操作注意事项
 
 ```csharp
-// ToXmlFile ���Զ�����Ŀ¼
+// ToXmlFile 会自动创建目录
 config.ToXmlFile("Config/app.xml");
 
-// ����ļ��Ƿ����
+// 检查文件是否存在
 if (File.Exists(file))
 {
     var config = file.ToXmlFileEntity<AppConfig>();
 }
 ```
 
-### 3. ����һ����
+### 3. 编码一致性
 
 ```csharp
-// ����ͼ���ʹ����ͬ����
+// 保存和加载使用相同编码
 var encoding = Encoding.UTF8;
 config.ToXmlFile("config.xml", encoding);
 var loaded = "config.xml".ToXmlFileEntity<AppConfig>(encoding);
 ```
 
-## �� JSON �Ա�
+## 与 JSON 对比
 
-| ���� | XML | JSON |
+| 特性 | XML | JSON |
 |------|-----|------|
-| �ɶ��� | ��ע�͸����� | ������ |
-| ��� | �ϴ� | ��С |
-| ע��֧�� | ԭ��֧�� | ��֧�� |
-| �����ļ� | ? �Ƽ� | ? ���� |
-| API ���� | ? ���Ƽ� | ? �Ƽ� |
+| 可读性 | 带注释更清晰 | 更紧凑 |
+| 体积 | 较大 | 较小 |
+| 注释支持 | 原生支持 | 不支持 |
+| 配置文件 | ? 推荐 | ? 适用 |
+| API 数据 | ? 不推荐 | ? 推荐 |
 
-## �������
+## 相关链接
 
-- [JSON ���л�](json-JSON���л�.md)
-- [����ϵͳ Config](config-����ϵͳConfig.md)
-- [���������л� Binary](binary-���������л�Binary.md)
+- [JSON 序列化](json-JSON序列化.md)
+- [配置系统 Config](config-配置系统Config.md)
+- [二进制序列化 Binary](binary-二进制序列化Binary.md)

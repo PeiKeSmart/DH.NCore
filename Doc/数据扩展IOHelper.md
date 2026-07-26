@@ -1,47 +1,47 @@
-# ������չ IOHelper
+# 数据扩展 IOHelper
 
-## ����
+## 概述
 
-`IOHelper` �� DH.NCore �е� IO ���������࣬�ṩ��Ч���������������ֽ�����ת����ѹ����ѹ������ת���ȹ��ܡ���� .NET 6+ �� `Stream.Read` ����仯�����˼����Դ�����ȷ�������п�ܰ汾����Ϊһ�¡�
+`IOHelper` 是 NewLife.Core 中的 IO 操作工具类，提供高效的数据流操作、字节数组转换、压缩解压、编码转换等功能。针对 .NET 6+ 的 `Stream.Read` 语义变化进行了兼容性处理，确保在所有框架版本上行为一致。
 
-**�����ռ�**��`NewLife`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife`  
+**文档地址**：https://newlifex.com/core/io_helper
 
-## ��������
+## 核心特性
 
-- **��ȷ��ȡ**��`ReadExactly` ȷ����ȡָ���ֽ�������� .NET 6+ ���ֶ�ȡ����
-- **ѹ����ѹ**��֧�� Deflate �� GZip �����㷨
-- **�ֽ���ת��**��֧�ִ��/С���ֽ���ת��
-- **ʮ�����Ʊ���**����Ч��ʮ�������ַ���ת��
-- **�䳤����**��֧�� 7-bit �����ѹ��������д
+- **精确读取**：`ReadExactly` 确保读取指定字节数，解决 .NET 6+ 部分读取问题
+- **压缩解压**：支持 Deflate 和 GZip 两种算法
+- **字节序转换**：支持大端/小端字节序转换
+- **十六进制编码**：高效的十六进制字符串转换
+- **变长整数**：支持 7-bit 编码的压缩整数读写
 
-## ���ٿ�ʼ
+## 快速开始
 
 ```csharp
 using NewLife;
 
-// �ֽ�����תʮ�������ַ���
+// 字节数组转十六进制字符串
 var hex = new Byte[] { 0x12, 0xAB, 0xCD }.ToHex();  // "12ABCD"
 
-// ʮ�������ַ���ת�ֽ�����
+// 十六进制字符串转字节数组
 var data = "12ABCD".ToHex();  // [0x12, 0xAB, 0xCD]
 
-// Base64 �����
+// Base64 编解码
 var base64 = data.ToBase64();
 var bytes = base64.ToBase64();
 
-// ѹ������
+// 压缩数据
 var compressed = data.Compress();
 var decompressed = compressed.Decompress();
 
-// ��ת�ַ���
+// 流转字符串
 using var stream = new MemoryStream(Encoding.UTF8.GetBytes("Hello"));
 var str = stream.ToStr();  // "Hello"
 ```
 
-## API �ο�
+## API 参考
 
-### ��������
+### 属性配置
 
 #### MaxSafeArraySize
 
@@ -49,17 +49,17 @@ var str = stream.ToStr();  // "Hello"
 public static Int32 MaxSafeArraySize { get; set; } = 1024 * 1024;
 ```
 
-���ȫ�����С�������ô�Сʱ����ȡ���ݲ�����ǿ��ʧ�ܡ�
+最大安全数组大小。超过该大小时，读取数据操作将强制失败。
 
-**��;**�����������ã���������������ʱ��ȡ�������鵼��Ӧ�ñ�����
+**用途**：保护性设置，避免解码错误数据时读取超大数组导致应用崩溃。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ��Ҫ������Ͷ���������ʱ���ʵ��ſ�
+// 需要解码大型二进制数据时，适当放宽
 IOHelper.MaxSafeArraySize = 10 * 1024 * 1024;  // 10MB
 ```
 
-### ��������ȡ
+### 数据流读取
 
 #### ReadExactly
 
@@ -68,19 +68,19 @@ public static Int32 ReadExactly(this Stream stream, Byte[] buffer, Int32 offset,
 public static Byte[] ReadExactly(this Stream stream, Int64 count)
 ```
 
-��ȷ��ȡָ���ֽ����������ݲ������׳� `EndOfStreamException`��
+精确读取指定字节数。若数据不足则抛出 `EndOfStreamException`。
 
-**����**��.NET 6 ��ʼ��`Stream.Read` ���ܷ��ز������ݣ�partial read����������ȷ����ȡ�������ݡ�
+**背景**：.NET 6 开始，`Stream.Read` 可能返回部分数据（partial read），本方法确保读取完整数据。
 
-**ʾ��**��
+**示例**：
 ```csharp
 using var fs = File.OpenRead("data.bin");
 
-// ��ȡ�̶����ȵ�Э��ͷ
+// 读取固定长度的协议头
 var header = new Byte[16];
 fs.ReadExactly(header, 0, 16);
 
-// ��ȡ������������
+// 读取并返回新数组
 var data = fs.ReadExactly(1024);
 ```
 
@@ -90,21 +90,21 @@ var data = fs.ReadExactly(1024);
 public static Int32 ReadAtLeast(this Stream stream, Byte[] buffer, Int32 offset, Int32 count, Int32 minimumBytes, Boolean throwOnEndOfStream = true)
 ```
 
-��ȡ����ָ���ֽ�����������ȡ���൫������ `count`��
+读取至少指定字节数，允许读取更多但不超过 `count`。
 
-**����˵��**��
-- `minimumBytes`��������Ҫ��ȡ���ֽ���
-- `throwOnEndOfStream`�����ݲ���ʱ�Ƿ��׳��쳣
+**参数说明**：
+- `minimumBytes`：最少需要读取的字节数
+- `throwOnEndOfStream`：数据不足时是否抛出异常
 
-**ʾ��**��
+**示例**：
 ```csharp
 var buffer = new Byte[1024];
 
-// ���ٶ�ȡ 100 �ֽڣ���� 1024 �ֽ�
+// 至少读取 100 字节，最多 1024 字节
 var read = stream.ReadAtLeast(buffer, 0, 1024, 100, throwOnEndOfStream: false);
 if (read < 100)
 {
-    Console.WriteLine("���ݲ���");
+    Console.WriteLine("数据不足");
 }
 ```
 
@@ -114,21 +114,21 @@ if (read < 100)
 public static Byte[] ReadBytes(this Stream stream, Int64 length)
 ```
 
-�����ж�ȡָ�����ȵ��ֽ����顣
+从流中读取指定长度的字节数组。
 
-**����˵��**��
-- `length`��Ҫ��ȡ���ֽ�����-1 ��ʾ��ȡ����ĩβ
+**参数说明**：
+- `length`：要读取的字节数，-1 表示读取到流末尾
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ��ȡָ������
+// 读取指定长度
 var data = stream.ReadBytes(1024);
 
-// ��ȡȫ��ʣ������
+// 读取全部剩余数据
 var all = stream.ReadBytes(-1);
 ```
 
-### ������д��
+### 数据流写入
 
 #### Write
 
@@ -136,9 +136,9 @@ var all = stream.ReadBytes(-1);
 public static Stream Write(this Stream des, params Byte[] src)
 ```
 
-���ֽ�����д����������
+将字节数组写入数据流。
 
-**ʾ��**��
+**示例**：
 ```csharp
 using var ms = new MemoryStream();
 ms.Write(new Byte[] { 1, 2, 3 });
@@ -152,23 +152,23 @@ public static Stream WriteArray(this Stream des, params Byte[] src)
 public static Byte[] ReadArray(this Stream des)
 ```
 
-д��/��ȡ������ǰ׺���ֽ����飨ʹ�� 7-bit ����������Ϊ���ȣ���
+写入/读取带长度前缀的字节数组（使用 7-bit 编码整数作为长度）。
 
-**ʾ��**��
+**示例**：
 ```csharp
 using var ms = new MemoryStream();
 
-// д�������ǰ׺������
+// 写入带长度前缀的数据
 ms.WriteArray(new Byte[] { 1, 2, 3, 4, 5 });
 
-// ��ȡ
+// 读取
 ms.Position = 0;
 var data = ms.ReadArray();  // [1, 2, 3, 4, 5]
 ```
 
-### ѹ����ѹ
+### 压缩解压
 
-#### Compress / Decompress��Deflate��
+#### Compress / Decompress（Deflate）
 
 ```csharp
 public static Stream Compress(this Stream inStream, Stream? outStream = null)
@@ -177,16 +177,16 @@ public static Byte[] Compress(this Byte[] data)
 public static Byte[] Decompress(this Byte[] data)
 ```
 
-ʹ�� Deflate �㷨ѹ��/��ѹ���ݡ�
+使用 Deflate 算法压缩/解压数据。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ѹ���ֽ�����
+// 压缩字节数组
 var data = Encoding.UTF8.GetBytes("Hello World!");
 var compressed = data.Compress();
 var decompressed = compressed.Decompress();
 
-// ѹ��������
+// 压缩数据流
 using var input = new MemoryStream(data);
 using var output = new MemoryStream();
 input.Compress(output);
@@ -201,16 +201,16 @@ public static Byte[] CompressGZip(this Byte[] data)
 public static Byte[] DecompressGZip(this Byte[] data)
 ```
 
-ʹ�� GZip �㷨ѹ��/��ѹ���ݡ�GZip ��ʽ�����ļ�ͷ��Ϣ�������Ը��á�
+使用 GZip 算法压缩/解压数据。GZip 格式包含文件头信息，兼容性更好。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var data = File.ReadAllBytes("large-file.txt");
 var gzipped = data.CompressGZip();
 File.WriteAllBytes("large-file.txt.gz", gzipped);
 ```
 
-### �ֽ���ת��
+### 字节序转换
 
 #### ToUInt16 / ToUInt32 / ToUInt64
 
@@ -220,15 +220,15 @@ public static UInt32 ToUInt32(this Byte[] data, Int32 offset = 0, Boolean isLitt
 public static UInt64 ToUInt64(this Byte[] data, Int32 offset = 0, Boolean isLittleEndian = true)
 ```
 
-���ֽ������ȡ������֧�ִ��/С���ֽ���
+从字节数组读取整数，支持大端/小端字节序。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var data = new Byte[] { 0x01, 0x00, 0x00, 0x00 };
 
-// С����Ĭ�ϣ�
+// 小端序（默认）
 var value1 = data.ToUInt32();                    // 1
-// �����
+// 大端序
 var value2 = data.ToUInt32(isLittleEndian: false);  // 16777216
 ```
 
@@ -238,18 +238,18 @@ var value2 = data.ToUInt32(isLittleEndian: false);  // 16777216
 public static Byte[] GetBytes(this Int16 value, Boolean isLittleEndian = true)
 public static Byte[] GetBytes(this Int32 value, Boolean isLittleEndian = true)
 public static Byte[] GetBytes(this Int64 value, Boolean isLittleEndian = true)
-// ... ��������
+// ... 更多重载
 ```
 
-������ת��Ϊ�ֽ����顣
+将整数转换为字节数组。
 
-**ʾ��**��
+**示例**：
 ```csharp
-var bytes1 = 12345.GetBytes();                      // С����
-var bytes2 = 12345.GetBytes(isLittleEndian: false); // �����
+var bytes1 = 12345.GetBytes();                      // 小端序
+var bytes2 = 12345.GetBytes(isLittleEndian: false); // 大端序
 ```
 
-### ʮ�����Ʊ���
+### 十六进制编码
 
 #### ToHex
 
@@ -258,40 +258,40 @@ public static String ToHex(this Byte[] data, Int32 offset = 0, Int32 count = -1)
 public static String ToHex(this Byte[] data, String? separate, Int32 lineSize = 0)
 ```
 
-���ֽ�����ת��Ϊʮ�������ַ�����
+将字节数组转换为十六进制字符串。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var data = new Byte[] { 0x12, 0xAB, 0xCD, 0xEF };
 
-// ����ת��
+// 基本转换
 data.ToHex()                         // "12ABCDEF"
 
-// ���ָ���
+// 带分隔符
 data.ToHex("-")                      // "12-AB-CD-EF"
 data.ToHex(" ")                      // "12 AB CD EF"
 
-// ������ʾ
+// 分行显示
 var largeData = new Byte[32];
-largeData.ToHex(" ", lineSize: 16)   // ÿ 16 �ֽ�һ��
+largeData.ToHex(" ", lineSize: 16)   // 每 16 字节一行
 ```
 
-#### ToHex���ַ���ת�ֽ����飩
+#### ToHex（字符串转字节数组）
 
 ```csharp
 public static Byte[] ToHex(this String? data)
 ```
 
-��ʮ�������ַ���ת��Ϊ�ֽ����顣
+将十六进制字符串转换为字节数组。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "12ABCDEF".ToHex()           // [0x12, 0xAB, 0xCD, 0xEF]
-"12-AB-CD-EF".ToHex()        // [0x12, 0xAB, 0xCD, 0xEF]���Զ����Էָ�����
+"12-AB-CD-EF".ToHex()        // [0x12, 0xAB, 0xCD, 0xEF]（自动忽略分隔符）
 "12 AB CD EF".ToHex()        // [0x12, 0xAB, 0xCD, 0xEF]
 ```
 
-### Base64 ����
+### Base64 编码
 
 #### ToBase64
 
@@ -300,19 +300,19 @@ public static String ToBase64(this Byte[] data)
 public static Byte[] ToBase64(this String? data)
 ```
 
-Base64 ����롣
+Base64 编解码。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ����
+// 编码
 var data = Encoding.UTF8.GetBytes("Hello");
 var base64 = data.ToBase64();        // "SGVsbG8="
 
-// ����
+// 解码
 var bytes = base64.ToBase64();       // [72, 101, 108, 108, 111]
 ```
 
-### �ַ���ת��
+### 字符串转换
 
 #### ToStr
 
@@ -321,20 +321,20 @@ public static String ToStr(this Stream stream, Encoding? encoding = null)
 public static String ToStr(this Byte[] buf, Encoding? encoding = null, Int32 offset = 0, Int32 count = -1)
 ```
 
-�������ֽ�����ת��Ϊ�ַ������Զ����� BOM��
+将流或字节数组转换为字符串，自动处理 BOM。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ��ת�ַ���
+// 流转字符串
 using var stream = new MemoryStream(Encoding.UTF8.GetBytes("Hello"));
 var str = stream.ToStr();  // "Hello"
 
-// �ֽ�����ת�ַ���
-var data = Encoding.UTF8.GetBytes("����");
-var text = data.ToStr(Encoding.UTF8);  // "����"
+// 字节数组转字符串
+var data = Encoding.UTF8.GetBytes("世界");
+var text = data.ToStr(Encoding.UTF8);  // "世界"
 ```
 
-### �䳤��������
+### 变长整数编码
 
 #### WriteEncodedInt / ReadEncodedInt
 
@@ -343,31 +343,31 @@ public static Stream WriteEncodedInt(this Stream stream, Int32 value)
 public static Int32 ReadEncodedInt(this Stream stream)
 ```
 
-ʹ�� 7-bit �����д�䳤������Сֵռ�ø����ֽڡ�
+使用 7-bit 编码读写变长整数，小值占用更少字节。
 
-**�������**��
-- 0-127��1 �ֽ�
-- 128-16383��2 �ֽ�
-- 16384-2097151��3 �ֽ�
-- �Դ�����
+**编码规则**：
+- 0-127：1 字节
+- 128-16383：2 字节
+- 16384-2097151：3 字节
+- 以此类推
 
-**ʾ��**��
+**示例**：
 ```csharp
 using var ms = new MemoryStream();
 
-// д��Сֵֻ�� 1 �ֽ�
-ms.WriteEncodedInt(100);   // 1 �ֽ�
+// 写入小值只需 1 字节
+ms.WriteEncodedInt(100);   // 1 字节
 
-// д���ֵ��Ҫ�����ֽ�
-ms.WriteEncodedInt(10000); // 2 �ֽ�
+// 写入大值需要更多字节
+ms.WriteEncodedInt(10000); // 2 字节
 
-// ��ȡ
+// 读取
 ms.Position = 0;
 var v1 = ms.ReadEncodedInt();  // 100
 var v2 = ms.ReadEncodedInt();  // 10000
 ```
 
-### ʱ���д
+### 时间读写
 
 #### WriteDateTime / ReadDateTime
 
@@ -376,9 +376,9 @@ public static Stream WriteDateTime(this Stream stream, DateTime dt)
 public static DateTime ReadDateTime(this Stream stream)
 ```
 
-�� Unix ʱ������룩��ʽ��дʱ�䣬4 �ֽڴ洢��
+以 Unix 时间戳（秒）格式读写时间，4 字节存储。
 
-**ʾ��**��
+**示例**：
 ```csharp
 using var ms = new MemoryStream();
 
@@ -388,7 +388,7 @@ ms.Position = 0;
 var dt = ms.ReadDateTime();
 ```
 
-### �ֽ��������
+### 字节数组操作
 
 #### ReadBytes
 
@@ -396,13 +396,13 @@ var dt = ms.ReadDateTime();
 public static Byte[] ReadBytes(this Byte[] src, Int32 offset, Int32 count)
 ```
 
-���ֽ������и���ָ����Χ�����ݡ�
+从字节数组中复制指定范围的数据。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var data = new Byte[] { 1, 2, 3, 4, 5 };
 var part = data.ReadBytes(1, 3);  // [2, 3, 4]
-var rest = data.ReadBytes(2, -1); // [3, 4, 5]��-1 ��ʾ��ĩβ��
+var rest = data.ReadBytes(2, -1); // [3, 4, 5]（-1 表示到末尾）
 ```
 
 #### Write
@@ -411,48 +411,48 @@ var rest = data.ReadBytes(2, -1); // [3, 4, 5]��-1 ��ʾ��ĩβ��
 public static Int32 Write(this Byte[] dst, Int32 dstOffset, Byte[] src, Int32 srcOffset = 0, Int32 count = -1)
 ```
 
-���ֽ�����д�����ݡ�
+向字节数组写入数据。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var buffer = new Byte[10];
 var data = new Byte[] { 1, 2, 3 };
-var written = buffer.Write(0, data);  // д�� 3 �ֽ�
+var written = buffer.Write(0, data);  // 写入 3 字节
 ```
 
-#### CopyTo��ָ�����ȣ�
+#### CopyTo（指定长度）
 
 ```csharp
 public static void CopyTo(this Stream source, Stream destination, Int64 length, Int32 bufferSize)
 ```
 
-��Դ������ָ���������ݵ�Ŀ������
+从源流复制指定长度数据到目标流。
 
-**ʾ��**��
+**示例**：
 ```csharp
 using var source = File.OpenRead("large-file.bin");
 using var dest = File.Create("part.bin");
 
-// ֻ����ǰ 1MB
+// 只复制前 1MB
 source.CopyTo(dest, 1024 * 1024, bufferSize: 81920);
 ```
 
-## ʹ�ó���
+## 使用场景
 
-### 1. ����Э�����
+### 1. 网络协议解析
 
 ```csharp
 public class ProtocolParser
 {
     public Message Parse(Stream stream)
     {
-        // ��ȡ�̶����ȵ�Э��ͷ
+        // 读取固定长度的协议头
         var header = stream.ReadExactly(8);
         
         var magic = header.ToUInt32(0);
         var length = header.ToUInt32(4);
         
-        // ��ȡ��Ϣ��
+        // 读取消息体
         var body = stream.ReadExactly(length);
         
         return new Message { Header = header, Body = body };
@@ -460,7 +460,7 @@ public class ProtocolParser
 }
 ```
 
-### 2. ���������л�
+### 2. 二进制序列化
 
 ```csharp
 public class BinarySerializer
@@ -470,7 +470,7 @@ public class BinarySerializer
         var json = JsonSerializer.Serialize(obj);
         var data = Encoding.UTF8.GetBytes(json);
         
-        // д�볤�Ⱥ�����
+        // 写入长度和数据
         stream.WriteArray(data);
     }
     
@@ -483,20 +483,20 @@ public class BinarySerializer
 }
 ```
 
-### 3. ����ѹ������
+### 3. 数据压缩传输
 
 ```csharp
 public class CompressedTransport
 {
     public Byte[] Send(Byte[] data)
     {
-        // ѹ������
+        // 压缩数据
         var compressed = data.CompressGZip();
         
-        // �����������[ѹ����־][ԭʼ����][ѹ������]
+        // 构建传输包：[压缩标志][原始长度][压缩数据]
         using var ms = new MemoryStream();
-        ms.WriteByte(1);  // ѹ����־
-        ms.WriteEncodedInt(data.Length);  // ԭʼ����
+        ms.WriteByte(1);  // 压缩标志
+        ms.WriteEncodedInt(data.Length);  // 原始长度
         ms.Write(compressed);
         
         return ms.ToArray();
@@ -514,49 +514,49 @@ public class CompressedTransport
 }
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ʹ�� ReadExactly ��� Read
+### 1. 使用 ReadExactly 替代 Read
 
 ```csharp
-// �Ƽ���ȷ����ȡ��������
+// 推荐：确保读取完整数据
 var data = stream.ReadExactly(100);
 
-// ���Ƽ�������ֻ��ȡ��������
+// 不推荐：可能只读取部分数据
 var buffer = new Byte[100];
-stream.Read(buffer, 0, 100);  // .NET 6+ ���ܷ���С�� 100
+stream.Read(buffer, 0, 100);  // .NET 6+ 可能返回小于 100
 ```
 
-### 2. ע���ֽ���
+### 2. 注意字节序
 
 ```csharp
-// ������ϵͳ����ʱע���ֽ���
-// ����Э��ͨ��ʹ�ô����
+// 与其他系统交互时注意字节序
+// 网络协议通常使用大端序
 var networkValue = data.ToUInt32(isLittleEndian: false);
 
-// ���ش洢ͨ��ʹ��С����x86/x64 Ĭ�ϣ�
+// 本地存储通常使用小端序（x86/x64 默认）
 var localValue = data.ToUInt32();
 ```
 
-### 3. ʹ�ö���ؼ����ڴ����
+### 3. 使用对象池减少内存分配
 
 ```csharp
 using NewLife.Collections;
 
-// ʹ���ڴ�����
+// 使用内存流池
 var ms = Pool.MemoryStream.Get();
 try
 {
-    // ʹ����...
+    // 使用流...
 }
 finally
 {
-    ms.Return(true);  // �黹�����
+    ms.Return(true);  // 归还并清空
 }
 ```
 
-## �������
+## 相关链接
 
-- [·����չ PathHelper](path_helper-·����չPathHelper.md)
-- [��ȫ��չ SecurityHelper](security_helper-��ȫ��չSecurityHelper.md)
-- [���ݰ� IPacket](packet-���ݰ�IPacket.md)
+- [路径扩展 PathHelper](path_helper-路径扩展PathHelper.md)
+- [安全扩展 SecurityHelper](security_helper-安全扩展SecurityHelper.md)
+- [数据包 IPacket](packet-数据包IPacket.md)

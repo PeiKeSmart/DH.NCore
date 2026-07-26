@@ -1,158 +1,158 @@
-# ����ϵͳ Config
+# 配置系统 Config
 
-## ����
+## 概述
 
-DH.NCore �ṩ��ǿ����������ϵͳ��֧�� XML��JSON��INI �ȶ��ָ�ʽ���Լ������ļ���Զ���������ġ�ͨ�� `Config<T>` ������Կ��ٴ���ǿ�������ã�֧���ȸ��º��Զ����档
+NewLife.Core 提供了强大灵活的配置系统，支持 XML、JSON、INI 等多种格式，以及本地文件和远程配置中心。通过 `Config<T>` 基类可以快速创建强类型配置，支持热更新和自动保存。
 
-**�����ռ�**��`NewLife.Configuration`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife.Configuration`  
+**文档地址**：https://newlifex.com/core/config
 
-## ��������
+## 核心特性
 
-- **ǿ��������**���̳� `Config<T>` �Զ����������ļ�
-- **���ʽ֧��**��XML��JSON��INI��HTTP �������ṩ��
-- **�ȸ���**�������ļ��仯ʱ�Զ�����
-- **ע��֧��**��XML ��ʽ֧���Զ�����ע��
-- **�ֲ�����**��֧�ֶ༶Ƕ�����ýṹ
-- **��������**��֧��Զ���������ģ����ǳ���
+- **强类型配置**：继承 `Config<T>` 自动管理配置文件
+- **多格式支持**：XML、JSON、INI、HTTP 等配置提供者
+- **热更新**：配置文件变化时自动重载
+- **注释支持**：XML 格式支持自动生成注释
+- **分层配置**：支持多级嵌套配置结构
+- **配置中心**：支持远程配置中心（如星尘）
 
-## ���ٿ�ʼ
+## 快速开始
 
-### ����������
+### 定义配置类
 
 ```csharp
 using NewLife.Configuration;
 using System.ComponentModel;
 
-/// <summary>Ӧ������</summary>
-[Config("App")]  // �����ļ���Ϊ App.config
+/// <summary>应用配置</summary>
+[Config("App")]  // 配置文件名为 App.config
 public class AppConfig : Config<AppConfig>
 {
-    [Description("Ӧ������")]
+    [Description("应用名称")]
     public String Name { get; set; } = "MyApp";
     
-    [Description("����˿�")]
+    [Description("服务端口")]
     public Int32 Port { get; set; } = 8080;
     
-    [Description("����ģʽ")]
+    [Description("调试模式")]
     public Boolean Debug { get; set; }
     
-    [Description("���ݿ�����")]
+    [Description("数据库连接")]
     public String ConnectionString { get; set; } = "Server=.;Database=test";
 }
 ```
 
-### ʹ������
+### 使用配置
 
 ```csharp
-// ��ȡ���ã��Զ�����/���������ļ���
+// 读取配置（自动加载/创建配置文件）
 var config = AppConfig.Current;
 
-Console.WriteLine($"Ӧ��: {config.Name}");
-Console.WriteLine($"�˿�: {config.Port}");
+Console.WriteLine($"应用: {config.Name}");
+Console.WriteLine($"端口: {config.Port}");
 
-// �޸Ĳ�����
+// 修改并保存
 config.Debug = true;
 config.Save();
 ```
 
-**�Զ����ɵ������ļ�** (`App.config`)��
+**自动生成的配置文件** (`App.config`)：
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <App>
-  <!--Ӧ������-->
+  <!--应用名称-->
   <Name>MyApp</Name>
-  <!--����˿�-->
+  <!--服务端口-->
   <Port>8080</Port>
-  <!--����ģʽ-->
+  <!--调试模式-->
   <Debug>false</Debug>
-  <!--���ݿ�����-->
+  <!--数据库连接-->
   <ConnectionString>Server=.;Database=test</ConnectionString>
 </App>
 ```
 
-## API �ο�
+## API 参考
 
-### Config&lt;T&gt; ����
+### Config&lt;T&gt; 基类
 
 ```csharp
 public class Config<TConfig> where TConfig : Config<TConfig>, new()
 {
-    /// <summary>��ǰʹ�õ��ṩ��</summary>
+    /// <summary>当前使用的提供者</summary>
     public static IConfigProvider? Provider { get; set; }
     
-    /// <summary>��ǰʵ��</summary>
+    /// <summary>当前实例</summary>
     public static TConfig Current { get; }
     
-    /// <summary>��������</summary>
+    /// <summary>加载配置</summary>
     public virtual Boolean Load();
     
-    /// <summary>��������</summary>
+    /// <summary>保存配置</summary>
     public virtual Boolean Save();
     
-    /// <summary>���ü��غ󴥷�</summary>
+    /// <summary>配置加载后触发</summary>
     protected virtual void OnLoaded() { }
 }
 ```
 
-### ConfigAttribute ����
+### ConfigAttribute 特性
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class)]
 public class ConfigAttribute : Attribute
 {
-    /// <summary>���������ļ�����������չ����</summary>
+    /// <summary>配置名（文件名，不含扩展名）</summary>
     public String Name { get; set; }
     
-    /// <summary>�����ṩ������</summary>
+    /// <summary>配置提供者类型</summary>
     public Type? Provider { get; set; }
 }
 ```
 
-### IConfigProvider �ӿ�
+### IConfigProvider 接口
 
 ```csharp
 public interface IConfigProvider
 {
-    /// <summary>����</summary>
+    /// <summary>名称</summary>
     String Name { get; set; }
     
-    /// <summary>��Ԫ��</summary>
+    /// <summary>根元素</summary>
     IConfigSection Root { get; set; }
     
-    /// <summary>�Ƿ�������</summary>
+    /// <summary>是否新配置</summary>
     Boolean IsNew { get; set; }
     
-    /// <summary>��ȡ/��������ֵ</summary>
+    /// <summary>获取/设置配置值</summary>
     String? this[String key] { get; set; }
     
-    /// <summary>��������</summary>
+    /// <summary>加载配置</summary>
     Boolean LoadAll();
     
-    /// <summary>��������</summary>
+    /// <summary>保存配置</summary>
     Boolean SaveAll();
     
-    /// <summary>���ص�ģ��</summary>
+    /// <summary>加载到模型</summary>
     T? Load<T>(String? path = null) where T : new();
     
-    /// <summary>��ģ�ͣ��ȸ��£�</summary>
+    /// <summary>绑定模型（热更新）</summary>
     void Bind<T>(T model, Boolean autoReload = true, String? path = null);
     
-    /// <summary>���øı��¼�</summary>
+    /// <summary>配置改变事件</summary>
     event EventHandler? Changed;
 }
 ```
 
-## �����ṩ��
+## 配置提供者
 
-### XmlConfigProvider��Ĭ�ϣ�
+### XmlConfigProvider（默认）
 
 ```csharp
-// �Զ�ʹ�� XML ��ʽ
+// 自动使用 XML 格式
 [Config("Database")]
 public class DbConfig : Config<DbConfig> { }
 
-// ����ʽָ��
+// 或显式指定
 [Config("Database", Provider = typeof(XmlConfigProvider))]
 public class DbConfig : Config<DbConfig> { }
 ```
@@ -174,7 +174,7 @@ public class LoggingConfig
 }
 ```
 
-**���ɵ� JSON �ļ�**��
+**生成的 JSON 文件**：
 ```json
 {
   "Name": "MyApp",
@@ -198,7 +198,7 @@ public class IniConfig : Config<IniConfig>
 
 ### HttpConfigProvider
 
-��������Զ���������ģ�
+用于连接远程配置中心：
 
 ```csharp
 [HttpConfig("http://config.server.com", AppId = "myapp", Secret = "xxx")]
@@ -208,33 +208,33 @@ public class RemoteConfig : Config<RemoteConfig>
 }
 ```
 
-## ʹ�ó���
+## 使用场景
 
-### 1. ���ݿ�����
+### 1. 数据库配置
 
 ```csharp
 [Config("Database")]
 public class DatabaseConfig : Config<DatabaseConfig>
 {
-    [Description("���ݿ�����")]
+    [Description("数据库类型")]
     public String DbType { get; set; } = "MySql";
     
-    [Description("�����ַ���")]
+    [Description("连接字符串")]
     public String ConnectionString { get; set; }
     
-    [Description("���������")]
+    [Description("最大连接数")]
     public Int32 MaxPoolSize { get; set; } = 100;
     
-    [Description("���ʱ���룩")]
+    [Description("命令超时（秒）")]
     public Int32 CommandTimeout { get; set; } = 30;
 }
 
-// ʹ��
+// 使用
 var db = DatabaseConfig.Current;
 var connStr = db.ConnectionString;
 ```
 
-### 2. Ƕ������
+### 2. 嵌套配置
 
 ```csharp
 [Config("Service")]
@@ -259,7 +259,7 @@ public class CacheConfig
 }
 ```
 
-### 3. ��������
+### 3. 数组配置
 
 ```csharp
 [Config("Servers")]
@@ -276,7 +276,7 @@ public class EndpointConfig
 }
 ```
 
-### 4. ������֤
+### 4. 配置验证
 
 ```csharp
 [Config("App")]
@@ -286,125 +286,125 @@ public class AppConfig : Config<AppConfig>
     
     protected override void OnLoaded()
     {
-        // ��֤����
+        // 验证配置
         if (Port <= 0 || Port > 65535)
         {
             Port = 8080;
-            XTrace.WriteLine("�˿�������Ч��ʹ��Ĭ��ֵ 8080");
+            XTrace.WriteLine("端口配置无效，使用默认值 8080");
         }
     }
 }
 ```
 
-### 5. ���ñ������
+### 5. 配置变更监听
 
 ```csharp
 var config = AppConfig.Current;
 AppConfig.Provider.Changed += (s, e) =>
 {
-    XTrace.WriteLine("�����Ѹ���");
-    // ���¶�ȡ����
+    XTrace.WriteLine("配置已更新");
+    // 重新读取配置
     config = AppConfig.Current;
 };
 ```
 
-### 6. ֱ��ʹ���ṩ��
+### 6. 直接使用提供者
 
 ```csharp
-// ���̳� Config<T>��ֱ��ʹ���ṩ��
+// 不继承 Config<T>，直接使用提供者
 var provider = new JsonConfigProvider { FileName = "custom.json" };
 provider.LoadAll();
 
-// ��ȡֵ
+// 读取值
 var name = provider["Name"];
 var port = provider["Server:Port"].ToInt();
 
-// ����ֵ
+// 设置值
 provider["Debug"] = "true";
 provider.SaveAll();
 ```
 
-## �����ļ�·��
+## 配置文件路径
 
-Ĭ�������ļ������Ӧ�ó���Ŀ¼����ͨ�����·�ʽ�Զ��壺
+默认配置文件存放在应用程序目录，可通过以下方式自定义：
 
 ```csharp
-// ���·��
+// 相对路径
 [Config("Config/App")]
 public class AppConfig : Config<AppConfig> { }
 
-// �����ṩ�߳�ʼ��
+// 配置提供者初始化
 var provider = new XmlConfigProvider();
 provider.Init("Config/App.config");
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ʹ�� Description ����
+### 1. 使用 Description 特性
 
 ```csharp
-[Description("��־����Debug/Info/Warn/Error")]
+[Description("日志级别：Debug/Info/Warn/Error")]
 public String LogLevel { get; set; } = "Info";
 ```
 
-### 2. �ṩĬ��ֵ
+### 2. 提供默认值
 
 ```csharp
 public Int32 MaxRetry { get; set; } = 3;
 public String[] AllowedHosts { get; set; } = ["*"];
 ```
 
-### 3. ������Ϣ����
+### 3. 敏感信息处理
 
 ```csharp
 [Config("Secrets")]
 public class SecretsConfig : Config<SecretsConfig>
 {
-    // ����ӻ���������ȡ
+    // 建议从环境变量读取
     public String ApiKey { get; set; } = 
         Environment.GetEnvironmentVariable("API_KEY") ?? "";
 }
 ```
 
-### 4. ��������
+### 4. 配置重载
 
 ```csharp
-// ǿ�����¼�������
+// 强制重新加载配置
 AppConfig._Current = null;
 var fresh = AppConfig.Current;
 ```
 
-## �� appsettings.json ����
+## 与 appsettings.json 集成
 
 ```csharp
-// ���� ASP.NET Core ��������
+// 加载 ASP.NET Core 风格的配置
 var provider = JsonConfigProvider.LoadAppSettings();
 var connectionString = provider["ConnectionStrings:Default"];
 var logLevel = provider["Logging:LogLevel:Default"];
 ```
 
-## ���ü̳�
+## 配置继承
 
 ```csharp
 public abstract class BaseConfig<T> : Config<T> where T : BaseConfig<T>, new()
 {
-    [Description("Ӧ�ð汾")]
+    [Description("应用版本")]
     public String Version { get; set; } = "1.0.0";
     
-    [Description("���õ���")]
+    [Description("启用调试")]
     public Boolean Debug { get; set; }
 }
 
 [Config("MyApp")]
 public class MyAppConfig : BaseConfig<MyAppConfig>
 {
-    [Description("�ض�����")]
+    [Description("特定设置")]
     public String CustomSetting { get; set; }
 }
 ```
 
-## �������
+## 相关链接
 
-- [JSON ���л�](json-JSON���л�.md)
-- [XML ���л�](xml-XML���л�.md)
-- [��־ϵͳ ILog](log-��־ILog.md)
+- [JSON 序列化](json-JSON序列化.md)
+- [XML 序列化](xml-XML序列化.md)
+- [日志系统 ILog](log-日志ILog.md)

@@ -1,42 +1,42 @@
-# ����ת�� Utility
+# 类型转换 Utility
 
-## ����
+## 概述
 
-`Utility` �� DH.NCore ��������Ĺ����࣬�ṩ��Ч����ȫ������ת����չ����������ת��������֧��Ĭ��ֵ����ת��ʧ��ʱ����Ĭ��ֵ�����׳��쳣����������ճ������е�����ת��������
+`Utility` 是 NewLife.Core 中最基础的工具类，提供高效、安全的类型转换扩展方法。所有转换方法均支持默认值，在转换失败时返回默认值而不抛出异常，极大简化了日常开发中的类型转换操作。
 
-**�����ռ�**��`NewLife`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife`  
+**文档地址**：https://newlifex.com/core/utility
 
-## ��������
+## 核心特性
 
-- **��ȫת��**������ת��ʧ��ʱ����Ĭ��ֵ�����׳��쳣
-- **��չ����**��ֱ���ڶ����ϵ��� `.ToInt()`��`.ToDateTime()` ��
-- **������֧��**��֧���ַ�����ȫ���ַ����ֽ����顢ʱ����ȶ�������
-- **������**����Գ�����������Ż������ⲻ��Ҫ���ڴ����
-- **����չ**��ͨ�� `DefaultConvert` ��֧���Զ���ת���߼�
+- **安全转换**：所有转换失败时返回默认值，不抛出异常
+- **扩展方法**：直接在对象上调用 `.ToInt()`、`.ToDateTime()` 等
+- **多类型支持**：支持字符串、全角字符、字节数组、时间戳等多种输入
+- **高性能**：针对常见场景深度优化，避免不必要的内存分配
+- **可扩展**：通过 `DefaultConvert` 类支持自定义转换逻辑
 
-## ���ٿ�ʼ
+## 快速开始
 
 ```csharp
 using NewLife;
 
-// �ַ���ת����
+// 字符串转整数
 var num = "123".ToInt();           // 123
-var num2 = "abc".ToInt(-1);        // -1��ת��ʧ�ܷ���Ĭ��ֵ��
+var num2 = "abc".ToInt(-1);        // -1（转换失败返回默认值）
 
-// �ַ���תʱ��
+// 字符串转时间
 var dt = "2024-01-15".ToDateTime();
 var dt2 = "invalid".ToDateTime();  // DateTime.MinValue
 
-// ����ת����
+// 对象转布尔
 var flag = "true".ToBoolean();     // true
 var flag2 = "1".ToBoolean();       // true
 var flag3 = "yes".ToBoolean();     // true
 ```
 
-## API �ο�
+## API 参考
 
-### ����ת��
+### 整数转换
 
 #### ToInt
 
@@ -44,32 +44,32 @@ var flag3 = "yes".ToBoolean();     // true
 public static Int32 ToInt(this Object? value, Int32 defaultValue = 0)
 ```
 
-������ת��Ϊ32λ������
+将对象转换为32位整数。
 
-**֧�ֵ���������**��
-- �ַ�������ȫ�����֣�
-- �ֽ����飨С����1-4�ֽڣ�
-- DateTime��תΪUnix�룬����ʱ��ת����
-- DateTimeOffset��תΪUnix�룩
-- ʵ�� `IConvertible` ������
+**支持的输入类型**：
+- 字符串（含全角数字）
+- 字节数组（小端序，1-4字节）
+- DateTime（转为Unix秒，不含时区转换）
+- DateTimeOffset（转为Unix秒）
+- 实现 `IConvertible` 的类型
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ����ת��
+// 基本转换
 "123".ToInt()                    // 123
-"  456  ".ToInt()                // 456���Զ�ȥ���ո�
-"������".ToInt()                 // 123��֧��ȫ�����֣�
-"1,234,567".ToInt()              // 1234567��֧��ǧ��λ��
+"  456  ".ToInt()                // 456（自动去除空格）
+"１２３".ToInt()                 // 123（支持全角数字）
+"1,234,567".ToInt()              // 1234567（支持千分位）
 
-// �ֽ�����ת����С����
+// 字节数组转换（小端序）
 new Byte[] { 0x01 }.ToInt()                    // 1
 new Byte[] { 0x01, 0x00 }.ToInt()              // 1
 new Byte[] { 0x01, 0x00, 0x00, 0x00 }.ToInt()  // 1
 
-// ʱ��תUnix��
-DateTime.Now.ToInt()             // ��ǰUnixʱ������룩
+// 时间转Unix秒
+DateTime.Now.ToInt()             // 当前Unix时间戳（秒）
 
-// ת��ʧ�ܷ���Ĭ��ֵ
+// 转换失败返回默认值
 "abc".ToInt()                    // 0
 "abc".ToInt(-1)                  // -1
 ((Object?)null).ToInt()          // 0
@@ -81,19 +81,19 @@ DateTime.Now.ToInt()             // ��ǰUnixʱ������룩
 public static Int64 ToLong(this Object? value, Int64 defaultValue = 0)
 ```
 
-������ת��Ϊ64λ��������
+将对象转换为64位长整数。
 
-**���⴦��**��
-- DateTime תΪ Unix ���루����ʱ��ת����
-- �ֽ�����֧�� 1-8 �ֽ�
+**特殊处理**：
+- DateTime 转为 Unix 毫秒（不含时区转换）
+- 字节数组支持 1-8 字节
 
-**ʾ��**��
+**示例**：
 ```csharp
 "9223372036854775807".ToLong()   // Int64.MaxValue
-DateTime.Now.ToLong()            // ��ǰUnixʱ��������룩
+DateTime.Now.ToLong()            // 当前Unix时间戳（毫秒）
 ```
 
-### ������ת��
+### 浮点数转换
 
 #### ToDouble
 
@@ -101,13 +101,13 @@ DateTime.Now.ToLong()            // ��ǰUnixʱ��������룩
 public static Double ToDouble(this Object? value, Double defaultValue = 0)
 ```
 
-������ת��Ϊ˫���ȸ�������
+将对象转换为双精度浮点数。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "3.14".ToDouble()                // 3.14
-"3.14E+10".ToDouble()            // 31400000000��֧�ֿ�ѧ��������
-"1,234.56".ToDouble()            // 1234.56��֧��ǧ��λ��
+"3.14E+10".ToDouble()            // 31400000000（支持科学计数法）
+"1,234.56".ToDouble()            // 1234.56（支持千分位）
 ```
 
 #### ToDecimal
@@ -116,14 +116,14 @@ public static Double ToDouble(this Object? value, Double defaultValue = 0)
 public static Decimal ToDecimal(this Object? value, Decimal defaultValue = 0)
 ```
 
-������ת��Ϊ�߾��ȸ������������ڽ��ڼ���Ⱦ���Ҫ��ߵĳ�����
+将对象转换为高精度浮点数，适用于金融计算等精度要求高的场景。
 
-**ʾ��**��
+**示例**：
 ```csharp
-"123456789.123456789".ToDecimal()  // ��ȷ����С��
+"123456789.123456789".ToDecimal()  // 精确保留小数
 ```
 
-### ����ֵת��
+### 布尔值转换
 
 #### ToBoolean
 
@@ -131,12 +131,12 @@ public static Decimal ToDecimal(this Object? value, Decimal defaultValue = 0)
 public static Boolean ToBoolean(this Object? value, Boolean defaultValue = false)
 ```
 
-������ת��Ϊ����ֵ��
+将对象转换为布尔值。
 
-**֧�ֵ���ֵ**��`true`��`True`��`1`��`y`��`yes`��`on`��`enable`��`enabled`  
-**֧�ֵļ�ֵ**��`false`��`False`��`0`��`n`��`no`��`off`��`disable`��`disabled`
+**支持的真值**：`true`、`True`、`1`、`y`、`yes`、`on`、`enable`、`enabled`  
+**支持的假值**：`false`、`False`、`0`、`n`、`no`、`off`、`disable`、`disabled`
 
-**ʾ��**��
+**示例**：
 ```csharp
 "true".ToBoolean()               // true
 "True".ToBoolean()               // true
@@ -150,11 +150,11 @@ public static Boolean ToBoolean(this Object? value, Boolean defaultValue = false
 "no".ToBoolean()                 // false
 "off".ToBoolean()                // false
 
-"invalid".ToBoolean()            // false��Ĭ��ֵ��
-"invalid".ToBoolean(true)        // true��ָ��Ĭ��ֵ��
+"invalid".ToBoolean()            // false（默认值）
+"invalid".ToBoolean(true)        // true（指定默认值）
 ```
 
-### ʱ��ת��
+### 时间转换
 
 #### ToDateTime
 
@@ -163,35 +163,35 @@ public static DateTime ToDateTime(this Object? value)
 public static DateTime ToDateTime(this Object? value, DateTime defaultValue)
 ```
 
-������ת��Ϊʱ�����ڡ�
+将对象转换为时间日期。
 
-**֧�ֵĸ�ʽ**��
-- ��׼����ʱ���ַ���
-- `yyyy-M-d` ��ʽ
-- `yyyy/M/d` ��ʽ
-- `yyyyMMddHHmmss` ��ʽ
-- `yyyyMMdd` ��ʽ
-- Unix �루Int32��
-- Unix ���루Int64���Զ��жϣ�
-- UTC ��ǣ�ĩβ `Z` �� ` UTC`��
+**支持的格式**：
+- 标准日期时间字符串
+- `yyyy-M-d` 格式
+- `yyyy/M/d` 格式
+- `yyyyMMddHHmmss` 格式
+- `yyyyMMdd` 格式
+- Unix 秒（Int32）
+- Unix 毫秒（Int64，自动判断）
+- UTC 标记（末尾 `Z` 或 ` UTC`）
 
-**ʾ��**��
+**示例**：
 ```csharp
-// �ַ���ת��
+// 字符串转换
 "2024-01-15".ToDateTime()
-"2024-1-5".ToDateTime()          // ֧�ֵ�λ������
+"2024-1-5".ToDateTime()          // 支持单位数月日
 "2024/01/15".ToDateTime()
 "20240115".ToDateTime()
 "20240115120000".ToDateTime()
 "2024-01-15 12:30:45".ToDateTime()
-"2024-01-15T12:30:45Z".ToDateTime()  // UTC ʱ��
+"2024-01-15T12:30:45Z".ToDateTime()  // UTC 时间
 
-// Unix ʱ���ת��
-1705276800.ToDateTime()          // Unix ��
-1705276800000L.ToDateTime()      // Unix ���루�Զ��жϣ�
+// Unix 时间戳转换
+1705276800.ToDateTime()          // Unix 秒
+1705276800000L.ToDateTime()      // Unix 毫秒（自动判断）
 ```
 
-> **ע��**������תʱ��ʱ������ UTC �뱾��ʱ��ת�����������������У��豸����λ�ڲ�ͬʱ��������ͳһʹ�� UTC ʱ�䴫�����ת����
+> **注意**：整数转时间时不进行 UTC 与本地时间转换。在物联网场景中，设备可能位于不同时区，建议统一使用 UTC 时间传输后再转换。
 
 #### ToDateTimeOffset
 
@@ -200,9 +200,9 @@ public static DateTimeOffset ToDateTimeOffset(this Object? value)
 public static DateTimeOffset ToDateTimeOffset(this Object? value, DateTimeOffset defaultValue)
 ```
 
-������ת��Ϊ��ʱ����ʱ�����ڡ�
+将对象转换为带时区的时间日期。
 
-### ʱ���ʽ��
+### 时间格式化
 
 #### ToFullString
 
@@ -211,13 +211,13 @@ public static String ToFullString(this DateTime value, String? emptyValue = null
 public static String ToFullString(this DateTime value, Boolean useMillisecond, String? emptyValue = null)
 ```
 
-��ʱ���ʽ��Ϊ `yyyy-MM-dd HH:mm:ss` ��׼��ʽ��
+将时间格式化为 `yyyy-MM-dd HH:mm:ss` 标准格式。
 
-**����˵��**��
-- `useMillisecond`���Ƿ�������룬��ʽΪ `yyyy-MM-dd HH:mm:ss.fff`
-- `emptyValue`����ʱ��Ϊ `MinValue` ʱ��ʾ������ַ���
+**参数说明**：
+- `useMillisecond`：是否包含毫秒，格式为 `yyyy-MM-dd HH:mm:ss.fff`
+- `emptyValue`：当时间为 `MinValue` 时显示的替代字符串
 
-**ʾ��**��
+**示例**：
 ```csharp
 DateTime.Now.ToFullString()                    // "2024-01-15 12:30:45"
 DateTime.Now.ToFullString(true)                // "2024-01-15 12:30:45.123"
@@ -231,26 +231,26 @@ DateTime.MinValue.ToFullString("N/A")          // "N/A"
 public static DateTime Trim(this DateTime value, String format = "s")
 ```
 
-�ض�ʱ�侫�ȡ�
+截断时间精度。
 
-**��ʽ����**��
-- `ns`�����뾫�ȣ�ʵ��Ϊ 100ns���� 1 tick��
-- `us`��΢�뾫��
-- `ms`�����뾫��
-- `s`���뾫�ȣ�Ĭ�ϣ�
-- `m`�����Ӿ���
-- `h`��Сʱ����
+**格式参数**：
+- `ns`：纳秒精度（实际为 100ns，即 1 tick）
+- `us`：微秒精度
+- `ms`：毫秒精度
+- `s`：秒精度（默认）
+- `m`：分钟精度
+- `h`：小时精度
 
-**ʾ��**��
+**示例**：
 ```csharp
 var dt = new DateTime(2024, 1, 15, 12, 30, 45, 123);
 dt.Trim("s")                     // 2024-01-15 12:30:45.000
 dt.Trim("m")                     // 2024-01-15 12:30:00.000
 dt.Trim("h")                     // 2024-01-15 12:00:00.000
-dt.Trim("ms")                    // ��������
+dt.Trim("ms")                    // 保留毫秒
 ```
 
-### �ֽڵ�λ��ʽ��
+### 字节单位格式化
 
 #### ToGMK
 
@@ -259,21 +259,21 @@ public static String ToGMK(this Int64 value, String? format = null)
 public static String ToGMK(this UInt64 value, String? format = null)
 ```
 
-���ֽ�����ʽ��Ϊ�ɶ��ĵ�λ�ַ�����
+将字节数格式化为可读的单位字符串。
 
-**ʾ��**��
+**示例**：
 ```csharp
 1024L.ToGMK()                    // "1.00K"
 1048576L.ToGMK()                 // "1.00M"
 1073741824L.ToGMK()              // "1.00G"
 1099511627776L.ToGMK()           // "1.00T"
 
-// �Զ����ʽ
+// 自定义格式
 1536L.ToGMK("n1")                // "1.5K"
 1536L.ToGMK("n0")                // "2K"
 ```
 
-### �쳣����
+### 异常处理
 
 #### GetTrue
 
@@ -281,13 +281,13 @@ public static String ToGMK(this UInt64 value, String? format = null)
 public static Exception GetTrue(this Exception ex)
 ```
 
-��ȡ�쳣����ʵ�ڲ��쳣���Զ���� `AggregateException`��`TargetInvocationException`��`TypeInitializationException` �Ȱ�װ�쳣��
+获取异常的真实内部异常，自动解包 `AggregateException`、`TargetInvocationException`、`TypeInitializationException` 等包装异常。
 
-**ʾ��**��
+**示例**：
 ```csharp
 try
 {
-    // �����׳���װ�쳣�Ĵ���
+    // 可能抛出包装异常的代码
 }
 catch (Exception ex)
 {
@@ -302,18 +302,18 @@ catch (Exception ex)
 public static String GetMessage(this Exception ex)
 ```
 
-��ȡ��ʽ�����쳣��Ϣ�����˵�����Ҫ�Ķ�ջ��Ϣ���� `System.Runtime.ExceptionServices` �ȣ���
+获取格式化的异常消息，过滤掉不必要的堆栈信息（如 `System.Runtime.ExceptionServices` 等）。
 
-## �Զ���ת��
+## 自定义转换
 
-ͨ���滻 `Utility.Convert` �����Զ�����������ת������Ϊ��
+通过替换 `Utility.Convert` 可以自定义所有类型转换的行为：
 
 ```csharp
 public class MyConvert : DefaultConvert
 {
     public override Int32 ToInt(Object? value, Int32 defaultValue)
     {
-        // �Զ���ת���߼�
+        // 自定义转换逻辑
         if (value is MyCustomType mct)
             return mct.Value;
             
@@ -321,54 +321,54 @@ public class MyConvert : DefaultConvert
     }
 }
 
-// ȫ���滻
+// 全局替换
 Utility.Convert = new MyConvert();
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ʼ���ṩ�������Ĭ��ֵ
+### 1. 始终提供有意义的默认值
 
 ```csharp
-// �Ƽ�����ȷָ��Ĭ��ֵ
+// 推荐：明确指定默认值
 var port = config["Port"].ToInt(8080);
 var timeout = config["Timeout"].ToInt(30);
 
-// ���Ƽ���ʹ����ʽĬ��ֵ 0 ���ܵ�������
-var port = config["Port"].ToInt();  // �������ȱʧ���˿�Ϊ 0
+// 不推荐：使用隐式默认值 0 可能导致问题
+var port = config["Port"].ToInt();  // 如果配置缺失，端口为 0
 ```
 
-### 2. ʱ���ת��ע��ʱ��
+### 2. 时间戳转换注意时区
 
 ```csharp
-// �������������豸�ϱ� UTC ʱ���
-var deviceTime = timestamp.ToDateTime();      // ����ʱ��ת��
-var localTime = deviceTime.ToLocalTime();     // תΪ����ʱ��
+// 物联网场景：设备上报 UTC 时间戳
+var deviceTime = timestamp.ToDateTime();      // 不含时区转换
+var localTime = deviceTime.ToLocalTime();     // 转为本地时间
 
-// ����ʹ�� DateTimeOffset
+// 或者使用 DateTimeOffset
 var dto = timestamp.ToDateTimeOffset();
 ```
 
-### 3. ������ʽ���ü򻯴���
+### 3. 利用链式调用简化代码
 
 ```csharp
-// ��ͳд��
+// 传统写法
 Int32 value;
 if (!Int32.TryParse(str, out value))
     value = defaultValue;
 
-// NewLife д��
+// NewLife 写法
 var value = str.ToInt(defaultValue);
 ```
 
-## ����˵��
+## 性能说明
 
-- ����ת��������Գ������ͣ�String��Int32 �ȣ������˿���·���Ż�
-- �ַ���ת��ʹ�� `Span<T>` ���ⲻ��Ҫ���ڴ����
-- ʱ���ʽ������ʹ�� `ToString()` ��ʽ���������ֶ�ƴ����������
-- �ֽ�����ת��ֱ��ʹ�� `BitConverter`���޶��⿪��
+- 所有转换方法针对常见类型（String、Int32 等）进行了快速路径优化
+- 字符串转换使用 `Span<T>` 避免不必要的内存分配
+- 时间格式化避免使用 `ToString()` 格式化，采用手动拼接提升性能
+- 字节数组转换直接使用 `BitConverter`，无额外开销
 
-## �������
+## 相关链接
 
-- [�ַ�����չ StringHelper](string_helper-�ַ�����չStringHelper.md)
-- [������չ IOHelper](io_helper-������չIOHelper.md)
+- [字符串扩展 StringHelper](string_helper-字符串扩展StringHelper.md)
+- [数据扩展 IOHelper](io_helper-数据扩展IOHelper.md)

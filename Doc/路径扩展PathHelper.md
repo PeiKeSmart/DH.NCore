@@ -1,44 +1,44 @@
-# ·����չ PathHelper
+# 路径扩展 PathHelper
 
-## ����
+## 概述
 
-`PathHelper` �� DH.NCore �е�·�����������࣬�ṩ��ƽ̨���ļ�·��������Ŀ¼�������ļ�ѹ����ѹ����ϣУ��ȹ��ܡ����ܴ������·���;���·�����Զ����� Windows �� Linux ��·���ָ�����
+`PathHelper` 是 NewLife.Core 中的路径操作工具类，提供跨平台的文件路径处理、目录管理、文件压缩解压、哈希校验等功能。智能处理相对路径和绝对路径，自动适配 Windows 和 Linux 的路径分隔符。
 
-**�����ռ�**��`System.IO`������ֱ��ʹ�ã�����������ã�  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`System.IO`（便于直接使用，无需额外引用）  
+**文档地址**：https://newlifex.com/core/path_helper
 
-## ��������
+## 核心特性
 
-- **��ƽ̨·������**���Զ����� Windows��`\`���� Linux��`/`��·���ָ���
-- **����·������**��֧�����·��������·��������·��
-- **��������֧��**��ͨ�������в����򻷾��������û���Ŀ¼
-- **ѹ����ѹ֧��**��֧�� zip��tar��tar.gz��7z �ȸ�ʽ
-- **�ļ���ϣУ��**��֧�� MD5��SHA1��SHA256��SHA512��CRC32
+- **跨平台路径处理**：自动适配 Windows（`\`）和 Linux（`/`）路径分隔符
+- **智能路径解析**：支持相对路径、绝对路径、网络路径
+- **函数计算支持**：通过命令行参数或环境变量配置基础目录
+- **压缩解压支持**：支持 zip、tar、tar.gz、7z 等格式
+- **文件哈希校验**：支持 MD5、SHA1、SHA256、SHA512、CRC32
 
-## ���ٿ�ʼ
+## 快速开始
 
 ```csharp
 using System.IO;
 
-// ��ȡ����·��
+// 获取完整路径
 var path = "config/app.json".GetFullPath();
 
-// ȷ��Ŀ¼����
+// 确保目录存在
 "logs/2024/01/".EnsureDirectory(false);
 
-// �ϲ�·��
+// 合并路径
 var file = "data".CombinePath("users", "config.json");
 
-// ѹ��Ŀ¼
+// 压缩目录
 "output".AsDirectory().Compress("backup.zip");
 
-// ��֤�ļ���ϣ
+// 验证文件哈希
 var valid = "app.exe".AsFile().VerifyHash("md5$1234567890abcdef");
 ```
 
-## API �ο�
+## API 参考
 
-### ·������
+### 路径属性
 
 #### BasePath
 
@@ -46,12 +46,12 @@ var valid = "app.exe".AsFile().VerifyHash("md5$1234567890abcdef");
 public static String? BasePath { get; set; }
 ```
 
-����Ŀ¼������ `GetBasePath` ��������Ҫ���� X ����ڲ���Ŀ¼��ר��Ϊ������������ơ�
+基础目录，用于 `GetBasePath` 方法。主要用于 X 组件内部各目录，专门为函数计算而定制。
 
-**���÷�ʽ**�������ȼ�����
-1. �����в�����`-BasePath /app/data` �� `--BasePath /app/data`
-2. ����������`BasePath=/app/data`
-3. Ĭ��ֵ��Ӧ�ó��������Ŀ¼
+**配置方式**（按优先级）：
+1. 命令行参数：`-BasePath /app/data` 或 `--BasePath /app/data`
+2. 环境变量：`BasePath=/app/data`
+3. 默认值：应用程序域基础目录
 
 #### BaseDirectory
 
@@ -59,9 +59,9 @@ public static String? BasePath { get; set; }
 public static String? BaseDirectory { get; set; }
 ```
 
-��׼Ŀ¼������ `GetFullPath` ������֧��ͨ�������в����ͻ����������á�
+基准目录，用于 `GetFullPath` 方法。支持通过命令行参数和环境变量配置。
 
-### ·��ת��
+### 路径转换
 
 #### GetFullPath
 
@@ -69,30 +69,30 @@ public static String? BaseDirectory { get; set; }
 public static String GetFullPath(this String path)
 ```
 
-��ȡ�ļ���Ŀ¼����Ӧ�ó������Ŀ¼��ȫ·����
+获取文件或目录基于应用程序域基目录的全路径。
 
-**�ص�**��
-- �Զ��������·��
-- �Զ�ת��·���ָ���
-- ֧������·����`\\server\share`��
-- ֧�� `~` ��ͷ��·��
+**特点**：
+- 自动处理相对路径
+- 自动转换路径分隔符
+- 支持网络路径（`\\server\share`）
+- 支持 `~` 开头的路径
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ���·��ת����·��
+// 相对路径转绝对路径
 "config/app.json".GetFullPath()      
 // Windows: C:\MyApp\config\app.json
 // Linux: /home/user/myapp/config/app.json
 
-// ���Ǿ���·����ԭ������
+// 已是绝对路径则原样返回
 "C:\\temp\\file.txt".GetFullPath()   // C:\temp\file.txt
 "/var/log/app.log".GetFullPath()     // /var/log/app.log
 
-// ����·��
+// 网络路径
 "\\\\server\\share\\file.txt".GetFullPath()  // \\server\share\file.txt
 
-// ~ ��ͷ��·��
-"~/config/app.json".GetFullPath()    // ȥ�� ~ ��ƴ�ӻ���Ŀ¼
+// ~ 开头的路径
+"~/config/app.json".GetFullPath()    // 去除 ~ 后拼接基础目录
 ```
 
 #### GetBasePath
@@ -101,12 +101,12 @@ public static String GetFullPath(this String path)
 public static String GetBasePath(this String path)
 ```
 
-��ȡ�ļ���Ŀ¼��ȫ·�������� X ����ڲ���Ŀ¼��
+获取文件或目录的全路径，用于 X 组件内部各目录。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "logs/app.log".GetBasePath()
-// ���� BasePath ������·��
+// 基于 BasePath 的完整路径
 ```
 
 #### GetCurrentPath
@@ -115,15 +115,15 @@ public static String GetBasePath(this String path)
 public static String GetCurrentPath(this String path)
 ```
 
-��ȡ�ļ���Ŀ¼���ڵ�ǰ����Ŀ¼��ȫ·����
+获取文件或目录基于当前工作目录的全路径。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "output/result.txt".GetCurrentPath()
-// ���� Environment.CurrentDirectory ������·��
+// 基于 Environment.CurrentDirectory 的完整路径
 ```
 
-### Ŀ¼����
+### 目录操作
 
 #### EnsureDirectory
 
@@ -131,23 +131,23 @@ public static String GetCurrentPath(this String path)
 public static String EnsureDirectory(this String path, Boolean isfile = true)
 ```
 
-ȷ��Ŀ¼���ڣ����������򴴽���
+确保目录存在，若不存在则创建。
 
-**����˵��**��
-- `isfile`��·���Ƿ�Ϊ�ļ�·����`true` ʱȡĿ¼���֣�б�ܽ�β��·��ʼ����ΪĿ¼��
+**参数说明**：
+- `isfile`：路径是否为文件路径。`true` 时取目录部分；斜杠结尾的路径始终视为目录。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ȷ���ļ�����Ŀ¼����
+// 确保文件所在目录存在
 "logs/2024/01/app.log".EnsureDirectory(true);
-// ���� logs/2024/01/ Ŀ¼
+// 创建 logs/2024/01/ 目录
 
-// ȷ��Ŀ¼��������
+// 确保目录本身存在
 "data/cache/".EnsureDirectory(false);
-// ���� data/cache/ Ŀ¼
+// 创建 data/cache/ 目录
 
-// б�ܽ�β��·��ʼ����ΪĿ¼
-"output/temp/".EnsureDirectory();  // isfile ����������
+// 斜杠结尾的路径始终视为目录
+"output/temp/".EnsureDirectory();  // isfile 参数被忽略
 ```
 
 #### CombinePath
@@ -156,19 +156,19 @@ public static String EnsureDirectory(this String path, Boolean isfile = true)
 public static String CombinePath(this String? path, params String[] ps)
 ```
 
-�ϲ����·����
+合并多段路径。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "data".CombinePath("users", "config.json")
 // Windows: data\users\config.json
 // Linux: data/users/config.json
 
-// ֧�ֿ�·��
+// 支持空路径
 "".CombinePath("logs", "app.log")  // logs/app.log
 ```
 
-### �ļ�����
+### 文件操作
 
 #### AsFile
 
@@ -176,14 +176,14 @@ public static String CombinePath(this String? path, params String[] ps)
 public static FileInfo AsFile(this String file)
 ```
 
-��·���ַ���ת��Ϊ `FileInfo` ����
+将路径字符串转换为 `FileInfo` 对象。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var fi = "config/app.json".AsFile();
 if (fi.Exists)
 {
-    Console.WriteLine($"�ļ���С: {fi.Length}");
+    Console.WriteLine($"文件大小: {fi.Length}");
 }
 ```
 
@@ -193,16 +193,16 @@ if (fi.Exists)
 public static Byte[] ReadBytes(this FileInfo file, Int32 offset = 0, Int32 count = -1)
 ```
 
-���ļ���ȡ�ֽ����ݡ�
+从文件读取字节数据。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ��ȡ�����ļ�
+// 读取整个文件
 var data = "data.bin".AsFile().ReadBytes();
 
-// ��ȡָ����Χ
-var header = "data.bin".AsFile().ReadBytes(0, 100);  // ǰ100�ֽ�
-var tail = "data.bin".AsFile().ReadBytes(1000, 50);  // ��1000��ʼ��50�ֽ�
+// 读取指定范围
+var header = "data.bin".AsFile().ReadBytes(0, 100);  // 前100字节
+var tail = "data.bin".AsFile().ReadBytes(1000, 50);  // 从1000开始的50字节
 ```
 
 #### WriteBytes
@@ -211,9 +211,9 @@ var tail = "data.bin".AsFile().ReadBytes(1000, 50);  // ��1000��ʼ��
 public static FileInfo WriteBytes(this FileInfo file, Byte[] data, Int32 offset = 0)
 ```
 
-���ļ�д���ֽ����ݡ�
+向文件写入字节数据。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var data = new Byte[] { 1, 2, 3, 4, 5 };
 "output.bin".AsFile().WriteBytes(data);
@@ -225,18 +225,18 @@ var data = new Byte[] { 1, 2, 3, 4, 5 };
 public static Boolean CopyToIfNewer(this FileInfo fi, String destFileName)
 ```
 
-����Դ�ļ���Ŀ���ļ���ʱ�Ÿ��ơ�
+仅当源文件比目标文件新时才复制。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var source = "src/app.dll".AsFile();
 if (source.CopyToIfNewer("dest/app.dll"))
 {
-    Console.WriteLine("�ļ��Ѹ���");
+    Console.WriteLine("文件已更新");
 }
 ```
 
-### Ŀ¼����
+### 目录操作
 
 #### AsDirectory
 
@@ -244,14 +244,14 @@ if (source.CopyToIfNewer("dest/app.dll"))
 public static DirectoryInfo AsDirectory(this String dir)
 ```
 
-��·���ַ���ת��Ϊ `DirectoryInfo` ����
+将路径字符串转换为 `DirectoryInfo` 对象。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var di = "data/cache".AsDirectory();
 if (di.Exists)
 {
-    Console.WriteLine($"���� {di.GetFiles().Length} ���ļ�");
+    Console.WriteLine($"包含 {di.GetFiles().Length} 个文件");
 }
 ```
 
@@ -261,22 +261,22 @@ if (di.Exists)
 public static IEnumerable<FileInfo> GetAllFiles(this DirectoryInfo di, String? exts = null, Boolean allSub = false)
 ```
 
-��ȡĿ¼�����з����������ļ���֧�ֶ���չ��ƥ�䡣
+获取目录内所有符合条件的文件，支持多扩展名匹配。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var dir = "src".AsDirectory();
 
-// ��ȡ�����ļ�
+// 获取所有文件
 var allFiles = dir.GetAllFiles();
 
-// ��ȡָ����չ���ļ�
+// 获取指定扩展名文件
 var csharpFiles = dir.GetAllFiles("*.cs");
 
-// ����չ��ƥ�䣨�ֺš����ߡ����ŷָ���
+// 多扩展名匹配（分号、竖线、逗号分隔）
 var codeFiles = dir.GetAllFiles("*.cs;*.xaml;*.json");
 
-// ������Ŀ¼
+// 包含子目录
 var allCsharp = dir.GetAllFiles("*.cs", true);
 ```
 
@@ -286,15 +286,15 @@ var allCsharp = dir.GetAllFiles("*.cs", true);
 public static String[] CopyTo(this DirectoryInfo di, String destDirName, String? exts = null, Boolean allSub = false, Action<String>? callback = null)
 ```
 
-����Ŀ¼�е��ļ���Ŀ��Ŀ¼��
+复制目录中的文件到目标目录。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var copied = "src".AsDirectory().CopyTo("backup", "*.cs;*.json", true, name =>
 {
-    Console.WriteLine($"����: {name}");
+    Console.WriteLine($"复制: {name}");
 });
-Console.WriteLine($"������ {copied.Length} ���ļ�");
+Console.WriteLine($"共复制 {copied.Length} 个文件");
 ```
 
 #### CopyToIfNewer
@@ -303,73 +303,73 @@ Console.WriteLine($"������ {copied.Length} ���ļ�");
 public static String[] CopyToIfNewer(this DirectoryInfo di, String destDirName, String? exts = null, Boolean allSub = false, Action<String>? callback = null)
 ```
 
-������ԴĿ¼�б�Ŀ��Ŀ¼���µ��ļ���
+仅复制源目录中比目标目录更新的文件。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var updated = "src".AsDirectory().CopyToIfNewer("dest", "*.dll;*.exe", true);
 ```
 
-### ѹ����ѹ
+### 压缩解压
 
-#### Extract���ļ���ѹ��
+#### Extract（文件解压）
 
 ```csharp
 public static void Extract(this FileInfo fi, String destDir, Boolean overwrite = false)
 ```
 
-��ѹ�ļ���ָ��Ŀ¼��
+解压文件到指定目录。
 
-**֧�ָ�ʽ**��zip��tar��tar.gz��tgz��7z���� Windows��
+**支持格式**：zip、tar、tar.gz、tgz、7z（仅 Windows）
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ��ѹ zip �ļ�
+// 解压 zip 文件
 "package.zip".AsFile().Extract("output");
 
-// ��ѹ tar.gz �ļ�
+// 解压 tar.gz 文件
 "archive.tar.gz".AsFile().Extract("output", overwrite: true);
 
-// Ĭ�Ͻ�ѹ��ͬ��Ŀ¼
-"app.zip".AsFile().Extract("");  // ��ѹ�� app/ Ŀ¼
+// 默认解压到同名目录
+"app.zip".AsFile().Extract("");  // 解压到 app/ 目录
 ```
 
-#### Compress���ļ�ѹ����
+#### Compress（文件压缩）
 
 ```csharp
 public static void Compress(this FileInfo fi, String destFile)
 ```
 
-ѹ�������ļ���
+压缩单个文件。
 
-**ʾ��**��
+**示例**：
 ```csharp
 "large-file.log".AsFile().Compress("large-file.zip");
 "data.bin".AsFile().Compress("data.tar.gz");
 ```
 
-#### Compress��Ŀ¼ѹ����
+#### Compress（目录压缩）
 
 ```csharp
 public static void Compress(this DirectoryInfo di, String? destFile = null)
 public static void Compress(this DirectoryInfo di, String? destFile, Boolean includeBaseDirectory)
 ```
 
-ѹ������Ŀ¼��
+压缩整个目录。
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ѹ��Ŀ¼��Ĭ�� zip ��ʽ��
+// 压缩目录（默认 zip 格式）
 "src".AsDirectory().Compress("src.zip");
 
-// ѹ��Ϊ tar.gz
+// 压缩为 tar.gz
 "dist".AsDirectory().Compress("dist.tar.gz");
 
-// ������Ŀ¼����
+// 包含根目录名称
 "project".AsDirectory().Compress("project.zip", true);
 ```
 
-### �ļ���ϣУ��
+### 文件哈希校验
 
 #### VerifyHash
 
@@ -377,42 +377,42 @@ public static void Compress(this DirectoryInfo di, String? destFile, Boolean inc
 public static Boolean VerifyHash(this FileInfo file, String hash)
 ```
 
-��֤�ļ���ϣ�Ƿ�ƥ��Ԥ��ֵ��
+验证文件哈希是否匹配预期值。
 
-**֧�ֵ��㷨**��
-- MD5��16λ��32λ��
+**支持的算法**：
+- MD5（16位或32位）
 - SHA1
 - SHA256
 - SHA512
 - CRC32
 
-**��ϣ��ʽ**��
-- ��ǰ׺��`md5$abc123...`��`sha256$def456...`��`crc32$12345678`
-- ��ǰ׺�����ݳ����Զ�ʶ��
-  - 8 �ַ���CRC32
-  - 16/32 �ַ���MD5
-  - 40 �ַ���SHA1
-  - 64 �ַ���SHA256
-  - 128 �ַ���SHA512
+**哈希格式**：
+- 带前缀：`md5$abc123...`、`sha256$def456...`、`crc32$12345678`
+- 无前缀：根据长度自动识别
+  - 8 字符：CRC32
+  - 16/32 字符：MD5
+  - 40 字符：SHA1
+  - 64 字符：SHA256
+  - 128 字符：SHA512
 
-**ʾ��**��
+**示例**：
 ```csharp
 var file = "app.exe".AsFile();
 
-// ���㷨ǰ׺
+// 带算法前缀
 file.VerifyHash("md5$d41d8cd98f00b204e9800998ecf8427e")
 file.VerifyHash("sha256$e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 file.VerifyHash("crc32$00000000")
 
-// ��ǰ׺���Զ�ʶ��
-file.VerifyHash("d41d8cd98f00b204e9800998ecf8427e")  // 32λ -> MD5
-file.VerifyHash("d41d8cd98f00b204")                  // 16λ -> MD5��ǰ8�ֽڣ�
-file.VerifyHash("12345678")                          // 8λ -> CRC32
+// 无前缀（自动识别）
+file.VerifyHash("d41d8cd98f00b204e9800998ecf8427e")  // 32位 -> MD5
+file.VerifyHash("d41d8cd98f00b204")                  // 16位 -> MD5（前8字节）
+file.VerifyHash("12345678")                          // 8位 -> CRC32
 ```
 
-## ʹ�ó���
+## 使用场景
 
-### 1. �����ļ�����
+### 1. 配置文件管理
 
 ```csharp
 public class ConfigManager
@@ -433,7 +433,7 @@ public class ConfigManager
 }
 ```
 
-### 2. ��־Ŀ¼����
+### 2. 日志目录管理
 
 ```csharp
 public class LogManager
@@ -448,7 +448,7 @@ public class LogManager
 }
 ```
 
-### 3. ����������У��
+### 3. 软件更新与校验
 
 ```csharp
 public class UpdateManager
@@ -457,17 +457,17 @@ public class UpdateManager
     {
         var tempFile = Path.GetTempFileName();
         
-        // �����ļ�
+        // 下载文件
         await DownloadAsync(url, tempFile);
         
-        // У���ϣ
+        // 校验哈希
         if (!tempFile.AsFile().VerifyHash(expectedHash))
         {
             File.Delete(tempFile);
             return false;
         }
         
-        // ��ѹ����
+        // 解压更新
         tempFile.AsFile().Extract("update_temp", overwrite: true);
         
         return true;
@@ -475,7 +475,7 @@ public class UpdateManager
 }
 ```
 
-### 4. ��Ŀ����
+### 4. 项目部署
 
 ```csharp
 public class Deployer
@@ -484,62 +484,62 @@ public class Deployer
     {
         var source = sourceDir.AsDirectory();
         
-        // �������и��µ��ļ�
+        // 复制所有更新的文件
         var updated = source.CopyToIfNewer(targetDir, "*.dll;*.exe;*.json", true, name =>
         {
-            Console.WriteLine($"����: {name}");
+            Console.WriteLine($"更新: {name}");
         });
         
-        Console.WriteLine($"������ {updated.Length} ���ļ�");
+        Console.WriteLine($"共更新 {updated.Length} 个文件");
         
-        // ѹ������
+        // 压缩备份
         targetDir.AsDirectory().Compress($"backup_{DateTime.Now:yyyyMMdd}.zip");
     }
 }
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ʼ��ʹ�� GetFullPath ����·��
+### 1. 始终使用 GetFullPath 处理路径
 
 ```csharp
-// �Ƽ���ʹ����չ������ȡ����·��
+// 推荐：使用扩展方法获取完整路径
 var path = "config/app.json".GetFullPath();
 
-// ���Ƽ���ֱ��ʹ�����·��
-var path = "config/app.json";  // �����ڲ�ͬ��������Ϊ��һ��
+// 不推荐：直接使用相对路径
+var path = "config/app.json";  // 可能在不同环境下行为不一致
 ```
 
-### 2. �����ļ�ǰȷ��Ŀ¼����
+### 2. 创建文件前确保目录存在
 
 ```csharp
-// �Ƽ�����ȷ��Ŀ¼����
+// 推荐：先确保目录存在
 var path = "logs/2024/01/app.log".GetFullPath();
 path.EnsureDirectory(true);
 File.WriteAllText(path, content);
 
-// ���Ƽ��������׳� DirectoryNotFoundException
+// 不推荐：可能抛出 DirectoryNotFoundException
 File.WriteAllText("logs/2024/01/app.log", content);
 ```
 
-### 3. ʹ�� AsFile/AsDirectory ��ʽ����
+### 3. 使用 AsFile/AsDirectory 链式操作
 
 ```csharp
-// ������ʽ����
+// 简洁的链式操作
 var size = "data.bin".AsFile().ReadBytes().Length;
 var files = "src".AsDirectory().GetAllFiles("*.cs", true).Count();
 ```
 
-## ƽ̨����
+## 平台差异
 
-| ���� | Windows | Linux |
+| 功能 | Windows | Linux |
 |------|---------|-------|
-| ·���ָ��� | `\` | `/` |
-| 7z ѹ�� | ? ֧�� | ? ��֧�� |
-| tar.gz ѹ�� | .NET 7+ ԭ��֧�� | .NET 7+ ԭ��֧�� |
+| 路径分隔符 | `\` | `/` |
+| 7z 压缩 | ? 支持 | ? 不支持 |
+| tar.gz 压缩 | .NET 7+ 原生支持 | .NET 7+ 原生支持 |
 
-## �������
+## 相关链接
 
-- [������չ IOHelper](io_helper-������չIOHelper.md)
-- [ѹ����ѹ��](compression-ѹ����ѹ��.md)
-- [��ȫ��չ SecurityHelper](security_helper-��ȫ��չSecurityHelper.md)
+- [数据扩展 IOHelper](io_helper-数据扩展IOHelper.md)
+- [压缩解压缩](compression-压缩解压缩.md)
+- [安全扩展 SecurityHelper](security_helper-安全扩展SecurityHelper.md)

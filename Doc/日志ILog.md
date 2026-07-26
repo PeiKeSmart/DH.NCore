@@ -1,177 +1,177 @@
-# ��־ILog
+# 日志ILog
 
-## ����
+## 概述
 
-`NewLife.Log.ILog` �� DH.NCore �ĺ�����־�ӿڣ��ṩͳһ����־��¼�淶��当前源码仍沿用 `NewLife.Log` 命名空间��
+`NewLife.Log.ILog` 是 NewLife.Core 的核心日志接口，提供统一的日志记录规范。NewLife 全系列组件均使用该接口记录日志。
 
-ͨ����̬�� `XTrace` ���Է����ʹ����־���ܣ�֧�֣�
-- �ļ���־��Ĭ�ϣ�
-- ����̨��־
-- ������־
-- �Զ�����־ʵ��
+通过静态类 `XTrace` 可以方便地使用日志功能，支持：
+- 文件日志（默认）
+- 控制台日志
+- 网络日志
+- 自定义日志实现
 
-**�����ռ�**: `NewLife.Log`  
-**Դ��**: [DH.NCore/Log/ILog.cs](https://github.com/PeiKeSmart/DH.NCore/blob/master/DH.NCore/Log/ILog.cs)  
-**文档**: 历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**: `NewLife.Log`  
+**源码**: [NewLife.Core/Log/ILog.cs](https://github.com/NewLifeX/X/blob/master/NewLife.Core/Log/ILog.cs)  
+**文档**: https://newlifex.com/core/log
 
 ---
 
-## ��������
+## 快速入门
 
-### �����÷�
+### 基础用法
 
 ```csharp
 using NewLife.Log;
 
-// ��ʽ1��ʹ�� XTrace ��̬�ࣨ�Ƽ���
-XTrace.WriteLine("����һ����Ϣ");
-XTrace.WriteLine("�û�{0}��¼", "admin");
+// 方式1：使用 XTrace 静态类（推荐）
+XTrace.WriteLine("这是一条信息");
+XTrace.WriteLine("用户{0}登录", "admin");
 
-// ��ʽ2��ֱ��ʹ�� ILog �ӿ�
+// 方式2：直接使用 ILog 接口
 ILog log = XTrace.Log;
-log.Info("����һ����Ϣ");
-log.Error("����һ������");
+log.Info("这是一条信息");
+log.Error("这是一条错误");
 ```
 
-### ��־����
+### 日志级别
 
 ```csharp
-XTrace.Log.Debug("������Ϣ");      // ������־
-XTrace.Log.Info("��ͨ��Ϣ");       // ��Ϣ��־
-XTrace.Log.Warn("������Ϣ");       // ������־
-XTrace.Log.Error("������Ϣ");      // ������־
-XTrace.Log.Fatal("���ش���");      // ���ش�����־
+XTrace.Log.Debug("调试信息");      // 调试日志
+XTrace.Log.Info("普通信息");       // 信息日志
+XTrace.Log.Warn("警告信息");       // 警告日志
+XTrace.Log.Error("错误信息");      // 错误日志
+XTrace.Log.Fatal("严重错误");      // 严重错误日志
 ```
 
-### ����쳣
+### 输出异常
 
 ```csharp
 try
 {
-    // ҵ�����
+    // 业务代码
 }
 catch (Exception ex)
 {
-    XTrace.WriteException(ex);  // ����쳣��ջ
+    XTrace.WriteException(ex);  // 输出异常堆栈
 }
 ```
 
 ---
 
-## ILog �ӿ�
+## ILog 接口
 
 ```csharp
 public interface ILog
 {
-    /// <summary>д��־</summary>
+    /// <summary>写日志</summary>
     void Write(LogLevel level, String format, params Object?[] args);
 
-    /// <summary>������־</summary>
+    /// <summary>调试日志</summary>
     void Debug(String format, params Object?[] args);
 
-    /// <summary>��Ϣ��־</summary>
+    /// <summary>信息日志</summary>
     void Info(String format, params Object?[] args);
 
-    /// <summary>������־</summary>
+    /// <summary>警告日志</summary>
     void Warn(String format, params Object?[] args);
 
-    /// <summary>������־</summary>
+    /// <summary>错误日志</summary>
     void Error(String format, params Object?[] args);
 
-    /// <summary>���ش�����־</summary>
+    /// <summary>严重错误日志</summary>
     void Fatal(String format, params Object?[] args);
 
-    /// <summary>�Ƿ�������־��Ϊfalseʱ������κ���־</summary>
+    /// <summary>是否启用日志。为false时不输出任何日志</summary>
     Boolean Enable { get; set; }
 
-    /// <summary>��־�ȼ���ֻ������ڵ��ڸü������־��Ĭ��Info</summary>
+    /// <summary>日志等级，只输出大于等于该级别的日志，默认Info</summary>
     LogLevel Level { get; set; }
 }
 ```
 
-### ��־���� LogLevel
+### 日志级别 LogLevel
 
 ```csharp
 public enum LogLevel
 {
-    /// <summary>�ر���־</summary>
+    /// <summary>关闭日志</summary>
     Off = 0,
     
-    /// <summary>���ش��󡣵���Ӧ�ó����˳�</summary>
+    /// <summary>严重错误。导致应用程序退出</summary>
     Fatal = 1,
     
-    /// <summary>����Ӱ�칦�����У���Ҫ��������</summary>
+    /// <summary>错误。影响功能运行，需要立即处理</summary>
     Error = 2,
     
-    /// <summary>���档��Ӱ�칦�ܣ�����Ҫ��ע</summary>
+    /// <summary>警告。不影响功能，但需要关注</summary>
     Warn = 3,
     
-    /// <summary>��Ϣ��������־��Ϣ</summary>
+    /// <summary>信息。常规日志信息</summary>
     Info = 4,
     
-    /// <summary>���ԡ�������־����������Ӧ�ر�</summary>
+    /// <summary>调试。调试日志，生产环境应关闭</summary>
     Debug = 5,
     
-    /// <summary>ȫ��</summary>
+    /// <summary>全部</summary>
     All = 6
 }
 ```
 
 ---
 
-## XTrace ��̬��
+## XTrace 静态类
 
-`XTrace` ����־����Ҫʹ����ڣ��ṩ��ݵľ�̬������
+`XTrace` 是日志的主要使用入口，提供便捷的静态方法。
 
-### ��������
+### 基础方法
 
 ```csharp
-// �����Ϣ��־
-XTrace.WriteLine("��Ϣ");
-XTrace.WriteLine("�û�{0}��{1}��¼", "admin", DateTime.Now);
+// 输出信息日志
+XTrace.WriteLine("消息");
+XTrace.WriteLine("用户{0}在{1}登录", "admin", DateTime.Now);
 
-// ����쳣
+// 输出异常
 XTrace.WriteException(ex);
 ```
 
-### �ؼ�����
+### 关键属性
 
 ```csharp
-// ��ȡ��������־ʵ��
-ILog log = XTrace.Log;  // Ĭ��Ϊ�ļ���־
-XTrace.Log = new ConsoleLog();  // �л�Ϊ����̨��־
+// 获取或设置日志实现
+ILog log = XTrace.Log;  // 默认为文件日志
+XTrace.Log = new ConsoleLog();  // 切换为控制台日志
 
-// �Ƿ����ģʽ
-XTrace.Debug = true;  // �������ԣ����Debug������־
+// 是否调试模式
+XTrace.Debug = true;  // 开启调试，输出Debug级别日志
 
-// ��־·��
-XTrace.LogPath = "Logs";  // ������־�ļ���
+// 日志路径
+XTrace.LogPath = "Logs";  // 设置日志文件夹
 ```
 
 ---
 
-## Ĭ���ļ���־
+## 默认文件日志
 
-NewLife Ĭ��ʹ�� `TextFileLog`������־������ı��ļ���
+NewLife 默认使用 `TextFileLog`，将日志输出到文本文件。
 
-### ����
+### 特性
 
-- �Զ������ڷָ���־�ļ����� `2025-01-07.log`��
-- �첽д�룬������ҵ���߳�
-- �Զ����ݺ���������־
-- ֧��������־·��������ļ���С��
+- 自动按日期分割日志文件（如 `2025-01-07.log`）
+- 异步写入，不阻塞业务线程
+- 自动备份和清理旧日志
+- 支持配置日志路径、最大文件大小等
 
-### ����
+### 配置
 
-�� `NewLife.config` �� `appsettings.json` �����ã�
+在 `NewLife.config` 或 `appsettings.json` 中配置：
 
 ```xml
 <!-- NewLife.config -->
 <Config>
   <Setting>
-    <LogPath>Logs</LogPath>         <!-- ��־·�� -->
-    <LogLevel>Info</LogLevel>        <!-- ��־���� -->
-    <LogFileFormat>{0:yyyy-MM-dd}.log</LogFileFormat>  <!-- �ļ�������ʽ -->
+    <LogPath>Logs</LogPath>         <!-- 日志路径 -->
+    <LogLevel>Info</LogLevel>        <!-- 日志级别 -->
+    <LogFileFormat>{0:yyyy-MM-dd}.log</LogFileFormat>  <!-- 文件命名格式 -->
   </Setting>
 </Config>
 ```
@@ -189,112 +189,112 @@ NewLife Ĭ��ʹ�� `TextFileLog`������־������ı�
 }
 ```
 
-### ��־�ļ�ʾ��
+### 日志文件示例
 
 ```
-2025-01-07 10:15:23.456  Info  Ӧ�ó�������
-2025-01-07 10:15:24.123  Info  �û�admin��¼
-2025-01-07 10:20:15.789  Warn  ���ӳ�����
-2025-01-07 10:25:30.456  Error ���ݿ����ӳ�ʱ
-System.TimeoutException: ���ӳ�ʱ
+2025-01-07 10:15:23.456  Info  应用程序启动
+2025-01-07 10:15:24.123  Info  用户admin登录
+2025-01-07 10:20:15.789  Warn  连接池已满
+2025-01-07 10:25:30.456  Error 数据库连接超时
+System.TimeoutException: 连接超时
    at MyApp.Database.Query(String sql)
    at MyApp.Service.GetData()
 ```
 
 ---
 
-## ����̨��־
+## 控制台日志
 
-�ڿ���̨Ӧ���У�����ʹ�� `UseConsole()` ����־���������̨��
+在控制台应用中，可以使用 `UseConsole()` 将日志输出到控制台。
 
-### ʹ�÷���
+### 使用方法
 
 ```csharp
 class Program
 {
     static void Main(String[] args)
     {
-        // �ض�����־������̨
+        // 重定向日志到控制台
         XTrace.UseConsole();
         
-        XTrace.WriteLine("Ӧ�ó�������");
-        XTrace.Log.Error("����һ������");
+        XTrace.WriteLine("应用程序启动");
+        XTrace.Log.Error("这是一条错误");
     }
 }
 ```
 
-### ��ɫ���
+### 彩色输出
 
-����̨��־֧�ֲ�ɫ�������ͬ��־����ʹ�ò�ͬ��ɫ��
-- **Debug**: ��ɫ
-- **Info**: ��ɫ
-- **Warn**: ��ɫ
-- **Error**: ��ɫ
-- **Fatal**: ���ɫ
+控制台日志支持彩色输出，不同日志级别使用不同颜色：
+- **Debug**: 灰色
+- **Info**: 白色
+- **Warn**: 黄色
+- **Error**: 红色
+- **Fatal**: 洋红色
 
-### ���̲߳�ɫ
+### 多线程彩色
 
 ```csharp
-XTrace.UseConsole(useColor: true);  // ���ò�ɫ���
+XTrace.UseConsole(useColor: true);  // 启用彩色输出
 
 ThreadPool.QueueUserWorkItem(_ =>
 {
-    XTrace.WriteLine("�߳�1");  // �Զ�ʹ�ò�ͬ��ɫ
+    XTrace.WriteLine("线程1");  // 自动使用不同颜色
 });
 
 ThreadPool.QueueUserWorkItem(_ =>
 {
-    XTrace.WriteLine("�߳�2");  // �Զ�ʹ�ò�ͬ��ɫ
+    XTrace.WriteLine("线程2");  // 自动使用不同颜色
 });
 ```
 
 ---
 
-## ������־
+## 网络日志
 
-����־ͨ�����緢�͵�Զ����־��������
+将日志通过网络发送到远程日志服务器。
 
-### ʹ�÷���
+### 使用方法
 
 ```csharp
-// ����������־
+// 配置网络日志
 XTrace.Log = new NetworkLog("tcp://logserver:514");
 
-XTrace.WriteLine("������־�ᷢ�͵�Զ�̷�����");
+XTrace.WriteLine("这条日志会发送到远程服务器");
 ```
 
-### ���ó���
+### 适用场景
 
-- ����ʽ��־�ռ�
-- �ֲ�ʽϵͳ��־�ۺ�
-- ������Ӧ����־���
+- 集中式日志收集
+- 分布式系统日志聚合
+- 容器化应用日志输出
 
 ---
 
-## ������־
+## 复合日志
 
-ͬʱ��������Ŀ�ꡣ
+同时输出到多个目标。
 
-### ʹ�÷���
+### 使用方法
 
 ```csharp
 using NewLife.Log;
 
 var compositeLog = new CompositeLog();
-compositeLog.Add(new TextFileLog());    // �ļ���־
-compositeLog.Add(new ConsoleLog());     // ����̨��־
-compositeLog.Add(new NetworkLog("tcp://logserver:514"));  // ������־
+compositeLog.Add(new TextFileLog());    // 文件日志
+compositeLog.Add(new ConsoleLog());     // 控制台日志
+compositeLog.Add(new NetworkLog("tcp://logserver:514"));  // 网络日志
 
 XTrace.Log = compositeLog;
 ```
 
 ---
 
-## �Զ�����־
+## 自定义日志
 
-ʵ�� `ILog` �ӿڴ����Զ�����־��
+实现 `ILog` 接口创建自定义日志。
 
-### ʾ�������ݿ���־
+### 示例：数据库日志
 
 ```csharp
 public class DatabaseLog : ILog
@@ -308,7 +308,7 @@ public class DatabaseLog : ILog
 
         var message = args.Length > 0 ? String.Format(format, args) : format;
         
-        // д�����ݿ�
+        // 写入数据库
         Database.Insert("Logs", new
         {
             Level = level.ToString(),
@@ -324,24 +324,24 @@ public class DatabaseLog : ILog
     public void Fatal(String format, params Object?[] args) => Write(LogLevel.Fatal, format, args);
 }
 
-// ʹ��
+// 使用
 XTrace.Log = new DatabaseLog();
 ```
 
 ---
 
-## ʹ�ó���
+## 使用场景
 
-### 1. Ӧ�ó���������־
+### 1. 应用程序启动日志
 
 ```csharp
 class Program
 {
     static void Main(String[] args)
     {
-        XTrace.WriteLine("Ӧ�ó�������");
-        XTrace.WriteLine("�汾��{0}", Assembly.GetExecutingAssembly().GetName().Version);
-        XTrace.WriteLine("����ʱ��{0}", Runtime.Version);
+        XTrace.WriteLine("应用程序启动");
+        XTrace.WriteLine("版本：{0}", Assembly.GetExecutingAssembly().GetName().Version);
+        XTrace.WriteLine("运行时：{0}", Runtime.Version);
         
         try
         {
@@ -350,34 +350,34 @@ class Program
         catch (Exception ex)
         {
             XTrace.WriteException(ex);
-            XTrace.Log.Fatal("Ӧ�ó����쳣�˳�");
+            XTrace.Log.Fatal("应用程序异常退出");
         }
     }
 }
 ```
 
-### 2. �ӿڵ�����־
+### 2. 接口调用日志
 
 ```csharp
 public class UserService
 {
     public void Login(String username, String password)
     {
-        XTrace.WriteLine("�û�{0}���Ե�¼", username);
+        XTrace.WriteLine("用户{0}尝试登录", username);
         
         if (ValidateUser(username, password))
         {
-            XTrace.WriteLine("�û�{0}��¼�ɹ�", username);
+            XTrace.WriteLine("用户{0}登录成功", username);
         }
         else
         {
-            XTrace.Log.Warn("�û�{0}��¼ʧ�ܣ��������", username);
+            XTrace.Log.Warn("用户{0}登录失败：密码错误", username);
         }
     }
 }
 ```
 
-### 3. �쳣����
+### 3. 异常处理
 
 ```csharp
 try
@@ -387,7 +387,7 @@ try
 }
 catch (TimeoutException ex)
 {
-    XTrace.Log.Warn("���ݻ�ȡ��ʱ��{0}", ex.Message);
+    XTrace.Log.Warn("数据获取超时：{0}", ex.Message);
 }
 catch (Exception ex)
 {
@@ -396,106 +396,106 @@ catch (Exception ex)
 }
 ```
 
-### 4. ������־
+### 4. 调试日志
 
 ```csharp
 #if DEBUG
-XTrace.Debug = true;  // ����������������
+XTrace.Debug = true;  // 开发环境开启调试
 #endif
 
-XTrace.Log.Debug("��ʼ�������ݣ�{0}��", data.Length);
+XTrace.Log.Debug("开始处理数据：{0}条", data.Length);
 foreach (var item in data)
 {
-    XTrace.Log.Debug("������Ŀ��{0}", item.Id);
+    XTrace.Log.Debug("处理项目：{0}", item.Id);
     ProcessItem(item);
 }
-XTrace.Log.Debug("���ݴ������");
+XTrace.Log.Debug("数据处理完成");
 ```
 
 ---
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ����ʹ����־����
+### 1. 合理使用日志级别
 
 ```csharp
-// Debug��������Ϣ����������Ӧ�ر�
-XTrace.Log.Debug("����ֵ��{0}", value);
+// Debug：调试信息，生产环境应关闭
+XTrace.Log.Debug("变量值：{0}", value);
 
-// Info��������Ϣ����¼��Ҫ����
-XTrace.Log.Info("�û�{0}��¼", username);
+// Info：常规信息，记录重要操作
+XTrace.Log.Info("用户{0}登录", username);
 
-// Warn��������Ϣ����Ӱ�칦�ܵ����ע
-XTrace.Log.Warn("���ӳ�ʹ���ʣ�{0}%", usage);
+// Warn：警告信息，不影响功能但需关注
+XTrace.Log.Warn("连接池使用率：{0}%", usage);
 
-// Error��������Ϣ��Ӱ�칦������
-XTrace.Log.Error("���ݿ�����ʧ�ܣ�{0}", ex.Message);
+// Error：错误信息，影响功能运行
+XTrace.Log.Error("数据库连接失败：{0}", ex.Message);
 
-// Fatal�����ش��󣬵���Ӧ���˳�
-XTrace.Log.Fatal("�����ļ��𻵣�Ӧ�ó����˳�");
+// Fatal：严重错误，导致应用退出
+XTrace.Log.Fatal("配置文件损坏，应用程序退出");
 ```
 
-### 2. ������־��Ϣ����
+### 2. 避免日志信息过多
 
 ```csharp
-// ���Ƽ���ѭ���������־
-foreach (var item in items)  // 100��������
+// 不推荐：循环中输出日志
+foreach (var item in items)  // 100万条数据
 {
-    XTrace.Log.Debug("������{0}", item);  // ����100������־��
+    XTrace.Log.Debug("处理：{0}", item);  // 产生100万条日志！
 }
 
-// �Ƽ����������
+// 推荐：汇总输出
 var count = 0;
 foreach (var item in items)
 {
     ProcessItem(item);
     count++;
 }
-XTrace.Log.Info("������ɣ�{0}��", count);
+XTrace.Log.Info("处理完成：{0}条", count);
 ```
 
-### 3. ʹ�ýṹ����־
+### 3. 使用结构化日志
 
 ```csharp
-// �Ƽ���ʹ��ռλ��
-XTrace.Log.Info("�û�{0}��{1}��¼��IP={2}", username, location, ip);
+// 推荐：使用占位符
+XTrace.Log.Info("用户{0}从{1}登录，IP={2}", username, location, ip);
 
-// ���Ƽ����ַ���ƴ��
-XTrace.Log.Info("�û�" + username + "��" + location + "��¼��IP=" + ip);
+// 不推荐：字符串拼接
+XTrace.Log.Info("用户" + username + "从" + location + "登录，IP=" + ip);
 ```
 
-### 4. ���ܿ���
+### 4. 性能考虑
 
 ```csharp
-// �Ƽ������жϼ���
+// 推荐：先判断级别
 if (XTrace.Log.Enable && XTrace.Log.Level >= LogLevel.Debug)
 {
-    var expensiveData = GetExpensiveDebugInfo();  // �������
-    XTrace.Log.Debug("������Ϣ��{0}", expensiveData);
+    var expensiveData = GetExpensiveDebugInfo();  // 昂贵操作
+    XTrace.Log.Debug("调试信息：{0}", expensiveData);
 }
 
-// ���Ƽ���ֱ�ӵ���
-XTrace.Log.Debug("������Ϣ��{0}", GetExpensiveDebugInfo());  // ��ʹDebug�ر�Ҳ��ִ��
+// 不推荐：直接调用
+XTrace.Log.Debug("调试信息：{0}", GetExpensiveDebugInfo());  // 即使Debug关闭也会执行
 ```
 
 ---
 
-## ���ù���
+## 配置管理
 
-### ͨ����������
+### 通过代码配置
 
 ```csharp
-// ������־����
-XTrace.Log.Level = LogLevel.Warn;  // ֻ���Warn������
+// 设置日志级别
+XTrace.Log.Level = LogLevel.Warn;  // 只输出Warn及以上
 
-// �ر���־
+// 关闭日志
 XTrace.Log.Enable = false;
 
-// ������־·��
+// 设置日志路径
 XTrace.LogPath = "C:\\Logs";
 ```
 
-### ͨ�������ļ�
+### 通过配置文件
 
 ```xml
 <!-- NewLife.config -->
@@ -508,10 +508,10 @@ XTrace.LogPath = "C:\\Logs";
 </Config>
 ```
 
-### ����ʱ�޸�
+### 运行时修改
 
 ```csharp
-// ��ʱ��������
+// 临时开启调试
 var oldDebug = XTrace.Debug;
 XTrace.Debug = true;
 
@@ -521,15 +521,15 @@ try
 }
 finally
 {
-    XTrace.Debug = oldDebug;  // �ָ�����
+    XTrace.Debug = oldDebug;  // 恢复设置
 }
 ```
 
 ---
 
-## ȫ���쳣����
+## 全局异常处理
 
-XTrace �Զ�����δ�����쳣��
+XTrace 自动捕获未处理异常：
 
 ```csharp
 static XTrace()
@@ -539,30 +539,30 @@ static XTrace()
 }
 ```
 
-������δ�����쳣ʱ�����Զ�����쳣��־��
+当发生未处理异常时，会自动输出异常日志。
 
 ---
 
-## ��������
+## 常见问题
 
-### 1. ��ιر���־��
+### 1. 如何关闭日志？
 
 ```csharp
-// ��ʽ1���ر���־���
+// 方式1：关闭日志输出
 XTrace.Log.Enable = false;
 
-// ��ʽ2��������־����ΪOff
+// 方式2：设置日志级别为Off
 XTrace.Log.Level = LogLevel.Off;
 
-// ��ʽ3��ʹ�ÿ���־
+// 方式3：使用空日志
 XTrace.Log = Logger.Null;
 ```
 
-### 2. ��־�ļ������
+### 2. 日志文件在哪里？
 
-Ĭ����Ӧ�ó����Ŀ¼�� `Logs` �ļ����£��ļ�����ʽΪ `yyyy-MM-dd.log`��
+默认在应用程序根目录的 `Logs` 文件夹下，文件名格式为 `yyyy-MM-dd.log`。
 
-### 3. �����������Ŀ�ꣿ
+### 3. 如何输出到多个目标？
 
 ```csharp
 var compositeLog = new CompositeLog();
@@ -571,40 +571,40 @@ compositeLog.Add(new ConsoleLog());
 XTrace.Log = compositeLog;
 ```
 
-### 4. ��־�ļ�̫����ô�죿
+### 4. 日志文件太大怎么办？
 
-������־���ݺ��������ԣ�
+配置日志备份和清理策略：
 ```csharp
 var textLog = new TextFileLog();
-textLog.MaxBytes = 10 * 1024 * 1024;  // ���10MB
-textLog.Backups = 10;                  // ����10������
+textLog.MaxBytes = 10 * 1024 * 1024;  // 最大10MB
+textLog.Backups = 10;                  // 保留10个备份
 ```
 
-### 5. �����ASP.NET Core��ʹ�ã�
+### 5. 如何在ASP.NET Core中使用？
 
 ```csharp
-// Startup.cs �� Program.cs
+// Startup.cs 或 Program.cs
 public void Configure(IApplicationBuilder app)
 {
-    // ��־���Զ���ʼ����ֱ��ʹ��
-    XTrace.WriteLine("Ӧ�ó�������");
+    // 日志已自动初始化，直接使用
+    XTrace.WriteLine("应用程序启动");
 }
 ```
 
 ---
 
-## �ο�����
+## 参考资料
 
-- 历史文档已归档，当前请以仓库内 Doc 为准
-- **Դ��**: https://github.com/PeiKeSmart/DH.NCore/tree/master/DH.NCore/Log
-- **��·׷��**: [tracer-��·׷��ITracer.md](tracer-��·׷��ITracer.md)
+- **在线文档**: https://newlifex.com/core/log
+- **源码**: https://github.com/NewLifeX/X/tree/master/NewLife.Core/Log
+- **链路追踪**: [tracer-链路追踪ITracer.md](tracer-链路追踪ITracer.md)
 
 ---
 
-## ������־
+## 更新日志
 
-- **2025-01**: �����ĵ���������ϸʾ��
-- **2024**: ֧�� .NET 9.0
-- **2023**: �Ż��첽д������
-- **2022**: ����������־֧��
-- **2020**: �ع���־�ܹ���ͳһ�ӿ�
+- **2025-01**: 完善文档，补充详细示例
+- **2024**: 支持 .NET 9.0
+- **2023**: 优化异步写入性能
+- **2022**: 增加网络日志支持
+- **2020**: 重构日志架构，统一接口

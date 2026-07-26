@@ -1,194 +1,194 @@
-# ����ģ�� Actor
+# 并行模型 Actor
 
-## ����
+## 概述
 
-`Actor` �� DH.NCore �е��������б��ģ�ͣ�������Ϣ����ʵ���̰߳�ȫ���첽������ÿ�� Actor ӵ�ж�������Ϣ����ʹ����̣߳�ͨ����Ϣ���ݽ���ͨ�ţ������˴�ͳ�����ƴ����ĸ����Ժ��������⡣
+`Actor` 是 NewLife.Core 中的无锁并行编程模型，基于消息队列实现线程安全的异步处理。每个 Actor 拥有独立的消息邮箱和处理线程，通过消息传递进行通信，避免了传统锁机制带来的复杂性和性能问题。
 
-**�����ռ�**��`NewLife.Model`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife.Model`  
+**文档地址**：https://newlifex.com/core/actor
 
-## ��������
+## 核心特性
 
-- **�������**��ͨ����Ϣ���и���״̬��������ʽ����
-- **�����߳�**��ÿ�� Actor ʹ�ö����̴߳�����Ϣ����Ӱ���̳߳�
-- **��������**��֧������������Ϣ�����������
-- **��������**��֧��������Ϣ���������������ֹ�ڴ����
-- **�Զ�����**��������Ϣʱ�Զ����� Actor
-- **����׷��**������ `ITracer` ֧����·׷��
+- **无锁设计**：通过消息队列隔离状态，无需显式加锁
+- **独立线程**：每个 Actor 使用独立线程处理消息，不影响线程池
+- **批量处理**：支持批量消费消息，提高吞吐量
+- **容量限制**：支持设置消息队列最大容量，防止内存溢出
+- **自动启动**：发送消息时自动启动 Actor
+- **性能追踪**：集成 `ITracer` 支持链路追踪
 
-## ���ٿ�ʼ
+## 快速开始
 
 ```csharp
 using NewLife.Model;
 
-// ���� Actor
+// 定义 Actor
 public class MyActor : Actor
 {
     protected override Task ReceiveAsync(ActorContext context, CancellationToken cancellationToken)
     {
         var message = context.Message;
-        Console.WriteLine($"�յ���Ϣ: {message}");
+        Console.WriteLine($"收到消息: {message}");
         return Task.CompletedTask;
     }
 }
 
-// ʹ�� Actor
+// 使用 Actor
 var actor = new MyActor();
 
-// ������Ϣ
+// 发送消息
 actor.Tell("Hello");
 actor.Tell("World");
 
-// �ȴ�������ɺ�ֹͣ
+// 等待处理完成后停止
 actor.Stop(5000);
 ```
 
-## API �ο�
+## API 参考
 
-### IActor �ӿ�
+### IActor 接口
 
 ```csharp
 public interface IActor
 {
-    /// <summary>������Ϣ�������ڲ�����</summary>
-    /// <param name="message">��Ϣ����</param>
-    /// <param name="sender">������Actor</param>
-    /// <returns>���ش�������Ϣ��</returns>
+    /// <summary>添加消息，驱动内部处理</summary>
+    /// <param name="message">消息对象</param>
+    /// <param name="sender">发送者Actor</param>
+    /// <returns>返回待处理消息数</returns>
     Int32 Tell(Object message, IActor? sender = null);
 }
 ```
 
-### ActorContext ��
+### ActorContext 类
 
 ```csharp
 public class ActorContext
 {
-    /// <summary>������</summary>
+    /// <summary>发送者</summary>
     public IActor? Sender { get; set; }
     
-    /// <summary>��Ϣ</summary>
+    /// <summary>消息</summary>
     public Object? Message { get; set; }
 }
 ```
 
-### Actor ����
+### Actor 基类
 
-#### ����
+#### 属性
 
 ```csharp
-/// <summary>����</summary>
+/// <summary>名称</summary>
 public String Name { get; set; }
 
-/// <summary>�Ƿ�����</summary>
+/// <summary>是否启用</summary>
 public Boolean Active { get; }
 
-/// <summary>�������������ɶѻ�����Ϣ����Ĭ��Int32.MaxValue</summary>
+/// <summary>受限容量。最大可堆积的消息数，默认Int32.MaxValue</summary>
 public Int32 BoundedCapacity { get; set; }
 
-/// <summary>����С��ÿ�δ�����Ϣ����Ĭ��1</summary>
+/// <summary>批大小。每次处理消息数，默认1</summary>
 public Int32 BatchSize { get; set; }
 
-/// <summary>�Ƿ�ʱ�����С�Ĭ��true��ʹ�ö����߳�</summary>
+/// <summary>是否长时间运行。默认true，使用独立线程</summary>
 public Boolean LongRunning { get; set; }
 
-/// <summary>��ǰ���г���</summary>
+/// <summary>当前队列长度</summary>
 public Int32 QueueLength { get; }
 
-/// <summary>����׷����</summary>
+/// <summary>性能追踪器</summary>
 public ITracer? Tracer { get; set; }
 ```
 
-#### Tell - ������Ϣ
+#### Tell - 发送消息
 
 ```csharp
 public virtual Int32 Tell(Object message, IActor? sender = null)
 ```
 
-�� Actor ������Ϣ����� Actor δ���������Զ�������
+向 Actor 发送消息。如果 Actor 未启动，会自动启动。
 
-**����**��
-- `message`����Ϣ���󣬿�������������
-- `sender`�������� Actor�����ڻظ���Ϣ
+**参数**：
+- `message`：消息对象，可以是任意类型
+- `sender`：发送者 Actor，用于回复消息
 
-**����ֵ**����ǰ����������Ϣ��
+**返回值**：当前待处理的消息数
 
-**ʾ��**��
+**示例**：
 ```csharp
 var actor = new MyActor();
 
-// ���ͼ���Ϣ
+// 发送简单消息
 actor.Tell("Hello");
 
-// ���͸��Ӷ���
+// 发送复杂对象
 actor.Tell(new { Id = 1, Name = "Test" });
 
-// ��������
+// 带发送者
 actor.Tell("Ping", senderActor);
 ```
 
-#### Start - ���� Actor
+#### Start - 启动 Actor
 
 ```csharp
 public virtual Task? Start()
 public virtual Task? Start(CancellationToken cancellationToken)
 ```
 
-�ֶ����� Actor��ͨ������Ҫ�ֶ����ã�`Tell` ���Զ�������
+手动启动 Actor。通常不需要手动调用，`Tell` 会自动启动。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var actor = new MyActor();
 
-// �ֶ�����
+// 手动启动
 actor.Start();
 
-// ��ȡ����������
+// 带取消令牌启动
 using var cts = new CancellationTokenSource();
 actor.Start(cts.Token);
 ```
 
-#### Stop - ֹͣ Actor
+#### Stop - 停止 Actor
 
 ```csharp
 public virtual Boolean Stop(Int32 msTimeout = 0)
 ```
 
-ֹͣ Actor�����ٽ�������Ϣ��
+停止 Actor，不再接受新消息。
 
-**����**��
-- `msTimeout`���ȴ���������0=���ȴ���-1=���޵ȴ�
+**参数**：
+- `msTimeout`：等待毫秒数。0=不等待，-1=无限等待
 
-**����ֵ**���Ƿ��ڳ�ʱǰ���������Ϣ����
+**返回值**：是否在超时前完成所有消息处理
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ����ֹͣ�����ȴ�
+// 立即停止，不等待
 actor.Stop(0);
 
-// �ȴ����5��
+// 等待最多5秒
 var completed = actor.Stop(5000);
 if (!completed)
-    Console.WriteLine("����Ϣδ�������");
+    Console.WriteLine("有消息未处理完成");
 
-// ���޵ȴ�
+// 无限等待
 actor.Stop(-1);
 ```
 
-#### ReceiveAsync - ������Ϣ
+#### ReceiveAsync - 处理消息
 
 ```csharp
-// ����������BatchSize=1��
+// 单条处理（BatchSize=1）
 protected virtual Task ReceiveAsync(ActorContext context, CancellationToken cancellationToken)
 
-// ����������BatchSize>1��
+// 批量处理（BatchSize>1）
 protected virtual Task ReceiveAsync(ActorContext[] contexts, CancellationToken cancellationToken)
 ```
 
-������д�˷���ʵ����Ϣ�����߼���
+子类重写此方法实现消息处理逻辑。
 
-## ʹ�ó���
+## 使用场景
 
-### 1. ��־�ռ���
+### 1. 日志收集器
 
 ```csharp
 public class LogActor : Actor
@@ -198,8 +198,8 @@ public class LogActor : Actor
     public LogActor(String filePath)
     {
         Name = "LogActor";
-        BatchSize = 100;  // ����д��
-        BoundedCapacity = 10000;  // ���ƶ���
+        BatchSize = 100;  // 批量写入
+        BoundedCapacity = 10000;  // 限制队列
         
         _writer = new StreamWriter(filePath, true) { AutoFlush = false };
     }
@@ -223,13 +223,13 @@ public class LogActor : Actor
     }
 }
 
-// ʹ��
+// 使用
 var logger = new LogActor("app.log");
-logger.Tell($"[{DateTime.Now:HH:mm:ss}] Ӧ������");
-logger.Tell($"[{DateTime.Now:HH:mm:ss}] ��������");
+logger.Tell($"[{DateTime.Now:HH:mm:ss}] 应用启动");
+logger.Tell($"[{DateTime.Now:HH:mm:ss}] 处理请求");
 ```
 
-### 2. ��Ϣ������
+### 2. 消息处理器
 
 ```csharp
 public class MessageProcessor : Actor
@@ -250,7 +250,7 @@ public class MessageProcessor : Actor
             {
                 await _handler.HandleAsync(msg, cancellationToken);
                 
-                // �ظ�������
+                // 回复发送者
                 context.Sender?.Tell(new Ack { MessageId = msg.Id });
             }
             catch (Exception ex)
@@ -262,7 +262,7 @@ public class MessageProcessor : Actor
 }
 ```
 
-### 3. ���ݾۺ���
+### 3. 数据聚合器
 
 ```csharp
 public class DataAggregator : Actor
@@ -287,7 +287,7 @@ public class DataAggregator : Actor
             }
         }
         
-        // ÿ�������һ��ͳ��
+        // 每分钟输出一次统计
         if ((DateTime.Now - _lastFlush).TotalMinutes >= 1)
         {
             foreach (var kv in _counts)
@@ -303,7 +303,7 @@ public class DataAggregator : Actor
 }
 ```
 
-### 4. Actor ֮��ͨ��
+### 4. Actor 之间通信
 
 ```csharp
 public class PingActor : Actor
@@ -312,7 +312,7 @@ public class PingActor : Actor
     {
         if (context.Message is String msg && msg == "Ping")
         {
-            Console.WriteLine("PingActor �յ� Ping������ Pong");
+            Console.WriteLine("PingActor 收到 Ping，发送 Pong");
             context.Sender?.Tell("Pong", this);
         }
         return Task.CompletedTask;
@@ -325,21 +325,21 @@ public class PongActor : Actor
     {
         if (context.Message is String msg && msg == "Pong")
         {
-            Console.WriteLine("PongActor �յ� Pong");
+            Console.WriteLine("PongActor 收到 Pong");
         }
         return Task.CompletedTask;
     }
 }
 
-// ʹ��
+// 使用
 var ping = new PingActor();
 var pong = new PongActor();
 
-// pong ���� Ping �� ping��ping ��ظ� Pong
+// pong 发送 Ping 给 ping，ping 会回复 Pong
 ping.Tell("Ping", pong);
 ```
 
-### 5. ����������
+### 5. 限流处理器
 
 ```csharp
 public class RateLimitedActor : Actor
@@ -380,56 +380,56 @@ public class RateLimitedActor : Actor
     
     private async Task ProcessAsync(Object? message, CancellationToken cancellationToken)
     {
-        // �����߼�
+        // 处理逻辑
         await Task.Delay(100, cancellationToken);
     }
 }
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. ������������С
+### 1. 合理设置批大小
 
 ```csharp
-// IO�ܼ��ͣ��ϴ�����
+// IO密集型：较大批次
 var ioActor = new IoActor { BatchSize = 100 };
 
-// CPU�ܼ��ͣ���С����
+// CPU密集型：较小批次
 var cpuActor = new CpuActor { BatchSize = 10 };
 
-// ʵʱ��Ҫ��ߣ���������
+// 实时性要求高：单条处理
 var realtimeActor = new RealtimeActor { BatchSize = 1 };
 ```
 
-### 2. ���ö�������
+### 2. 设置队列容量
 
 ```csharp
-// ��ֹ�ڴ����
+// 防止内存溢出
 var actor = new MyActor
 {
-    BoundedCapacity = 10000  // ���ѻ�1������Ϣ
+    BoundedCapacity = 10000  // 最多堆积1万条消息
 };
 
-// �����г���
+// 检查队列长度
 if (actor.QueueLength > 5000)
 {
-    Console.WriteLine("���棺��Ϣ��ѹ");
+    Console.WriteLine("警告：消息积压");
 }
 ```
 
-### 3. ����ֹͣ
+### 3. 优雅停止
 
 ```csharp
-// ֹͣ��������Ϣ���ȴ�������Ϣ�������
-var completed = actor.Stop(30_000);  // ����30��
+// 停止接收新消息，等待现有消息处理完成
+var completed = actor.Stop(30_000);  // 最多等30秒
 
 if (!completed)
 {
-    Console.WriteLine($"�� {actor.QueueLength} ����Ϣδ����");
+    Console.WriteLine($"有 {actor.QueueLength} 条消息未处理");
 }
 ```
 
-### 4. �쳣����
+### 4. 异常处理
 
 ```csharp
 public class SafeActor : Actor
@@ -442,10 +442,10 @@ public class SafeActor : Actor
         }
         catch (Exception ex)
         {
-            // ��¼��־�����׳��쳣
+            // 记录日志，不抛出异常
             XTrace.WriteException(ex);
             
-            // ��ѡ�����͵����Ŷ���
+            // 可选：发送到死信队列
             DeadLetterActor?.Tell(new DeadLetter
             {
                 Message = context.Message,
@@ -456,32 +456,32 @@ public class SafeActor : Actor
 }
 ```
 
-### 5. ����׷��
+### 5. 性能追踪
 
 ```csharp
 var actor = new MyActor
 {
-    Tracer = new DefaultTracer()  // ��ʹ���ǳ�׷��
+    Tracer = new DefaultTracer()  // 或使用星尘追踪
 };
 
-// ׷����Ϣ���Զ���¼��
+// 追踪信息会自动记录：
 // - actor:Start
 // - actor:Loop
 // - actor:Stop
 ```
 
-## ����������ģ�ͶԱ�
+## 与其他并发模型对比
 
-| ���� | Actor | Task/async | �� |
+| 特性 | Actor | Task/async | 锁 |
 |------|-------|------------|-----|
-| �̰߳�ȫ | ��Ȼ��ȫ | ��Ҫע�� | ��Ҫ��ʽ���� |
-| ��̸��Ӷ� | �е� | �� | �� |
-| ���ó��� | IO�ܼ� | ͨ�� | ����״̬ |
-| ��ѹ���� | ֧�� | ��֧�� | ��֧�� |
-| ��Ϣ˳�� | ��֤ | ����֤ | ������ |
+| 线程安全 | 天然安全 | 需要注意 | 需要显式加锁 |
+| 编程复杂度 | 中等 | 低 | 高 |
+| 适用场景 | IO密集 | 通用 | 共享状态 |
+| 背压处理 | 支持 | 不支持 | 不支持 |
+| 消息顺序 | 保证 | 不保证 | 不适用 |
 
-## �������
+## 相关链接
 
-- [�߼���ʱ�� TimerX](timerx-�߼���ʱ��TimerX.md)
-- [������Ӧ������ Host](host-������Ӧ������Host.md)
-- [��·׷�� ITracer](tracer-��·׷��ITracer.md)
+- [高级定时器 TimerX](timerx-高级定时器TimerX.md)
+- [轻量级应用主机 Host](host-轻量级应用主机Host.md)
+- [链路追踪 ITracer](tracer-链路追踪ITracer.md)

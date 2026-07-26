@@ -1,118 +1,118 @@
-# JSON ���л�
+# JSON 序列化
 
-## ����
+## 概述
 
-DH.NCore �ṩ���������� JSON ���л��ͷ����л����ܣ�ͨ�� `JsonHelper` ��չ�������Է���ؽ��ж����� JSON �ַ�����ת�������� `FastJson` ʵ�֣�ͬʱ֧���л��� `System.Text.Json`��
+NewLife.Core 提供了轻量级的 JSON 序列化和反序列化功能，通过 `JsonHelper` 扩展方法可以方便地进行对象与 JSON 字符串的转换。内置 `FastJson` 实现，同时支持切换到 `System.Text.Json`。
 
-**�����ռ�**��`NewLife.Serialization`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife.Serialization`  
+**文档地址**：https://newlifex.com/core/json
 
-## ��������
+## 核心特性
 
-- **������**������ `FastJson` ʵ�֣����ⲿ����
-- **������**����Գ��������Ż���֧�ֶ����
-- **��չ����**��`ToJson()` �� `ToJsonEntity<T>()` �������
-- **�������**��֧���շ����������Կ�ֵ��������ʽ����
-- **����ת��**���Զ�������������ת��
-- **���л�**��֧���л��� `System.Text.Json` ʵ��
+- **轻量级**：内置 `FastJson` 实现，无外部依赖
+- **高性能**：针对常见场景优化，支持对象池
+- **扩展方法**：`ToJson()` 和 `ToJsonEntity<T>()` 简洁易用
+- **配置灵活**：支持驼峰命名、忽略空值、缩进格式化等
+- **类型转换**：自动处理常见类型转换
+- **可切换**：支持切换到 `System.Text.Json` 实现
 
-## ���ٿ�ʼ
+## 快速开始
 
-### ���л�
+### 序列化
 
 ```csharp
 using NewLife.Serialization;
 
-// �򵥶������л�
-var user = new { Id = 1, Name = "����", Age = 25 };
+// 简单对象序列化
+var user = new { Id = 1, Name = "张三", Age = 25 };
 var json = user.ToJson();
-// {"Id":1,"Name":"����","Age":25}
+// {"Id":1,"Name":"张三","Age":25}
 
-// ��ʽ�����
+// 格式化输出
 var jsonIndented = user.ToJson(true);
 // {
 //   "Id": 1,
-//   "Name": "����",
+//   "Name": "张三",
 //   "Age": 25
 // }
 
-// �շ�����
+// 驼峰命名
 var jsonCamel = user.ToJson(false, true, true);
-// {"id":1,"name":"����","age":25}
+// {"id":1,"name":"张三","age":25}
 ```
 
-### �����л�
+### 反序列化
 
 ```csharp
 using NewLife.Serialization;
 
-var json = """{"Id":1,"Name":"����","Age":25}""";
+var json = """{"Id":1,"Name":"张三","Age":25}""";
 
-// �����л�Ϊָ������
+// 反序列化为指定类型
 var user = json.ToJsonEntity<User>();
 
-// �����л�Ϊ��̬�ֵ�
+// 反序列化为动态字典
 var dict = json.DecodeJson();
-var name = dict["Name"];  // "����"
+var name = dict["Name"];  // "张三"
 ```
 
-## API �ο�
+## API 参考
 
-### ToJson - ���л�
+### ToJson - 序列化
 
 ```csharp
-// �������л�
+// 基础序列化
 public static String ToJson(this Object value, Boolean indented = false)
 
-// ��������
+// 完整参数
 public static String ToJson(this Object value, Boolean indented, Boolean nullValue, Boolean camelCase)
 
-// ʹ�����ö���
+// 使用配置对象
 public static String ToJson(this Object value, JsonOptions jsonOptions)
 ```
 
-**����˵��**��
-- `indented`���Ƿ�������ʽ����Ĭ�� false
-- `nullValue`���Ƿ������ֵ��Ĭ�� true
-- `camelCase`���Ƿ�ʹ���շ�������Ĭ�� false
+**参数说明**：
+- `indented`：是否缩进格式化，默认 false
+- `nullValue`：是否输出空值，默认 true
+- `camelCase`：是否使用驼峰命名，默认 false
 
-**ʾ��**��
+**示例**：
 ```csharp
 var obj = new
 {
     Id = 1,
-    Name = "����",
+    Name = "测试",
     Description = (String?)null,
     CreateTime = DateTime.Now
 };
 
-// Ĭ�����
+// 默认输出
 obj.ToJson();
-// {"Id":1,"Name":"����","Description":null,"CreateTime":"2025-01-07 12:00:00"}
+// {"Id":1,"Name":"测试","Description":null,"CreateTime":"2025-01-07 12:00:00"}
 
-// ���Կ�ֵ
+// 忽略空值
 obj.ToJson(false, false, false);
-// {"Id":1,"Name":"����","CreateTime":"2025-01-07 12:00:00"}
+// {"Id":1,"Name":"测试","CreateTime":"2025-01-07 12:00:00"}
 
-// �շ����� + ��ʽ��
+// 驼峰命名 + 格式化
 obj.ToJson(true, true, true);
 ```
 
-### ToJsonEntity - �����л�
+### ToJsonEntity - 反序列化
 
 ```csharp
-// ���ͷ���
+// 泛型方法
 public static T? ToJsonEntity<T>(this String json)
 
-// ָ������
+// 指定类型
 public static Object? ToJsonEntity(this String json, Type type)
 ```
 
-**ʾ��**��
+**示例**：
 ```csharp
-var json = """{"id":1,"name":"����","roles":["admin","user"]}""";
+var json = """{"id":1,"name":"张三","roles":["admin","user"]}""";
 
-// �����л�Ϊ��
+// 反序列化为类
 public class User
 {
     public Int32 Id { get; set; }
@@ -121,19 +121,19 @@ public class User
 }
 
 var user = json.ToJsonEntity<User>();
-Console.WriteLine(user.Name);  // ����
+Console.WriteLine(user.Name);  // 张三
 Console.WriteLine(user.Roles[0]);  // admin
 ```
 
-### DecodeJson - ����Ϊ�ֵ�
+### DecodeJson - 解析为字典
 
 ```csharp
 public static IDictionary<String, Object?>? DecodeJson(this String json)
 ```
 
-�� JSON �ַ�������Ϊ�ֵ䣬�����ڶ�̬���ʳ�����
+将 JSON 字符串解析为字典，适用于动态访问场景。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var json = """{"code":0,"data":{"id":1,"name":"test"},"message":"ok"}""";
 
@@ -143,35 +143,35 @@ var data = dict["data"] as IDictionary<String, Object>;
 var id = data["id"].ToInt();  // 1
 ```
 
-### JsonOptions - ����ѡ��
+### JsonOptions - 配置选项
 
 ```csharp
 public class JsonOptions
 {
-    /// <summary>ʹ���շ�������Ĭ��false</summary>
+    /// <summary>使用驼峰命名。默认false</summary>
     public Boolean CamelCase { get; set; }
     
-    /// <summary>���Կ�ֵ��Ĭ��false</summary>
+    /// <summary>忽略空值。默认false</summary>
     public Boolean IgnoreNullValues { get; set; }
     
-    /// <summary>����ѭ�����á�Ĭ��false</summary>
+    /// <summary>忽略循环引用。默认false</summary>
     public Boolean IgnoreCycles { get; set; }
     
-    /// <summary>������ʽ����Ĭ��false</summary>
+    /// <summary>缩进格式化。默认false</summary>
     public Boolean WriteIndented { get; set; }
     
-    /// <summary>ʹ������ʱ���ʽ��Ĭ��false</summary>
+    /// <summary>使用完整时间格式。默认false</summary>
     public Boolean FullTime { get; set; }
     
-    /// <summary>ö��ʹ���ַ�����Ĭ��falseʹ������</summary>
+    /// <summary>枚举使用字符串。默认false使用数字</summary>
     public Boolean EnumString { get; set; }
     
-    /// <summary>��������Ϊ�ַ���������JS���ȶ�ʧ��Ĭ��false</summary>
+    /// <summary>长整型作为字符串。避免JS精度丢失，默认false</summary>
     public Boolean Int64AsString { get; set; }
 }
 ```
 
-**ʾ��**��
+**示例**：
 ```csharp
 var options = new JsonOptions
 {
@@ -184,15 +184,15 @@ var options = new JsonOptions
 var json = obj.ToJson(options);
 ```
 
-### Format - ��ʽ�� JSON
+### Format - 格式化 JSON
 
 ```csharp
 public static String Format(String json)
 ```
 
-��ѹ���� JSON �ַ�����ʽ��Ϊ�׶���ʽ��
+将压缩的 JSON 字符串格式化为易读格式。
 
-**ʾ��**��
+**示例**：
 ```csharp
 var json = """{"id":1,"name":"test","items":[1,2,3]}""";
 var formatted = JsonHelper.Format(json);
@@ -207,9 +207,9 @@ var formatted = JsonHelper.Format(json);
 // }
 ```
 
-## IJsonHost �ӿ�
+## IJsonHost 接口
 
-`IJsonHost` �� JSON ���л��ĺ��Ľӿڣ������л���ͬ��ʵ�֣�
+`IJsonHost` 是 JSON 序列化的核心接口，可以切换不同的实现：
 
 ```csharp
 public interface IJsonHost
@@ -226,22 +226,22 @@ public interface IJsonHost
 }
 ```
 
-### �л�ʵ��
+### 切换实现
 
 ```csharp
-// Ĭ��ʹ�� FastJson
+// 默认使用 FastJson
 JsonHelper.Default = new FastJson();
 
-// �л��� System.Text.Json��.NET 5+��
+// 切换到 System.Text.Json（.NET 5+）
 JsonHelper.Default = new SystemJson();
 ```
 
-## ʹ�ó���
+## 使用场景
 
-### 1. Web API ���ݽ���
+### 1. Web API 数据交换
 
 ```csharp
-// ���л���Ӧ
+// 序列化响应
 public class ApiResult<T>
 {
     public Int32 Code { get; set; }
@@ -256,40 +256,40 @@ var result = new ApiResult<User>
     Data = new User { Id = 1, Name = "test" }
 };
 
-// ʹ���շ�������ǰ���Ѻã�
+// 使用驼峰命名（前端友好）
 var json = result.ToJson(false, true, true);
 
-// ������Ӧ
+// 解析响应
 var response = json.ToJsonEntity<ApiResult<User>>();
 ```
 
-### 2. �����ļ�����
+### 2. 配置文件处理
 
 ```csharp
-// ��ȡ JSON ����
+// 读取 JSON 配置
 var json = File.ReadAllText("config.json");
 var config = json.ToJsonEntity<AppConfig>();
 
-// ��������
-var newJson = config.ToJson(true);  // ��ʽ�������Ķ�
+// 保存配置
+var newJson = config.ToJson(true);  // 格式化便于阅读
 File.WriteAllText("config.json", newJson);
 ```
 
-### 3. ��־��¼
+### 3. 日志记录
 
 ```csharp
 public void LogRequest(Object request)
 {
-    // ���л��������������־
+    // 序列化请求参数用于日志
     var json = request.ToJson();
     XTrace.WriteLine($"Request: {json}");
 }
 ```
 
-### 4. ��̬���ݴ���
+### 4. 动态数据处理
 
 ```csharp
-// ������ȷ���ṹ�� JSON
+// 处理不确定结构的 JSON
 var json = await httpClient.GetStringAsync(url);
 var dict = json.DecodeJson();
 
@@ -299,70 +299,70 @@ if (dict.TryGetValue("error", out var error))
 }
 
 var data = dict["data"] as IDictionary<String, Object>;
-// ��̬�����ֶ�...
+// 动态访问字段...
 ```
 
-### 5. ���������;�������
+### 5. 处理长整型精度问题
 
 ```csharp
-// JavaScript �޷���ȷ��ʾ���� 2^53 ������
+// JavaScript 无法精确表示超过 2^53 的整数
 var options = new JsonOptions { Int64AsString = true };
 
 var obj = new { Id = 9007199254740993L };
 var json = obj.ToJson(options);
-// {"Id":"9007199254740993"}  // �ַ�����ʽ�����⾫�ȶ�ʧ
+// {"Id":"9007199254740993"}  // 字符串形式，避免精度丢失
 ```
 
-## �������ʹ���
+## 特殊类型处理
 
-### ����ʱ��
+### 日期时间
 
 ```csharp
 var obj = new { Time = DateTime.Now };
 
-// Ĭ�ϸ�ʽ
+// 默认格式
 obj.ToJson();
 // {"Time":"2025-01-07 12:00:00"}
 
-// ���� ISO ��ʽ
+// 完整 ISO 格式
 var options = new JsonOptions { FullTime = true };
 obj.ToJson(options);
 // {"Time":"2025-01-07T12:00:00.0000000+08:00"}
 ```
 
-### ö��
+### 枚举
 
 ```csharp
 public enum Status { Pending, Active, Closed }
 
 var obj = new { Status = Status.Active };
 
-// Ĭ��ʹ������
+// 默认使用数字
 obj.ToJson();
 // {"Status":1}
 
-// ʹ���ַ���
+// 使用字符串
 var options = new JsonOptions { EnumString = true };
 obj.ToJson(options);
 // {"Status":"Active"}
 ```
 
-### �ֽ�����
+### 字节数组
 
 ```csharp
 var obj = new { Data = new Byte[] { 1, 2, 3, 4 } };
 
-// Ĭ�� Base64
+// 默认 Base64
 obj.ToJson();
 // {"Data":"AQIDBA=="}
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. �������ö���
+### 1. 复用配置对象
 
 ```csharp
-// ����ȫ������
+// 定义全局配置
 public static class JsonConfig
 {
     public static readonly JsonOptions Api = new()
@@ -378,41 +378,41 @@ public static class JsonConfig
     };
 }
 
-// ʹ��
+// 使用
 var json = data.ToJson(JsonConfig.Api);
 ```
 
-### 2. ������ֵ
+### 2. 处理空值
 
 ```csharp
-// �����л�ʱע���ֵ
+// 反序列化时注意空值
 var user = json.ToJsonEntity<User>();
 if (user == null)
 {
-    // JSON Ϊ null �����ʧ��
+    // JSON 为 null 或解析失败
 }
 
-// ��ʹ�ÿ��ַ������
+// 或使用空字符串检查
 if (json.IsNullOrEmpty()) return;
 var user = json.ToJsonEntity<User>();
 ```
 
-### 3. ������������
+### 3. 大数据量处理
 
 ```csharp
-// ���ڴ������ݣ����Ƿ�������
-// ����һ�������л�/�����л��������
+// 对于大量数据，考虑分批处理
+// 避免一次性序列化/反序列化超大对象
 ```
 
-## ����˵��
+## 性能说明
 
-- `FastJson` ��Գ��������Ż����ʺϴ����Ӧ��
-- ���ڸ�����Ҫ�󣬿��л��� `System.Text.Json`
-- ����Ƶ������ `JsonOptions`�����鸴��
-- �ַ�������ʹ�ö�����Ż�
+- `FastJson` 针对常见场景优化，适合大多数应用
+- 对于高性能要求，可切换到 `System.Text.Json`
+- 避免频繁创建 `JsonOptions`，建议复用
+- 字符串操作使用对象池优化
 
-## �������
+## 相关链接
 
-- [���������л� Binary](binary-���������л�Binary.md)
-- [XML ���л�](xml-XML���л�Xml.md)
-- [����ϵͳ Config](config-����ϵͳConfig.md)
+- [二进制序列化 Binary](binary-二进制序列化Binary.md)
+- [XML 序列化](xml-XML序列化Xml.md)
+- [配置系统 Config](config-配置系统Config.md)

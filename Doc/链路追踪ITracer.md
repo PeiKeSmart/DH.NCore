@@ -1,39 +1,39 @@
-# ��·׷��ITracer
+# 链路追踪ITracer
 
-## ����
+## 概述
 
-�ɹ۲����Ǻ����ִ�Ӧ�������ĺ���ָ��֮һ��DH.NCore �ṩ��һ����������·׷�ٹ淶��`ITracer`/`ISpan`������ʵ�������� APM��Application Performance Monitoring����
+可观测性是衡量现代应用质量的核心指标之一。NewLife.Core 提供了一套完整的链路追踪规范：`ITracer`/`ISpan`，用于实现轻量级 APM（Application Performance Monitoring）。
 
-�봫ͳ APM ϵͳ��ͬ��NewLife ����·׷�ٲ���**���ز���+ͳ��**�ķ�ʽ��
-- �ڱ���������ݲ����ͳ���ͳ��
-- ���ϱ�ͳ�����ݺ�������������
-- �����ʡ���紫��ʹ洢�ɱ�
+与传统 APM 系统不同，NewLife 的链路追踪采用**本地采样+统计**的方式：
+- 在本地完成数据采样和初步统计
+- 仅上报统计数据和少量采样样本
+- 极大节省网络传输和存储成本
 
-NewLife ȫϵ����Ŀ��30+ ������������� `ITracer` ��㣬�����߿��ԣ�
-1. ������ػ�ȡ�������ָ��
-2. �����ǳ����ƽ̨ʵ�ֲַ�ʽ׷��
-3. ���ڹ淶��չ�Զ������
+NewLife 全系列项目（30+ 组件）均内置了 `ITracer` 埋点，开发者可以：
+1. 无侵入地获取组件运行指标
+2. 接入星尘监控平台实现分布式追踪
+3. 基于规范扩展自定义埋点
 
-**Nuget ��**: `DH.NCore`  
-**Դ��**: [DH.NCore/Log/ITracer.cs](https://github.com/PeiKeSmart/DH.NCore/blob/master/DH.NCore/Log/ITracer.cs)
+**Nuget 包**: `NewLife.Core`  
+**源码**: [NewLife.Core/Log/ITracer.cs](https://github.com/NewLifeX/X/blob/master/NewLife.Core/Log/ITracer.cs)
 
 ---
 
-## ��������
+## 快速入门
 
-### �����÷�
+### 基础用法
 
-��򵥵����ʾ����
+最简单的埋点示例：
 
 ```csharp
-using var span = tracer?.NewSpan("��������");
+using var span = tracer?.NewSpan("操作名称");
 ```
 
-ʹ�� `using` �ؼ���ȷ�� span �����������ʱ�Զ���ɣ���¼��ʱ�ʹ�����
+使用 `using` 关键字确保 span 在作用域结束时自动完成，记录耗时和次数。
 
-### ����ʾ��
+### 完整示例
 
-����������������ݵ����ʾ����
+以下是网络接收数据的埋点示例：
 
 ```csharp
 private void Ss_Received(Object? sender, ReceivedEventArgs e)
@@ -41,7 +41,7 @@ private void Ss_Received(Object? sender, ReceivedEventArgs e)
     var ns = (this as INetSession).Host;
     var tracer = ns?.Tracer;
     
-    // ������㣬��¼���ղ���
+    // 创建埋点，记录接收操作
     using var span = tracer?.NewSpan($"net:{ns?.Name}:Receive", e.Message);
     try
     {
@@ -49,182 +49,182 @@ private void Ss_Received(Object? sender, ReceivedEventArgs e)
     }
     catch (Exception ex)
     {
-        // ��Ǵ��󲢼�¼�쳣��Ϣ
+        // 标记错误并记录异常信息
         span?.SetError(ex, e.Message ?? e.Packet);
         throw;
     }
 }
 ```
 
-���ʾ����ʾ�ˣ�
-- **�������**��ʹ�ö�̬���ɵ�����
-- **���ݱ�ǩ**���ڶ������� `e.Message` ��Ϊ���ݱ�ǩ
-- **�쳣����**��ͨ�� `SetError` ����쳣���
-- **�Զ���¼**��`using` ����Զ���¼��ʱ
+这个示例演示了：
+- **创建埋点**：使用动态生成的名称
+- **数据标签**：第二个参数 `e.Message` 作为数据标签
+- **异常处理**：通过 `SetError` 标记异常埋点
+- **自动记录**：`using` 语句自动记录耗时
 
-ͨ�������㣬���ǿ��ԣ�
-- ͳ�ƽ������ݰ��Ĵ���
-- ��¼ÿ�ν��յĺ�ʱ
-- ͳ���쳣��������
-- �鿴�������ݺͱ�ǩ
+通过这个埋点，我们可以：
+- 统计接收数据包的次数
+- 记录每次接收的耗时
+- 统计异常发生次数
+- 查看采样数据和标签
 
 ---
 
-## ���Ľӿ�
+## 核心接口
 
-### ITracer �ӿ�
+### ITracer 接口
 
-���ܸ������������� APM �淶�ĺ��Ľӿڡ�
+性能跟踪器，轻量级 APM 规范的核心接口。
 
 ```csharp
 public interface ITracer
 {
-    #region ����
-    /// <summary>�������ڡ���λ�룬Ĭ��15��</summary>
+    #region 属性
+    /// <summary>采样周期。单位秒，默认15秒</summary>
     Int32 Period { get; set; }
 
-    /// <summary>������������������������ڣ����ֻ��¼ָ�������������¼���Ĭ��1</summary>
+    /// <summary>最大正常采样数。采样周期内，最多只记录指定数量的正常事件，默认1</summary>
     Int32 MaxSamples { get; set; }
 
-    /// <summary>����쳣�����������������ڣ����ֻ��¼ָ���������쳣�¼���Ĭ��10</summary>
+    /// <summary>最大异常采样数。采样周期内，最多只记录指定数量的异常事件，默认10</summary>
     Int32 MaxErrors { get; set; }
 
-    /// <summary>��ʱʱ�䡣������ʱ��ʱǿ�Ʋ�������λ���룬Ĭ��5000</summary>
+    /// <summary>超时时间。超过该时间时强制采样，单位毫秒，默认5000</summary>
     Int32 Timeout { get; set; }
 
-    /// <summary>����ǩ���ȡ������ó���ʱ���ضϣ�Ĭ��1024�ַ�</summary>
+    /// <summary>最大标签长度。超过该长度时将截断，默认1024字符</summary>
     Int32 MaxTagLength { get; set; }
 
-    /// <summary>��http/rpc����ע��TraceId�Ĳ�������Ϊ�ձ�ʾ��ע�룬Ĭ��W3C��׼��traceparent</summary>
+    /// <summary>向http/rpc请求注入TraceId的参数名，为空表示不注入，默认W3C标准的traceparent</summary>
     String? AttachParameter { get; set; }
     #endregion
 
-    /// <summary>����Span������</summary>
-    /// <param name="name">�������ƣ����ڱ�ʶ��ͬ���������</param>
+    /// <summary>建立Span构建器</summary>
+    /// <param name="name">操作名称，用于标识不同的埋点类型</param>
     ISpanBuilder BuildSpan(String name);
 
-    /// <summary>��ʼһ��Span</summary>
-    /// <param name="name">�������ƣ����ڱ�ʶ��ͬ���������</param>
+    /// <summary>开始一个Span</summary>
+    /// <param name="name">操作名称，用于标识不同的埋点类型</param>
     ISpan NewSpan(String name);
 
-    /// <summary>��ʼһ��Span��ָ�����ݱ�ǩ</summary>
-    /// <param name="name">�������ƣ����ڱ�ʶ��ͬ���������</param>
-    /// <param name="tag">���ݱ�ǩ����¼�ؼ�������Ϣ</param>
+    /// <summary>开始一个Span，指定数据标签</summary>
+    /// <param name="name">操作名称，用于标识不同的埋点类型</param>
+    /// <param name="tag">数据标签，记录关键参数信息</param>
     ISpan NewSpan(String name, Object? tag);
 
-    /// <summary>�ض�����Span���������ݣ����ü���</summary>
+    /// <summary>截断所有Span构建器数据，重置集合</summary>
     ISpanBuilder[] TakeAll();
 }
 ```
 
-#### �ؼ�����˵��
+#### 关键属性说明
 
-| ���� | Ĭ��ֵ | ˵�� |
+| 属性 | 默认值 | 说明 |
 |-----|-------|------|
-| `Period` | 15�� | �������ڣ������ϱ����ݵ�ʱ���� |
-| `MaxSamples` | 1 | ÿ�������ڼ�¼�����������������ڻ��Ƶ���������ϵ |
-| `MaxErrors` | 10 | ÿ�������ڼ�¼���쳣������������������� |
-| `Timeout` | 5000ms | ��ʱ��ֵ��������ʱ��Ĳ����ᱻǿ�Ʋ��� |
-| `MaxTagLength` | 1024 | ��ǩ��󳤶ȣ������ᱻ�ض� |
-| `AttachParameter` | "traceparent" | HTTP/RPC ������ע�� TraceId �Ĳ���������ѭ W3C ��׼ |
+| `Period` | 15秒 | 采样周期，定期上报数据的时间间隔 |
+| `MaxSamples` | 1 | 每个周期内记录的正常采样数，用于绘制调用依赖关系 |
+| `MaxErrors` | 10 | 每个周期内记录的异常采样数，用于问题诊断 |
+| `Timeout` | 5000ms | 超时阈值，超过此时间的操作会被强制采样 |
+| `MaxTagLength` | 1024 | 标签最大长度，超过会被截断 |
+| `AttachParameter` | "traceparent" | HTTP/RPC 请求中注入 TraceId 的参数名，遵循 W3C 标准 |
 
-��Щ����ͨ�����ǳ�������Ķ�̬�·������������ֶ����á�
+这些参数通常由星尘监控中心动态下发调整，无需手动配置。
 
-#### ���ķ���
+#### 核心方法
 
-- **`NewSpan(String name)`**: ��õķ���������һ�������
-- **`NewSpan(String name, Object? tag)`**: ������㲢�������ݱ�ǩ
-- **`BuildSpan(String name)`**: ��ȡ�򴴽� SpanBuilder�����ڸ߼�����
+- **`NewSpan(String name)`**: 最常用的方法，创建一个新埋点
+- **`NewSpan(String name, Object? tag)`**: 创建埋点并附加数据标签
+- **`BuildSpan(String name)`**: 获取或创建 SpanBuilder，用于高级场景
 
-### ISpan �ӿ�
+### ISpan 接口
 
-���ܸ���Ƭ�Σ�����һ����������ʵ����
+性能跟踪片段，代表一个具体的埋点实例。
 
 ```csharp
 public interface ISpan : IDisposable
 {
-    /// <summary>Ψһ��ʶ�����߳������ġ�Http��Rpc���ݣ���Ϊ�ڲ�Ƭ�εĸ���</summary>
+    /// <summary>唯一标识。随线程上下文、Http、Rpc传递，作为内部片段的父级</summary>
     String Id { get; set; }
 
-    /// <summary>����������ڱ�ʶ��ͬ���͵Ĳ���</summary>
+    /// <summary>埋点名。用于标识不同类型的操作</summary>
     String Name { get; set; }
 
-    /// <summary>����Ƭ�α�ʶ�����ڹ���������</summary>
+    /// <summary>父级片段标识。用于构建调用链</summary>
     String? ParentId { get; set; }
 
-    /// <summary>���ٱ�ʶ�������ڹ������Ƭ�Σ�����������ϵ�����߳������ġ�Http��Rpc����</summary>
+    /// <summary>跟踪标识。可用于关联多个片段，建立依赖关系，随线程上下文、Http、Rpc传递</summary>
     String TraceId { get; set; }
 
-    /// <summary>��ʼʱ�䡣Unix����ʱ���</summary>
+    /// <summary>开始时间。Unix毫秒时间戳</summary>
     Int64 StartTime { get; set; }
 
-    /// <summary>����ʱ�䡣Unix����ʱ���</summary>
+    /// <summary>结束时间。Unix毫秒时间戳</summary>
     Int64 EndTime { get; set; }
 
-    /// <summary>�û���ֵ����¼�����ͱ�������ÿ�����ݿ�����������ǳ�ƽ̨����ͳ��</summary>
+    /// <summary>用户数值。记录数字型标量，如每次数据库操作行数，星尘平台汇总统计</summary>
     Int64 Value { get; set; }
 
-    /// <summary>���ݱ�ǩ����¼һЩ�������ݣ��������������Ӧ�����</summary>
+    /// <summary>数据标签。记录一些附加数据，如请求参数、响应结果等</summary>
     String? Tag { get; set; }
 
-    /// <summary>������Ϣ����¼�쳣��Ϣ</summary>
+    /// <summary>错误信息。记录异常消息</summary>
     String? Error { get; set; }
 
-    /// <summary>���ô�����Ϣ��ApiException����</summary>
+    /// <summary>设置错误信息，ApiException除外</summary>
     void SetError(Exception ex, Object? tag = null);
 
-    /// <summary>�������ݱ�ǩ���ڲ�������󳤶Ƚض�</summary>
+    /// <summary>设置数据标签。内部根据最大长度截断</summary>
     void SetTag(Object tag);
 
-    /// <summary>������㣬������ɼ�</summary>
+    /// <summary>抛弃埋点，不计入采集</summary>
     void Abandon();
 }
 ```
 
-#### �ؼ�����
+#### 关键属性
 
-| ���� | ���� | ˵�� |
+| 属性 | 类型 | 说明 |
 |-----|------|------|
-| `Id` | String | Span Ψһ��ʶ����ѭ W3C ��׼ |
-| `ParentId` | String? | ���� Span ID�����ڹ��������� |
-| `TraceId` | String | ��������ʶ��ͬһ�������е����� Span ������ͬ TraceId |
-| `StartTime` | Int64 | ��ʼʱ�䣨Unix ���룩 |
-| `EndTime` | Int64 | ����ʱ�䣨Unix ���룩 |
-| `Value` | Int64 | �û���ֵ���ɼ�¼ҵ��ָ�꣨�����ݿ������� |
-| `Tag` | String? | ���ݱ�ǩ����¼�����������Ӧ���ݵ� |
-| `Error` | String? | ������Ϣ |
+| `Id` | String | Span 唯一标识，遵循 W3C 标准 |
+| `ParentId` | String? | 父级 Span ID，用于构建调用树 |
+| `TraceId` | String | 跟踪链标识，同一调用链中的所有 Span 共享相同 TraceId |
+| `StartTime` | Int64 | 开始时间（Unix 毫秒） |
+| `EndTime` | Int64 | 结束时间（Unix 毫秒） |
+| `Value` | Int64 | 用户数值，可记录业务指标（如数据库行数） |
+| `Tag` | String? | 数据标签，记录请求参数、响应数据等 |
+| `Error` | String? | 错误信息 |
 
-#### ���ķ���
+#### 核心方法
 
-- **`SetError(Exception ex, Object? tag)`**: ����쳣��`ApiException` ���ͻᱻ���⴦��
-- **`SetTag(Object tag)`**: �������ݱ�ǩ��֧�ֶ��������Զ����л�
-- **`Abandon()`**: ������ǰ��㣬�����ڹ�����Ч������404ɨ�裩
+- **`SetError(Exception ex, Object? tag)`**: 标记异常，`ApiException` 类型会被特殊处理
+- **`SetTag(Object tag)`**: 设置数据标签，支持多种类型自动序列化
+- **`Abandon()`**: 丢弃当前埋点，常用于过滤无效请求（如404扫描）
 
 ---
 
-## ʹ�����ʵ��
+## 使用最佳实践
 
-### 1. ע�� ITracer
+### 1. 注入 ITracer
 
-�� ASP.NET Core Ӧ���У�ͨ���ǳ���չע�룺
+在 ASP.NET Core 应用中，通过星尘扩展注入：
 
 ```csharp
 using NewLife.Stardust.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ע�� DH.NStardust ���� ITracer ʵ��
+// 注入星尘，包含 ITracer 实现
 builder.Services.AddStardust();
 ```
 
-Stardust 历史平台地址已归档，当前请以对应仓库与现行部署信息为准
+详见：[星尘分布式服务平台](https://newlifex.com/blood/stardust)
 
-### 2. ��ȡ ITracer ʵ��
+### 2. 获取 ITracer 实例
 
-�ж��ַ�ʽ��ȡ `ITracer`��
+有多种方式获取 `ITracer`：
 
 ```csharp
-// ��ʽ1�����캯��ע�루�Ƽ���
+// 方式1：构造函数注入（推荐）
 public class MyService
 {
     private readonly ITracer _tracer;
@@ -235,58 +235,58 @@ public class MyService
     }
 }
 
-// ��ʽ2������ע��
+// 方式2：属性注入
 public class MyService
 {
     public ITracer? Tracer { get; set; }
 }
 
-// ��ʽ3��ʹ��ȫ�־�̬ʵ��
+// 方式3：使用全局静态实例
 var tracer = DefaultTracer.Instance;
 ```
 
-### 3. �������
+### 3. 创建埋点
 
-#### �������
+#### 基础埋点
 
 ```csharp
 using var span = _tracer?.NewSpan("MyOperation");
-// ҵ���߼�
+// 业务逻辑
 ```
 
-#### �����ݱ�ǩ�����
+#### 带数据标签的埋点
 
 ```csharp
 var request = new { UserId = 123, Action = "Query" };
 using var span = _tracer?.NewSpan("UserQuery", request);
-// ҵ���߼�
+// 业务逻辑
 ```
 
-#### ���쳣���������
+#### 带异常处理的埋点
 
 ```csharp
 using var span = _tracer?.NewSpan("DatabaseQuery");
 try
 {
-    // ִ�����ݿ��ѯ
+    // 执行数据库查询
     var result = await ExecuteQueryAsync();
 }
 catch (Exception ex)
 {
-    span?.SetError(ex, "��ѯʧ��");
+    span?.SetError(ex, "查询失败");
     throw;
 }
 ```
 
-#### ��¼ҵ��ָ��
+#### 记录业务指标
 
 ```csharp
 using var span = _tracer?.NewSpan("BatchProcess");
 var count = ProcessRecords();
-span.Value = count;  // ��¼�����ļ�¼��
+span.Value = count;  // 记录处理的记录数
 ```
 
-### 4. ��ʱ�������ʾ��
+### 4. 定时任务埋点示例
 
 ```csharp
 public class DataRetentionService : IHostedService
@@ -303,7 +303,7 @@ public class DataRetentionService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        // ÿ600��ִ��һ�Σ�����ӳ�����
+        // 每600秒执行一次，随机延迟启动
         _timer = new TimerX(DoWork, null, 
             DateTime.Today.AddMinutes(Rand.Next(60)), 
             600 * 1000) 
@@ -323,16 +323,16 @@ public class DataRetentionService : IHostedService
         var time2 = DateTime.Now.AddDays(-set.DataRetention2);
         var time3 = DateTime.Now.AddDays(-set.DataRetention3);
 
-        // ������㣬��¼��������
+        // 创建埋点，记录清理任务
         using var span = _tracer?.NewSpan("DataRetention", new { time, time2, time3 });
         try
         {
-            // ɾ��������
+            // 删除旧数据
             var rs = AppMinuteStat.DeleteBefore(time);
-            XTrace.WriteLine("ɾ��[{0}]֮ǰ��AppMinuteStat����{1:n0}", time, rs);
+            XTrace.WriteLine("删除[{0}]之前的AppMinuteStat共：{1:n0}", time, rs);
 
             rs = TraceMinuteStat.DeleteBefore(time);
-            XTrace.WriteLine("ɾ��[{0}]֮ǰ��TraceMinuteStat����{1:n0}", time, rs);
+            XTrace.WriteLine("删除[{0}]之前的TraceMinuteStat共：{1:n0}", time, rs);
         }
         catch (Exception ex)
         {
@@ -348,140 +348,141 @@ public class DataRetentionService : IHostedService
 }
 ```
 
-### 5. ������Ч����
+### 5. 过滤无效请求
 
-�� Web Ӧ���У�������������ɨ�����󣬿���ʹ�� `Abandon()` ������Щ��㣺
+在 Web 应用中，经常遇到各种扫描请求，可以使用 `Abandon()` 丢弃这些埋点：
 
 ```csharp
 public IActionResult ProcessRequest()
 {
     using var span = _tracer?.NewSpan("WebRequest");
     
-    // ��⵽��Ч������404ɨ�裩
+    // 检测到无效请求（如404扫描）
     if (IsInvalidScan())
     {
-        span?.Abandon();  // ������㣬������ͳ��
+        span?.Abandon();  // 丢弃埋点，不计入统计
         return NotFound();
     }
     
-    // ��������
+    // 正常处理
     return Ok();
 }
 ```
 
 ---
 
-## �ֲ�ʽ��·׷��
+## 分布式链路追踪
 
-### ����񴫵�
+### 跨服务传递
 
-ISpan �ṩ����չ������֧��ͨ�� HTTP/RPC ���ݸ��������ģ�
+ISpan 提供了扩展方法，支持通过 HTTP/RPC 传递跟踪上下文：
 
 ```csharp
-// HTTP ����ע��
+// HTTP 请求注入
 var request = new HttpRequestMessage(HttpMethod.Get, url);
-span?.Attach(request);  // ע�� traceparent ͷ
+span?.Attach(request);  // 注入 traceparent 头
 await httpClient.SendAsync(request);
 
-// RPC ����ע��
+// RPC 调用注入
 var args = new { UserId = 123 };
-span?.Attach(args);  // ע����ٲ���
+span?.Attach(args);  // 注入跟踪参数
 await rpcClient.InvokeAsync("Method", args);
 ```
 
-������յ�����󣬻��Զ����� `traceparent` �������ָ����������ġ�
+服务端收到请求后，会自动解析 `traceparent` 参数，恢复跟踪上下文。
 
-### ����������
+### 调用链构建
 
-ͬһ�� `TraceId` �µ����� Span ���Զ��γɵ�������
+同一个 `TraceId` 下的所有 Span 会自动形成调用链：
 
 ```
 TraceId: ac1b1e8617342790000015eb0ea2a6
-���� DataRetention (��)
-   ���� SQL:AppMinuteStat.DeleteBefore (��)
-   ���� SQL:TraceMinuteStat.DeleteBefore (��)
-   ���� SQL:TraceHourStat.DeleteBefore (��)
+├─ DataRetention (父)
+   ├─ SQL:AppMinuteStat.DeleteBefore (子)
+   ├─ SQL:TraceMinuteStat.DeleteBefore (子)
+   └─ SQL:TraceHourStat.DeleteBefore (子)
 ```
 
-���ǳ����ƽ̨���Բ鿴��
-- 示例追踪链接已归档，当前请以实际部署环境生成的链路地址为准
+在星尘监控平台可以查看：
+- [调用链火焰图](https://star.newlifex.com/trace?id=ac1b1e8617342790000015eb0ea2a6)
+- [调用链日志视图](https://star.newlifex.com/trace?id=ac1b1e8617342790000015eb0ea2a6&layout=detail)
 
 ---
 
-## ��������
+## 监控与分析
 
-### �鿴ͳ������
+### 查看统计数据
 
-���ǳ����ƽ̨���Բ鿴���ͳ�ƣ�
-- �����ܴ���
-- �쳣����
-- ƽ����ʱ������ʱ����С��ʱ
-- QPS��ÿ����������
+在星尘监控平台可以查看埋点统计：
+- 调用总次数
+- 异常次数
+- 平均耗时、最大耗时、最小耗时
+- QPS（每秒请求数）
 
-示例统计链接已归档，当前请以实际部署环境生成的统计地址为准
+示例：[DataRetention 埋点统计](https://star.newlifex.com/Monitors/traceDayStat?appId=4&itemId=284)
 
-### ��������
+### 采样策略
 
-ITracer �������ܲ������ԣ�
-1. **��������**��ÿ����������ౣ�� `MaxSamples` ������������Ĭ��1����
-2. **�쳣����**��ÿ����������ౣ�� `MaxErrors` ���쳣������Ĭ��10����
-3. **��ʱ����**����ʱ���� `Timeout` �Ĳ���ǿ�Ʋ���
-4. **ȫ��·����**������ `TraceFlag` �ĵ�����ȫ������
+ITracer 采用智能采样策略：
+1. **正常采样**：每个周期内最多保留 `MaxSamples` 个正常样本（默认1个）
+2. **异常采样**：每个周期内最多保留 `MaxErrors` 个异常样本（默认10个）
+3. **超时采样**：耗时超过 `Timeout` 的操作强制采样
+4. **全链路采样**：设置 `TraceFlag` 的调用链全量采样
 
-### ����ͳ�ƻ���
+### 本地统计机制
 
-ÿ���������Ӧһ�� `SpanBuilder`�������ۼ�ͳ�ƣ�
-- **Total**: �ܴ���
-- **Errors**: �쳣����
-- **Cost**: �ܺ�ʱ
-- **MaxCost**: ����ʱ
-- **MinCost**: ��С��ʱ
+每个埋点名对应一个 `SpanBuilder`，用于累加统计：
+- **Total**: 总次数
+- **Errors**: 异常次数
+- **Cost**: 总耗时
+- **MaxCost**: 最大耗时
+- **MinCost**: 最小耗时
 
-ÿ���������ڽ�����`SpanBuilder` ���ݴ���ϱ���Ȼ�����ü�������
+每个采样周期结束后，`SpanBuilder` 数据打包上报，然后重置计数器。
 
 ---
 
-## �߼�����
+## 高级特性
 
-### ��������淶
+### 埋点命名规范
 
-����ʹ�÷ֲ����������ڷ���ͳ�ƣ�
+建议使用分层命名，便于分类统计：
 
 ```csharp
-// �����
-tracer.NewSpan("net:{Э��}:Receive");
+// 网络层
+tracer.NewSpan("net:{协议}:Receive");
 tracer.NewSpan("net:tcp:Send");
 
-// ���ݿ��
-tracer.NewSpan("db:{����}:Select");
+// 数据库层
+tracer.NewSpan("db:{表名}:Select");
 tracer.NewSpan("db:User:Insert");
 
-// ҵ���
-tracer.NewSpan("biz:{ģ��}:{����}");
+// 业务层
+tracer.NewSpan("biz:{模块}:{操作}");
 tracer.NewSpan("biz:Order:Create");
 
-// �ⲿ����
-tracer.NewSpan("http:{����}:{����}");
+// 外部调用
+tracer.NewSpan("http:{服务}:{方法}");
 tracer.NewSpan("http:PaymentApi:Pay");
 ```
 
-### ��̬��������
+### 动态参数调整
 
-���Զ�̬��������������
+可以动态调整采样参数：
 
 ```csharp
 var tracer = DefaultTracer.Instance;
-tracer.Period = 30;           // ��Ϊ30������
-tracer.MaxSamples = 5;        // ��������������
-tracer.Timeout = 10000;       // ��ʱ��ֵ��Ϊ10��
-tracer.MaxTagLength = 2048;   // ��ǩ���ȸ�Ϊ2K
+tracer.Period = 30;           // 改为30秒周期
+tracer.MaxSamples = 5;        // 增加正常采样数
+tracer.Timeout = 10000;       // 超时阈值改为10秒
+tracer.MaxTagLength = 2048;   // 标签长度改为2K
 ```
 
-ͨ����Щ�������ǳ��������ͳһ�·���
+通常这些参数由星尘监控中心统一下发。
 
-### �Զ��� ITracer ʵ��
+### 自定义 ITracer 实现
 
-����ʵ���Լ��� `ITracer`��
+可以实现自己的 `ITracer`：
 
 ```csharp
 public class CustomTracer : ITracer
@@ -489,51 +490,51 @@ public class CustomTracer : ITracer
     public Int32 Period { get; set; } = 15;
     public Int32 MaxSamples { get; set; } = 1;
     public Int32 MaxErrors { get; set; } = 10;
-    // ... ʵ�ֽӿڷ���
+    // ... 实现接口方法
     
     public ISpan NewSpan(String name)
     {
-        // �Զ�����㴴���߼�
+        // 自定义埋点创建逻辑
         var span = new CustomSpan { Name = name };
         span.Start();
         return span;
     }
 }
 
-// ע���Զ���ʵ��
+// 注册自定义实现
 DefaultTracer.Instance = new CustomTracer();
 ```
 
 ---
 
-## �����Ż�
+## 性能优化
 
-### �����
+### 对象池
 
-`DefaultTracer` �����˶���أ����� `ISpanBuilder` �� `ISpan` ʵ����
+`DefaultTracer` 内置了对象池，复用 `ISpanBuilder` 和 `ISpan` 实例：
 
 ```csharp
 public IPool<ISpanBuilder> BuilderPool { get; }
 public IPool<ISpan> SpanPool { get; }
 ```
 
-Ƶ����������������Զ��黹����أ����� GC ѹ����
+频繁创建的埋点对象会自动归还对象池，减少 GC 压力。
 
-### ��ǩ���ȿ���
+### 标签长度控制
 
-���ڴ��Ͷ��󣬽�����Ʊ�ǩ���ݣ�
+对于大型对象，建议控制标签内容：
 
 ```csharp
-// ���Ƽ�����¼���������
+// 不推荐：记录整个大对象
 span.SetTag(largeObject);
 
-// �Ƽ���ֻ��¼�ؼ���Ϣ
+// 推荐：只记录关键信息
 span.SetTag(new { Id = obj.Id, Name = obj.Name });
 ```
 
-### �������
+### 条件埋点
 
-���ڷǹؼ�·�������������Դ�����㣺
+对于非关键路径，可以条件性创建埋点：
 
 ```csharp
 ISpan? span = null;
@@ -544,7 +545,7 @@ if (_tracer != null && IsImportantOperation())
 
 try
 {
-    // ҵ���߼�
+    // 业务逻辑
 }
 finally
 {
@@ -554,87 +555,87 @@ finally
 
 ---
 
-## �쳣����
+## 异常处理
 
-### ApiException ���⴦��
+### ApiException 特殊处理
 
-ҵ���쳣 `ApiException` ���ᱻ���Ϊ����
+业务异常 `ApiException` 不会被标记为错误：
 
 ```csharp
 catch (ApiException aex)
 {
     span?.SetError(aex, request);
-    // ��¼Ϊ������㣬Tag�а���ҵ�������
+    // 记录为正常埋点，Tag中包含业务错误码
 }
 catch (Exception ex)
 {
     span?.SetError(ex, request);
-    // ��¼Ϊ�쳣��㣬Error�а����쳣��Ϣ
+    // 记录为异常埋点，Error中包含异常消息
 }
 ```
 
-### �쳣���
+### 异常埋点
 
-ÿ���쳣���Զ������������쳣��㣬���ڰ��쳣����ͳ�ƣ�
+每个异常会自动创建独立的异常埋点，便于按异常类型统计：
 
 ```csharp
-// ԭʼ���
+// 原始埋点
 using var span = tracer.NewSpan("DatabaseQuery");
 
 try
 {
-    // �׳��쳣
-    throw new TimeoutException("��ѯ��ʱ");
+    // 抛出异常
+    throw new TimeoutException("查询超时");
 }
 catch (Exception ex)
 {
     span.SetError(ex, query);
-    // �Զ����� "ex:TimeoutException" ���
+    // 自动创建 "ex:TimeoutException" 埋点
 }
 ```
 
 ---
 
-## ��������
+## 常见问题
 
-### 1. ����������ǳ�ƽ̨��������
+### 1. 埋点数据在星尘平台看不到？
 
-������¼��㣺
-- ȷ����ע���ǳ���չ��`services.AddStardust()`
-- ����������ӵ��ǳ�������
-- ���Ӧ�����ǳ�ƽ̨�Ƿ���ע��
-- �鿴������־��ȷ�������������
+检查以下几点：
+- 确认已注入星尘扩展：`services.AddStardust()`
+- 检查网络连接到星尘服务器
+- 检查应用在星尘平台是否已注册
+- 查看本地日志，确认埋点正常创建
 
-### 2. ��������̫�٣�
+### 2. 采样数据太少？
 
-��������������
+调整采样参数：
 ```csharp
-tracer.MaxSamples = 10;    // ��������������
-tracer.MaxErrors = 50;     // �����쳣������
-tracer.Timeout = 1000;     // ���ͳ�ʱ��ֵ
+tracer.MaxSamples = 10;    // 增加正常采样数
+tracer.MaxErrors = 50;     // 增加异常采样数
+tracer.Timeout = 1000;     // 降低超时阈值
 ```
 
-### 3. ��ιر���㣿
+### 3. 如何关闭埋点？
 
 ```csharp
-// ��ʽ1����ע�� ITracer
-// services.AddStardust();  // ע�͵�
+// 方式1：不注入 ITracer
+// services.AddStardust();  // 注释掉
 
-// ��ʽ2��ʹ�ÿ�ʵ��
+// 方式2：使用空实现
 DefaultTracer.Instance = null;
 ```
 
-### 4. ��β鿴����������ݣ�
+### 4. 如何查看本地埋点数据？
 
-DefaultTracer ���������־��
+DefaultTracer 会输出到日志：
 
 ```
 Tracer[DataRetention] Total=10 Errors=0 Speed=0.02tps Cost=1500ms MaxCost=2000ms MinCost=1000ms
 ```
 
-### 5. ���������� Span ������
+### 5. 并发场景下 Span 会乱吗？
 
-���ᡣ`ISpan` ʹ�� `AsyncLocal<ISpan>` ���������ģ�ÿ���첽���̶�����
+不会。`ISpan` 使用 `AsyncLocal<ISpan>` 保存上下文，每个异步流程独立：
 
 ```csharp
 public static AsyncLocal<ISpan?> Current { get; }
@@ -642,19 +643,19 @@ public static AsyncLocal<ISpan?> Current { get; }
 
 ---
 
-## �ο�����
+## 参考资料
 
-- Stardust 历史平台地址已归档
+- **星尘监控平台**: https://newlifex.com/blood/stardust
 - **W3C Trace Context**: https://www.w3.org/TR/trace-context/
-- **Դ��ֿ�**: https://github.com/PeiKeSmart/DH.NCore
-- 历史文档已归档，当前请以仓库内 Doc 为准
+- **源码仓库**: https://github.com/NewLifeX/X
+- **在线文档**: https://newlifex.com/core/tracer
 
 ---
 
-## ������־
+## 更新日志
 
-- **2024-12-16**: �����ĵ����������ʵ����ʾ������
-- **2024-08**: ֧�� .NET 9.0
-- **2023-11**: ���� `Abandon()` ����
-- **2023-06**: �Ż�����أ���������
-- **2022**: ��ʼ�汾����
+- **2024-12-16**: 完善文档，补充最佳实践和示例代码
+- **2024-08**: 支持 .NET 9.0
+- **2023-11**: 增加 `Abandon()` 方法
+- **2023-06**: 优化对象池，提升性能
+- **2022**: 初始版本发布

@@ -1,24 +1,24 @@
-# ���������л� Binary
+# 二进制序列化 Binary
 
-## ����
+## 概述
 
-`Binary` �� DH.NCore �еĸ����ܶ��������л��������ڽ��������л�Ϊ���յĶ����Ƹ�ʽ��Ӷ��������ݷ����л�Ϊ�����ر��ʺ�����ͨ�š�Э����������ݴ洢�ȶ����ܺ�����нϸ�Ҫ��ĳ�����
+`Binary` 是 NewLife.Core 中的高性能二进制序列化器，用于将对象序列化为紧凑的二进制格式或从二进制数据反序列化为对象。特别适合网络通信、协议解析、数据存储等对性能和体积有较高要求的场景。
 
-**�����ռ�**��`NewLife.Serialization`  
-**文档地址**：历史文档已归档，当前请以仓库内 Doc 为准
+**命名空间**：`NewLife.Serialization`  
+**文档地址**：https://newlifex.com/core/binary
 
-## ��������
+## 核心特性
 
-- **������**��ֱ�Ӳ����ֽ��������м��ʽת��
-- **���ո�ʽ**��֧��7λ�䳤���������������������
-- **�ֽ������**��֧�ִ��/С���ֽ���
-- **Э��֧��**��֧�� `FieldSize` ���Զ����ֶδ�С
-- **�汾����**��֧��Э��汾����
-- **��չ��ǿ**���������Զ��崦����
+- **高性能**：直接操作字节流，无中间格式转换
+- **紧凑格式**：支持7位变长编码整数，减少数据体积
+- **字节序控制**：支持大端/小端字节序
+- **协议支持**：支持 `FieldSize` 特性定义字段大小
+- **版本兼容**：支持协议版本控制
+- **扩展性强**：可添加自定义处理器
 
-## ���ٿ�ʼ
+## 快速开始
 
-### ���л�
+### 序列化
 
 ```csharp
 using NewLife.Serialization;
@@ -30,122 +30,122 @@ public class User
     public Int32 Age { get; set; }
 }
 
-var user = new User { Id = 1, Name = "����", Age = 25 };
+var user = new User { Id = 1, Name = "张三", Age = 25 };
 
-// �������л�
+// 快速序列化
 var packet = Binary.FastWrite(user);
 var bytes = packet.ToArray();
 
-// ��ʹ����
+// 或使用流
 using var ms = new MemoryStream();
 Binary.FastWrite(user, ms);
 ```
 
-### �����л�
+### 反序列化
 
 ```csharp
 using NewLife.Serialization;
 
-var bytes = /* ���������� */;
+var bytes = /* 二进制数据 */;
 
-// ���ٷ����л�
+// 快速反序列化
 using var ms = new MemoryStream(bytes);
 var user = Binary.FastRead<User>(ms);
 ```
 
-## API �ο�
+## API 参考
 
-### Binary ��
+### Binary 类
 
-#### ����
+#### 属性
 
 ```csharp
-/// <summary>ʹ��7λ����������Ĭ��false��ʹ��</summary>
+/// <summary>使用7位编码整数。默认false不使用</summary>
 public Boolean EncodeInt { get; set; }
 
-/// <summary>С���ֽ���Ĭ��false���</summary>
+/// <summary>小端字节序。默认false大端</summary>
 public Boolean IsLittleEndian { get; set; }
 
-/// <summary>ʹ��ָ����С��FieldSizeAttribute���ԡ�Ĭ��false</summary>
+/// <summary>使用指定大小的FieldSizeAttribute特性。默认false</summary>
 public Boolean UseFieldSize { get; set; }
 
-/// <summary>��С���ȡ���ѡ0/1/2/4��Ĭ��0��ʾѹ����������</summary>
+/// <summary>大小宽度。可选0/1/2/4，默认0表示压缩编码整数</summary>
 public Int32 SizeWidth { get; set; }
 
-/// <summary>�����ַ���ʱ���Ƿ������ͷ��0�ֽڡ�Ĭ��false</summary>
+/// <summary>解析字符串时，是否清空两头的0字节。默认false</summary>
 public Boolean TrimZero { get; set; }
 
-/// <summary>Э��汾������֧�ֶ�汾Э�����л�</summary>
+/// <summary>协议版本。用于支持多版本协议序列化</summary>
 public String? Version { get; set; }
 
-/// <summary>ʹ��������ʱ���ʽ��������ʽʹ��8���ֽڱ����������Ĭ��false</summary>
+/// <summary>使用完整的时间格式。完整格式使用8个字节保存毫秒数，默认false</summary>
 public Boolean FullTime { get; set; }
 
-/// <summary>�ܵ��ֽ�������ȡ��д��</summary>
+/// <summary>总的字节数。读取或写入</summary>
 public Int64 Total { get; set; }
 ```
 
-#### FastWrite - �������л�
+#### FastWrite - 快速序列化
 
 ```csharp
-// ���л�Ϊ���ݰ�
+// 序列化为数据包
 public static IPacket FastWrite(Object value, Boolean encodeInt = true)
 
-// ���л�����
+// 序列化到流
 public static Int64 FastWrite(Object value, Stream stream, Boolean encodeInt = true)
 ```
 
-**����**��
-- `value`��Ҫ���л��Ķ���
-- `encodeInt`���Ƿ�ʹ��7λ�䳤��������
-- `stream`��Ŀ����
+**参数**：
+- `value`：要序列化的对象
+- `encodeInt`：是否使用7位变长编码整数
+- `stream`：目标流
 
-**ʾ��**��
+**示例**：
 ```csharp
-// ���� IPacket
+// 返回 IPacket
 var packet = Binary.FastWrite(obj);
 var bytes = packet.ToArray();
 
-// д����
+// 写入流
 using var ms = new MemoryStream();
 var length = Binary.FastWrite(obj, ms);
 ```
 
-#### FastRead - ���ٷ����л�
+#### FastRead - 快速反序列化
 
 ```csharp
 public static T? FastRead<T>(Stream stream, Boolean encodeInt = true)
 ```
 
-**ʾ��**��
+**示例**：
 ```csharp
 using var ms = new MemoryStream(bytes);
 var obj = Binary.FastRead<MyClass>(ms);
 ```
 
-### �����÷�
+### 完整用法
 
 ```csharp
-// �������л���
+// 创建序列化器
 var bn = new Binary
 {
-    EncodeInt = true,           // ʹ��7λ����
-    IsLittleEndian = true,      // С���ֽ���
-    UseFieldSize = true         // ���� FieldSize ����
+    EncodeInt = true,           // 使用7位编码
+    IsLittleEndian = true,      // 小端字节序
+    UseFieldSize = true         // 启用 FieldSize 特性
 };
 
-// ������
+// 设置流
 bn.Stream = new MemoryStream();
 
-// д������
+// 写入数据
 bn.Write(obj);
 
-// ��ȡ���
+// 获取结果
 var bytes = bn.GetBytes();
 ```
 
 ```csharp
-// �����л�
+// 反序列化
 var bn = new Binary
 {
     Stream = new MemoryStream(bytes),
@@ -155,22 +155,22 @@ var bn = new Binary
 var obj = bn.Read<MyClass>();
 ```
 
-## IAccessor �ӿ�
+## IAccessor 接口
 
-������Ҫ�Զ������л��߼������ͣ�����ʵ�� `IAccessor` �ӿڣ�
+对于需要自定义序列化逻辑的类型，可以实现 `IAccessor` 接口：
 
 ```csharp
 public interface IAccessor
 {
-    /// <summary>����������ȡ</summary>
+    /// <summary>从数据流读取</summary>
     Boolean Read(Stream stream, Object context);
     
-    /// <summary>д��������</summary>
+    /// <summary>写入数据流</summary>
     Boolean Write(Stream stream, Object context);
 }
 ```
 
-**ʾ��**��
+**示例**：
 ```csharp
 public class CustomPacket : IAccessor
 {
@@ -205,29 +205,29 @@ public class CustomPacket : IAccessor
 }
 ```
 
-## FieldSize ����
+## FieldSize 特性
 
-`FieldSizeAttribute` ����ָ���ֶεĹ̶���С����������ֶΣ�
+`FieldSizeAttribute` 用于指定字段的固定大小或关联长度字段：
 
 ```csharp
 public class Protocol
 {
     public Byte Header { get; set; }
     
-    [FieldSize(2)]  // �̶�2�ֽ�
+    [FieldSize(2)]  // 固定2字节
     public Int16 Length { get; set; }
     
-    [FieldSize("Length")]  // ��С�� Length �ֶξ���
+    [FieldSize("Length")]  // 大小由 Length 字段决定
     public Byte[] Body { get; set; }
     
-    [FieldSize(4)]  // �̶�4�ֽ��ַ���
+    [FieldSize(4)]  // 固定4字节字符串
     public String Code { get; set; }
 }
 ```
 
-## ʹ�ó���
+## 使用场景
 
-### 1. ����Э�����
+### 1. 网络协议解析
 
 ```csharp
 public class TcpMessage
@@ -243,18 +243,18 @@ public class TcpMessage
     public Byte End { get; set; } = 0x7E;
 }
 
-// ����
+// 解析
 var bn = new Binary(stream) { IsLittleEndian = false, UseFieldSize = true };
 var msg = bn.Read<TcpMessage>();
 
-// ����
+// 构建
 var msg = new TcpMessage { MessageId = 0x0001, Body = data };
 msg.BodyLength = (UInt16)data.Length;
 msg.Checksum = CalculateChecksum(msg);
 var packet = Binary.FastWrite(msg);
 ```
 
-### 2. JT/T808 Э��
+### 2. JT/T808 协议
 
 ```csharp
 public class JT808Message
@@ -262,22 +262,22 @@ public class JT808Message
     public UInt16 MsgId { get; set; }
     public UInt16 MsgAttr { get; set; }
     
-    [FieldSize(6)]  // 2011��6�ֽڣ�2019��10�ֽ�
+    [FieldSize(6)]  // 2011版6字节，2019版10字节
     public String Phone { get; set; }
     
     public UInt16 SeqNo { get; set; }
     public Byte[] Body { get; set; }
 }
 
-// 2011�汾
+// 2011版本
 var bn = new Binary { UseFieldSize = true, Version = "2011" };
 var msg = bn.Read<JT808Message>();
 
-// 2019�汾
+// 2019版本
 var bn = new Binary { UseFieldSize = true, Version = "2019" };
 ```
 
-### 3. ���ݴ洢
+### 3. 数据存储
 
 ```csharp
 public class Record
@@ -287,14 +287,14 @@ public class Record
     public Byte[] Data { get; set; }
 }
 
-// ���浽�ļ�
+// 保存到文件
 using var fs = File.Create("data.bin");
 foreach (var record in records)
 {
     Binary.FastWrite(record, fs);
 }
 
-// ���ļ�����
+// 从文件加载
 using var fs = File.OpenRead("data.bin");
 var list = new List<Record>();
 while (fs.Position < fs.Length)
@@ -304,10 +304,10 @@ while (fs.Position < fs.Length)
 }
 ```
 
-### 4. ���������л�
+### 4. 高性能序列化
 
 ```csharp
-// ���� Binary ʵ������Ƶ������
+// 复用 Binary 实例避免频繁创建
 var bn = new Binary { EncodeInt = true };
 
 foreach (var item in items)
@@ -315,46 +315,46 @@ foreach (var item in items)
     bn.Stream = new MemoryStream();
     bn.Write(item);
     var bytes = bn.GetBytes();
-    // ���� bytes...
+    // 处理 bytes...
 }
 ```
 
-## 7λ�䳤����
+## 7位变长编码
 
-`EncodeInt = true` ʱ������ʹ��7λ�䳤���룬����������С��ֵ�Ĵ洢�ռ䣺
+`EncodeInt = true` 时，整数使用7位变长编码，可显著减少小数值的存储空间：
 
-| ֵ��Χ | �ֽ��� |
+| 值范围 | 字节数 |
 |--------|--------|
-| 0 ~ 127 | 1 �ֽ� |
-| 128 ~ 16383 | 2 �ֽ� |
-| 16384 ~ 2097151 | 3 �ֽ� |
-| 2097152 ~ 268435455 | 4 �ֽ� |
-| ���� | 5 �ֽ� |
+| 0 ~ 127 | 1 字节 |
+| 128 ~ 16383 | 2 字节 |
+| 16384 ~ 2097151 | 3 字节 |
+| 2097152 ~ 268435455 | 4 字节 |
+| 更大 | 5 字节 |
 
 ```csharp
-// ���ñ䳤����
+// 启用变长编码
 var bn = new Binary { EncodeInt = true };
 bn.Stream = new MemoryStream();
-bn.Write(100);      // 1�ֽ�
-bn.Write(1000);     // 2�ֽ�
-bn.Write(100000);   // 3�ֽ�
+bn.Write(100);      // 1字节
+bn.Write(1000);     // 2字节
+bn.Write(100000);   // 3字节
 ```
 
-## �ֽ���
+## 字节序
 
 ```csharp
-// ����ֽ��������ֽ���Ĭ�ϣ�
+// 大端字节序（网络字节序，默认）
 var bn = new Binary { IsLittleEndian = false };
-bn.Write((Int32)0x12345678);  // ���: 12 34 56 78
+bn.Write((Int32)0x12345678);  // 输出: 12 34 56 78
 
-// С���ֽ���Intel x86��
+// 小端字节序（Intel x86）
 var bn = new Binary { IsLittleEndian = true };
-bn.Write((Int32)0x12345678);  // ���: 78 56 34 12
+bn.Write((Int32)0x12345678);  // 输出: 78 56 34 12
 ```
 
-## ���ʵ��
+## 最佳实践
 
-### 1. Э�����ͳһ����
+### 1. 协议解析统一配置
 
 ```csharp
 public static class BinaryConfig
@@ -375,7 +375,7 @@ public static class BinaryConfig
 }
 ```
 
-### 2. ������
+### 2. 错误处理
 
 ```csharp
 var bn = new Binary(stream);
@@ -385,32 +385,32 @@ try
 }
 catch (EndOfStreamException)
 {
-    // ���ݲ�����
+    // 数据不完整
 }
 ```
 
-### 3. ���ʣ������
+### 3. 检查剩余数据
 
 ```csharp
 var bn = new Binary(stream);
 
-// ����Ƿ����㹻����
-if (bn.CheckRemain(10))  // ������Ҫ10�ֽ�
+// 检查是否有足够数据
+if (bn.CheckRemain(10))  // 至少需要10字节
 {
     var data = bn.ReadBytes(10);
 }
 ```
 
-## ���ܶԱ�
+## 性能对比
 
-| ���л���ʽ | ��� | �ٶ� | ���ó��� |
+| 序列化方式 | 体积 | 速度 | 适用场景 |
 |-----------|------|------|---------|
-| Binary | ��С | ��� | Э�顢�洢 |
-| JSON | �е� | �е� | API������ |
-| XML | ��� | ���� | ���á��ĵ� |
+| Binary | 最小 | 最快 | 协议、存储 |
+| JSON | 中等 | 中等 | API、配置 |
+| XML | 最大 | 较慢 | 配置、文档 |
 
-## �������
+## 相关链接
 
-- [JSON ���л�](json-JSON���л�.md)
-- [XML ���л�](xml-XML���л�.md)
-- [���ݰ� IPacket](packet-���ݰ�IPacket.md)
+- [JSON 序列化](json-JSON序列化.md)
+- [XML 序列化](xml-XML序列化.md)
+- [数据包 IPacket](packet-数据包IPacket.md)
