@@ -344,7 +344,8 @@ public class ScriptEngine
                 var code = "";
                 if (!err.FileName.IsNullOrEmpty() && File.Exists(err.FileName))
                 {
-                    code = File.ReadAllLines(err.FileName)[err.Line - 1];
+                    var lines = File.ReadAllLines(err.FileName);
+                    if (err.Line > 0 && err.Line <= lines.Length) code = lines[err.Line - 1];
                 }
                 else
                 {

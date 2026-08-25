@@ -130,7 +130,9 @@ public abstract class Actor : DisposeBase, IActor
             using var span = Tracer?.NewSpan("actor:Start", Name);
 
             _source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            MailBox ??= new BlockingCollection<ActorContext>(BoundedCapacity);
+            // Stop 后重启：邮箱已完成添加或任务已完成时重建，避免 Tell 对已 CompleteAdding 的集合操作崩溃
+            if (MailBox == null || MailBox.IsAddingCompleted) MailBox = new BlockingCollection<ActorContext>(BoundedCapacity);
+            if (_task != null && _task.IsCompleted) _task = null;
 
             // 启动异步任务
             _task ??= OnStart(_source.Token);
