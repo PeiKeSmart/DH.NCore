@@ -34,7 +34,7 @@ public class XmlConfigProvider : FileConfigProvider
         using var reader = XmlReader.Create(fs);
 
         // 移动到第一个元素
-        while (reader.NodeType != XmlNodeType.Element) reader.Read();
+        while (reader.NodeType != XmlNodeType.Element && reader.Read()) { }
 
         if (!reader.Name.IsNullOrEmpty()) RootName = reader.Name;
 

@@ -33,7 +33,7 @@ public class XmlParser
         var reader = _reader;
 
         // 移动到第一个元素
-        while (reader.NodeType != XmlNodeType.Element) reader.Read();
+        while (reader.NodeType != XmlNodeType.Element && reader.Read()) { }
 
         reader.ReadStartElement();
         while (reader.NodeType == XmlNodeType.Whitespace) reader.Skip();
