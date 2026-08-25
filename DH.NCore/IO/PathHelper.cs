@@ -242,7 +242,8 @@ public static class PathHelper
         {
             fs.Position = offset;
 
-            fs.Write(data, offset, data.Length);
+            // offset 仅作为文件写入位置，源数组从 0 开始写入
+            fs.Write(data, 0, data.Length);
         }
 
         return file;

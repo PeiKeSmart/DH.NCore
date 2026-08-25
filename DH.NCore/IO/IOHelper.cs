@@ -592,7 +592,8 @@ public static class IOHelper
             (data[3], data[2], data[1], data[0]) = (data[0], data[1], data[2], data[3]);
         }
 
-        return BitConverter.ToSingle(data, offset);
+        // 切片后从 0 开始读取，避免 offset 越界
+        return BitConverter.ToSingle(data, 0);
     }
 
     /// <summary>从字节数据指定位置读取一个双精度浮点数</summary>
@@ -608,7 +609,8 @@ public static class IOHelper
             (data[7], data[6], data[5], data[4], data[3], data[2], data[1], data[0]) = (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
         }
 
-        return BitConverter.ToDouble(data, offset);
+        // 切片后从 0 开始读取，避免 offset 越界
+        return BitConverter.ToDouble(data, 0);
     }
 
     /// <summary>向字节数组的指定位置写入一个无符号16位整数</summary>
