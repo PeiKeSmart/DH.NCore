@@ -859,7 +859,8 @@ public class MemoryCache : Cache
             // Key+Expire+TypeCode+Type+Length+Value
             bn.Write(item.Key);
             // 剩余秒数：0=永不过期（ExpiredTime=Int64.MaxValue），>0=从当前起的相对过期秒
-            var remain = ci.ExpiredTime == Int64.MaxValue ? 0 : (Int32)((ci.ExpiredTime - Runtime.TickCount64 + 999) / 1000);
+            // 条目可能在校验后瞬间过期，remain 算出 0 会被 Load 当作永不过期复活，须下限钳制为 1
+            var remain = ci.ExpiredTime == Int64.MaxValue ? 0 : Math.Max(1, (Int32)((ci.ExpiredTime - Runtime.TickCount64 + 999) / 1000));
             bn.Write(remain);
 
             var value = ci.Value;

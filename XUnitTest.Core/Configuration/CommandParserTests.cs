@@ -117,4 +117,24 @@ public class CommandParserTests
         //Assert.Equal("-appid=cube", args[0]);
         //Assert.Equal("F\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\"ddd", args[1]);
     }
+
+    [Fact(DisplayName = "空参数不崩溃")]
+    public void EmptyArgs()
+    {
+        var cmp = new CommandParser();
+        var dic = cmp.Parse(["", "-appid", "", "-port", "1234"]);
+
+        Assert.NotNull(dic);
+        // 空参数被跳过，空值参数正常保留
+        Assert.Equal(2, dic.Count);
+        Assert.Equal("1234", dic["port"]);
+        Assert.Null(dic["appid"]);
+    }
+
+    [Fact(DisplayName = "单字符引号不越界")]
+    public void TrimQuote_SingleChar()
+    {
+        Assert.Equal("\"", CommandParser.TrimQuote("\""));
+        Assert.Equal("'", CommandParser.TrimQuote("'"));
+    }
 }

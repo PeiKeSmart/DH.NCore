@@ -43,9 +43,9 @@ public class CacheLock : DisposeBase
         var value = $"{token}|{now + msExpire}";
         var expire = msExpire > 0 ? (msExpire + 999) / 1000 : 0;
 
-        // 循环等待
+        // 循环等待。至少尝试一次，msTimeout=0 时也允许直接抢锁（否则空闲锁也永远拿不到）
         var end = now + msTimeout;
-        while (now < end)
+        while (true)
         {
             // 申请加锁。没有冲突时可以直接返回
             var rs = ch.Add(Key, value, expire);
@@ -70,10 +70,12 @@ public class CacheLock : DisposeBase
                 }
             }
 
+            // 超时退出
+            now = Runtime.TickCount64;
+            if (now >= end) break;
+
             // 没抢到，继续
             Thread.Sleep(200);
-
-            now = Runtime.TickCount64;
         }
 
         return false;

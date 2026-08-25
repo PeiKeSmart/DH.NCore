@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Security.Cryptography;
 using NewLife.Log;
 using NewLife.Reflection;
@@ -252,12 +253,15 @@ public class HttpConfigProvider : ConfigProvider
             // 加密存储
             if (CacheLevel == ConfigCacheLevel.Encrypted) json = Aes.Create().Encrypt(json.GetBytes(), AppId.GetBytes()).ToBase64();
 
-            lock (file)
+            // 按文件路径取锁对象，避免字符串锁因非驻留字符串导致互斥失效，也避免污染驻留池
+            lock (_fileLocks.GetOrAdd(file, k => new Object()))
             {
                 File.WriteAllText(file.EnsureDirectory(true), json);
             }
         }
     }
+
+    private static readonly ConcurrentDictionary<String, Object> _fileLocks = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>保存配置树到数据源</summary>
     /// <returns>是否保存成功</returns>
