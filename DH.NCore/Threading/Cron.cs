@@ -169,6 +169,8 @@ public class Cron
         if (p > 0)
         {
             step = value[(p + 1)..].ToInt();
+            // 步进值为 0 会导致下方循环永不推进而挂死
+            if (step <= 0) return false;
             value = value[..p];
         }
 
@@ -221,6 +223,8 @@ public class Cron
         if (p > 0)
         {
             step = value[(p + 1)..].ToInt();
+            // 步进值为 0 会导致下方循环永不推进而挂死
+            if (step <= 0) return false;
             v = value[..p];
         }
 
