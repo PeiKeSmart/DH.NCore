@@ -4,27 +4,30 @@ using NewLife.Model;
 
 namespace NewLife.Net.Handlers;
 
-/// <summary>
-/// 按指定分割字节来处理粘包的处理器
-/// </summary>
+/// <summary>按指定分割字节来处理粘包的处理器</summary>
 /// <remarks>
 /// 默认以"0x0D 0x0A"即换行来分割，分割的包包含分割字节本身，使用时请注意。
-/// 默认分割方式：ISocket.Add&lt;SplitDataCodec&gt;()
-/// 自定义分割方式：ISocket.Add(new SplitDataHandler { SplitData = 自定义分割字节数组 })
-/// 自定义最大缓存大小方式：ISocket.Add(new SplitDataHandler { MaxCacheDataLength = 2048 })
-/// 自定义方式：ISocket.Add(new SplitDataHandler { MaxCacheDataLength = 2048, SplitData = 自定义分割字节数组 })
+/// 使用方式：
+/// <code>
+/// // 默认分割方式（\r\n）
+/// ISocket.Add&lt;SplitDataCodec&gt;();
+///
+/// // 自定义分割字节
+/// ISocket.Add(new SplitDataCodec { SplitData = [0x01, 0x02] });
+///
+/// // 自定义最大缓存大小
+/// ISocket.Add(new SplitDataCodec { MaxCacheDataLength = 2048 });
+/// </code>
 /// </remarks>
 public class SplitDataCodec : Handler
 {
-    /// <summary>
-    /// 粘包分割字节数据（默认0x0D,0x0A）
-    /// </summary>
+    #region 属性
+    /// <summary>粘包分割字节数据（默认0x0D,0x0A）</summary>
     public Byte[] SplitData { get; set; } = [0x0D, 0x0A];
 
-    /// <summary>
-    /// 最大缓存待处理数据，默认1024字节
-    /// </summary>
+    /// <summary>最大缓存待处理数据，默认1024字节</summary>
     public Int32 MaxCacheDataLength { get; set; } = 1024;
+    #endregion
 
     /// <summary>写入数据，发送时在末尾追加分割字节</summary>
     /// <param name="context">处理器上下文</param>
@@ -38,10 +41,10 @@ public class SplitDataCodec : Handler
         return base.Write(context, message);
     }
 
-    /// <summary>读取数据</summary>
-    /// <param name="context"></param>
-    /// <param name="message"></param>
-    /// <returns></returns>
+    /// <summary>读取数据，按分割字节拆包后逐个发送给后续处理器</summary>
+    /// <param name="context">处理器上下文</param>
+    /// <param name="message">接收到的数据包</param>
+    /// <returns>拆包后的消息已逐个分发，返回null</returns>
     public override Object? Read(IHandlerContext context, Object message)
     {
         if (message is not IPacket pk) return base.Read(context, message);
@@ -64,9 +67,9 @@ public class SplitDataCodec : Handler
     }
 
     /// <summary>连接关闭时，清空粘包编码器</summary>
-    /// <param name="context"></param>
-    /// <param name="reason"></param>
-    /// <returns></returns>
+    /// <param name="context">处理器上下文</param>
+    /// <param name="reason">关闭原因</param>
+    /// <returns>是否继续向下传递关闭通知</returns>
     public override Boolean Close(IHandlerContext context, String reason)
     {
         if (context.Owner is IExtend ss) ss["Codec"] = null;
@@ -75,10 +78,10 @@ public class SplitDataCodec : Handler
     }
 
     #region 粘包处理
-    /// <summary>解码</summary>
-    /// <param name="context"></param>
-    /// <param name="pk">包</param>
-    /// <returns></returns>
+    /// <summary>解码，从数据包中拆出多个完整消息</summary>
+    /// <param name="context">处理器上下文</param>
+    /// <param name="pk">待解码的数据包</param>
+    /// <returns>拆分后的消息列表，无法解码时返回null</returns>
     protected IList<IPacket>? Decode(IHandlerContext context, IPacket pk)
     {
         if (context.Owner is not IExtend ss) return null;
@@ -89,6 +92,7 @@ public class SplitDataCodec : Handler
             ss["Codec"] = pc = new PacketCodec
             {
                 MaxCache = MaxCacheDataLength,
+                // 主路径使用 GetLength2（span 版，性能更优），GetLength 仅链式包场景回退
                 GetLength = GetLineLength,
                 GetLength2 = GetLineLength,
                 Tracer = (context.Owner as ISocket)?.Tracer
@@ -99,11 +103,9 @@ public class SplitDataCodec : Handler
         return pc.Parse(pk);
     }
 
-    /// <summary>
-    /// 获取包含分割字节在内的数据长度
-    /// </summary>
-    /// <param name="pk"></param>
-    /// <returns></returns>
+    /// <summary>获取包含分割字节在内的数据长度（匹配 GetLength 委托，供链式包场景回退）</summary>
+    /// <param name="pk">数据包</param>
+    /// <returns>包含分割字节在内的数据长度，未找到分割字节时返回0</returns>
     protected Int32 GetLineLength(IPacket pk)
     {
         var idx = pk.GetSpan().IndexOf(SplitData);
@@ -112,11 +114,9 @@ public class SplitDataCodec : Handler
         return idx + SplitData.Length;
     }
 
-    /// <summary>
-    /// 获取包含分割字节在内的数据长度
-    /// </summary>
-    /// <param name="span"></param>
-    /// <returns></returns>
+    /// <summary>获取包含分割字节在内的数据长度（匹配 GetLength2 委托，性能更优）</summary>
+    /// <param name="span">数据片段</param>
+    /// <returns>包含分割字节在内的数据长度，未找到分割字节时返回0</returns>
     protected Int32 GetLineLength(ReadOnlySpan<Byte> span)
     {
         var idx = span.IndexOf(SplitData);
