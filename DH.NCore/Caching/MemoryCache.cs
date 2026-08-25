@@ -840,16 +840,27 @@ public class MemoryCache : Cache
         bn.Write(_Ver);
         bn.Write(0);
 
-        bn.WriteSize(_cache.Count);
+        // 先统计有效条目数（排除已过期），避免写入数与 Load 读出的条目数不一致
+        var validCount = 0;
+        foreach (var item in _cache)
+        {
+            if (item.Value.ExpiredTime > Runtime.TickCount64) validCount++;
+        }
+        bn.WriteSize(validCount);
         foreach (var item in _cache)
         {
             var ci = item.Value;
+
+            // 已过期条目不持久化，避免加载后复活
+            if (ci.ExpiredTime <= Runtime.TickCount64) continue;
 
             // Key+Expire+Empty
             // Key+Expire+TypeCode+Value
             // Key+Expire+TypeCode+Type+Length+Value
             bn.Write(item.Key);
-            bn.Write((Int32)(ci.ExpiredTime / 1000));
+            // 剩余秒数：0=永不过期（ExpiredTime=Int64.MaxValue），>0=从当前起的相对过期秒
+            var remain = ci.ExpiredTime == Int64.MaxValue ? 0 : (Int32)((ci.ExpiredTime - Runtime.TickCount64 + 999) / 1000);
+            bn.Write(remain);
 
             var value = ci.Value;
             var type = value?.GetType();
@@ -929,7 +940,8 @@ public class MemoryCache : Cache
                 }
             }
 
-            if (key != null) Set(key, value, exp - (Int32)(Runtime.TickCount64 / 1000));
+            // 新格式：0=永不过期，>0=相对过期秒
+            if (key != null) Set(key, value, exp);
         }
 
         return bn.Total;
