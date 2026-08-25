@@ -1,4 +1,4 @@
-using System.Diagnostics.Tracing;
+﻿using System.Diagnostics.Tracing;
 using NewLife.Log;
 using Xunit;
 
@@ -43,8 +43,11 @@ public class LogEventListenerTests
             // 等待一小段时间让事件处理完成
             System.Threading.Thread.Sleep(100);
 
-            // 日志中应该包含事件源名称和事件信息
-            Assert.Contains(messages, m => m.Contains("MyTestSource"));
+            // 日志中应该包含事件源名称和事件信息。事件线程可能并发写入，需在锁内断言
+            lock (messages)
+            {
+                Assert.Contains(messages, m => m.Contains("MyTestSource"));
+            }
         }
         finally
         {
@@ -82,9 +85,12 @@ public class LogEventListenerTests
 
             System.Threading.Thread.Sleep(100);
 
-            // 应包含 SourceA 和 SourceB 的事件
-            Assert.Contains(messages, m => m.Contains("SourceA"));
-            Assert.Contains(messages, m => m.Contains("SourceB"));
+            // 应包含 SourceA 和 SourceB 的事件。事件线程可能并发写入，需在锁内断言
+            lock (messages)
+            {
+                Assert.Contains(messages, m => m.Contains("SourceA"));
+                Assert.Contains(messages, m => m.Contains("SourceB"));
+            }
         }
         finally
         {
