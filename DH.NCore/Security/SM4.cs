@@ -32,7 +32,7 @@ public class SM4 : SymmetricAlgorithm
     public override void GenerateIV() => IV = Rand.NextBytes(16);
 
     /// <summary>生成密钥</summary>
-    public override void GenerateKey() => IV = Rand.NextBytes(16);
+    public override void GenerateKey() => Key = Rand.NextBytes(16);
 
     /// <summary>生成加密器</summary>
     /// <param name="key"></param>
