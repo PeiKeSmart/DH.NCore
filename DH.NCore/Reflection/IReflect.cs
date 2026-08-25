@@ -893,7 +893,7 @@ public class DefaultReflect : IReflect
     #endregion
 
     #region 对象拷贝
-    private static Dictionary<Type, IDictionary<String, PropertyInfo>> _properties = [];
+    private static readonly ConcurrentDictionary<Type, IDictionary<String, PropertyInfo>> _properties = new();
     /// <summary>从源对象拷贝数据到目标对象。针对IModel优化</summary>
     /// <remarks>
     /// 来源或目标对象为IModel时，借助IModel的索引器来取值赋值，提升性能。
@@ -909,12 +909,10 @@ public class DefaultReflect : IReflect
         var targetType = target.GetType();
         // 基础类型无法拷贝
         if (targetType.IsBaseType()) throw new XException("The base type {0} cannot be copied", targetType.FullName);
-        if (!_properties.TryGetValue(targetType, out var targetProperties))
-            _properties[targetType] = targetProperties = targetType.GetProperties(true).ToDictionary(e => e.Name, e => e);
+        var targetProperties = _properties.GetOrAdd(targetType, key => key.GetProperties(true).ToDictionary(e => e.Name, e => e));
 
         var sourceType = source.GetType();
-        if (!_properties.TryGetValue(sourceType, out var sourceProperties))
-            _properties[sourceType] = sourceProperties = sourceType.GetProperties(true).ToDictionary(e => e.Name, e => e);
+        var sourceProperties = _properties.GetOrAdd(sourceType, key => key.GetProperties(true).ToDictionary(e => e.Name, e => e));
 
         // 不是深度拷贝时，直接复制引用
         if (!deep)
@@ -987,7 +985,10 @@ public class DefaultReflect : IReflect
                     }
 
                     if (pi.PropertyType.IsArray)
-                        ArrayCopy(v, obj, deep);
+                    {
+                        v = ArrayCopy(v, obj, deep);
+                        SetValue(target, pi, v);
+                    }
                     else if (typeof(IDictionary).IsAssignableFrom(pi.PropertyType) ||
                         (pi.PropertyType.IsGenericType &&
                         pi.PropertyType.GetGenericTypeDefinition() == typeof(Dictionary<,>)))
@@ -1006,10 +1007,14 @@ public class DefaultReflect : IReflect
     /// <param name="targetArray"></param>
     /// <param name="sourceArray"></param>
     /// <param name="deep"></param>
-    private void ArrayCopy(Object targetArray, Object? sourceArray, Boolean deep)
+    private Object? ArrayCopy(Object targetArray, Object? sourceArray, Boolean deep)
     {
         if (targetArray is Array tarArr && sourceArray is Array srcArr)
         {
+            // 目标数组长度不足时，按源数组长度重建，避免越界
+            if (tarArr.Length < srcArr.Length)
+                tarArr = (Array)CreateInstance(GetElementType(tarArr.GetType())!, srcArr.Length);
+
             // 清空目标数组
             Array.Clear(tarArr, 0, tarArr.Length);
 
@@ -1031,7 +1036,10 @@ public class DefaultReflect : IReflect
                     Copy(tarValue!, srcValue!, deep);
                 }
             }
+
+            return tarArr;
         }
+        return targetArray;
     }
 
     /// <summary>字典拷贝</summary>
