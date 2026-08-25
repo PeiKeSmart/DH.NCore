@@ -154,4 +154,47 @@ public class PKCS7PaddingTransformTests
         // 16字节输入 + 16字节填充 = 32字节
         Assert.Equal(32, result.Length);
     }
+
+    /// <summary>单块转换器包装。CanTransformMultipleBlocks=false 用于覆盖多块末尾拷贝路径</summary>
+    private sealed class SingleBlockTransform(ICryptoTransform inner) : ICryptoTransform
+    {
+        public Boolean CanReuseTransform => inner.CanReuseTransform;
+
+        public Boolean CanTransformMultipleBlocks => false;
+
+        public Int32 InputBlockSize => inner.InputBlockSize;
+
+        public Int32 OutputBlockSize => inner.OutputBlockSize;
+
+        public Int32 TransformBlock(Byte[] inputBuffer, Int32 inputOffset, Int32 inputCount, Byte[] outputBuffer, Int32 outputOffset)
+            => inner.TransformBlock(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
+
+        public Byte[] TransformFinalBlock(Byte[] inputBuffer, Int32 inputOffset, Int32 inputCount)
+            => inner.TransformFinalBlock(inputBuffer, inputOffset, inputCount);
+
+        public void Dispose() => inner.Dispose();
+    }
+
+    [Fact(DisplayName = "多块加密在单块转换器下往返正确")]
+    public void MultiBlockWithSingleBlockTransformRoundTrip()
+    {
+        using var aes = Aes.Create();
+        aes.Mode = CipherMode.ECB;
+        aes.Padding = PaddingMode.None;
+
+        // 40 字节 → 填充到 48 字节（3 块），触发 TransformFinalBlock 的多块手动路径
+        var input = new Byte[40];
+        new Random(42).NextBytes(input);
+
+        using var encInner = new SingleBlockTransform(aes.CreateEncryptor());
+        using var enc = new PKCS7PaddingTransform(encInner, PaddingMode.PKCS7, true);
+        var encrypted = enc.TransformFinalBlock(input, 0, input.Length);
+        Assert.Equal(48, encrypted.Length);
+
+        using var decInner = new SingleBlockTransform(aes.CreateDecryptor());
+        using var dec = new PKCS7PaddingTransform(decInner, PaddingMode.PKCS7, false);
+        var decrypted = dec.TransformFinalBlock(encrypted, 0, encrypted.Length);
+
+        Assert.Equal(input, decrypted);
+    }
 }

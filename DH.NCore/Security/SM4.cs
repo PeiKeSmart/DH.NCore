@@ -238,7 +238,7 @@ public class SM4Transform : ICryptoTransform
     public SM4Transform(Byte[] key, Byte[]? iv, Boolean encryptMode)
     {
         if (key == null || key.Length != 16) throw new ArgumentException(nameof(key), "Key must be a 16-byte array.");
-        if (iv != null && iv.Length != 16) throw new ArgumentException(nameof(key), "IV must be a 16-byte array.");
+        if (iv != null && iv.Length != 16) throw new ArgumentException(nameof(iv), "IV must be a 16-byte array.");
 
         ExpandKey(encryptMode, key);
 

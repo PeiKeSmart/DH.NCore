@@ -56,7 +56,8 @@ public sealed class Crc16
     /// </param>
     public Crc16 Update(Int16 value)
     {
-        Value = (UInt16)((Value << 8) ^ CrcTable[((Value >> 8) ^ value)]);
+        // 只取低8位作为索引，否则 value 超出 0~255 时查表越界（文档声明取低8位）
+        Value = (UInt16)((Value << 8) ^ CrcTable[((Value >> 8) ^ value) & 0xFF]);
 
         return this;
     }
@@ -194,8 +195,11 @@ public sealed class Crc16
         Byte b;
 
         if (count <= 0) count = data.Length - offset;
+        if (offset < 0 || offset > data.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+        if (count < 0 || offset + count > data.Length) throw new ArgumentOutOfRangeException(nameof(count));
 
-        for (var i = offset; i < count; i++)
+        // 循环上界必须是 offset + count，原实现 i < count 在 offset > 0 时只校验部分字节甚至完全不校验
+        for (var i = offset; i < offset + count; i++)
         {
             b = data[i];
             u = (UInt16)(crc_ta[(b ^ u) & 15] ^ (u >> 4));

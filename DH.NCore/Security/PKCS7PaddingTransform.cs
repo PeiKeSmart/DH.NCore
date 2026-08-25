@@ -158,8 +158,10 @@ public sealed class PKCS7PaddingTransform : ICryptoTransform
                     _transform.TransformBlock(cipherBlock, i * InputBlockSize, InputBlockSize, returnData, i * OutputBlockSize);
 
                 var lastBlock = _transform.TransformFinalBlock(cipherBlock, cipherBlockLength - InputBlockSize, InputBlockSize);
-                Array.Resize(ref returnData, returnData.Length + lastBlock.Length);
-                Array.Copy(lastBlock, 0, returnData, OutputBlockSize, lastBlock.Length);
+                // 拷贝目标偏移必须是剩余块起点，原实现固定 OutputBlockSize 会覆盖前一块并留零块
+                var dataOffset = returnData.Length;
+                Array.Resize(ref returnData, dataOffset + lastBlock.Length);
+                Array.Copy(lastBlock, 0, returnData, dataOffset, lastBlock.Length);
                 return returnData;
             }
             finally

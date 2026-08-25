@@ -194,7 +194,8 @@ public class Asn1
     public Byte[]? GetByteArray(Boolean trimZero = false)
     {
         var buf = Value as Byte[];
-        if (buf != null && trimZero && buf[0] == 0) buf = buf.ReadBytes(1, buf.Length - 1);
+        // 空数组时 buf[0] 越界，须先判长度
+        if (buf != null && trimZero && buf.Length > 0 && buf[0] == 0) buf = buf.ReadBytes(1, buf.Length - 1);
 
         return buf;
     }

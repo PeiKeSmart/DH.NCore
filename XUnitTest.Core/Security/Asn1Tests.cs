@@ -182,4 +182,15 @@ public class Asn1Tests
         Assert.NotNull(asn);
         Assert.Equal(Asn1Tags.Integer, asn.Tag);
     }
+
+    [Fact(DisplayName = "GetByteArray空缓冲不越界")]
+    public void GetByteArrayEmptyBuffer()
+    {
+        // 空数组时 trimZero 不应访问 buf[0] 导致越界
+        var asn = new Asn1 { Tag = Asn1Tags.Integer, Value = Array.Empty<Byte>() };
+        var bytes = asn.GetByteArray(true);
+
+        Assert.NotNull(bytes);
+        Assert.Empty(bytes);
+    }
 }

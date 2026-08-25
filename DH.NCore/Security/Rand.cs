@@ -55,8 +55,9 @@ public static class Rand
 
         var n = BitConverter.ToInt32(_buf, 0);
         if (min == Int32.MinValue && max == Int32.MaxValue) return n;
-        if (min == 0 && max == Int32.MaxValue) return Math.Abs(n);
-        if (min == Int32.MinValue && max == 0) return -Math.Abs(n);
+        // Math.Abs(Int32.MinValue) 会抛 OverflowException，改用掩码取绝对值（极低概率但必现崩溃）
+        if (min == 0 && max == Int32.MaxValue) return n & Int32.MaxValue;
+        if (min == Int32.MinValue && max == 0) return -(n & Int32.MaxValue);
 
         var num = max - min;
         // 不要进行复杂运算，看做是生成从0到(max-min)的随机数，然后再加上min即可
