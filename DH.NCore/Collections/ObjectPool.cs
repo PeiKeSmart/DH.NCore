@@ -172,8 +172,14 @@ public class ObjectPool<T> : DisposeBase, IPool<T> where T : notnull
             {
                 // 获取一个 Item（优先从空闲池复用，否则新建）
                 if (!TryAcquireFree(out var pi))
+                {
                     pi = new Item { Value = OnCreate(), CreatedTime = TimerX.Now };
+                    // 创建失败时抛异常，由外层 catch 释放槽位，避免无限循环并永久占用槽位
+                    if (pi.Value == null)
+                        throw new InvalidOperationException($"[ObjectPool:{Name}] Unable to create instance of [{typeof(T).FullName}]");
+                }
 
+                // 空闲池中可能残留 null 项，跳过重试
                 if (pi.Value == null) continue;
 
                 // 生命周期检查（新建项 CreatedTime=now，不会误淘汰）
@@ -223,8 +229,14 @@ public class ObjectPool<T> : DisposeBase, IPool<T> where T : notnull
 
                 // 获取一个 Item（优先从空闲池复用，否则新建）
                 if (!TryAcquireFree(out var pi))
+                {
                     pi = new Item { Value = await OnCreateAsync(cancellationToken).ConfigureAwait(false), CreatedTime = TimerX.Now };
+                    // 创建失败时抛异常，由外层 catch 释放槽位，避免无限循环并永久占用槽位
+                    if (pi.Value == null)
+                        throw new InvalidOperationException($"[ObjectPool:{Name}] Unable to create instance of [{typeof(T).FullName}]");
+                }
 
+                // 空闲池中可能残留 null 项，跳过重试
                 if (pi.Value == null) continue;
 
                 // 生命周期检查（新建项 CreatedTime=now，不会误淘汰）
