@@ -107,12 +107,14 @@ public class WebSocket
         // 如果 Ping 有负载，保留引用以便后续回显 Pong
         var pingPayload = message.Type == WebSocketMessageType.Ping ? message.Payload : null;
 
-        // 释放内存
-        message.Payload?.TryDispose();
-
         var session = Context?.Connection;
         var socket = Context?.Socket;
-        if (session == null && socket == null) return;
+        if (session == null && socket == null)
+        {
+            // 释放内存
+            message.Payload?.TryDispose();
+            return;
+        }
 
         switch (message.Type)
         {
@@ -138,6 +140,9 @@ public class WebSocket
                 }
                 break;
         }
+
+        // 释放内存。Ping 负载在 Pong 发送之后才释放，避免使用已归还的缓冲
+        message.Payload?.TryDispose();
     }
 
     private void Send(WebSocketMessage msg)
