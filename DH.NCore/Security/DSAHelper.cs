@@ -77,9 +77,9 @@ public static class DSAHelper
                 case "G": parameters.G = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
                 case "Y": parameters.Y = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
                 case "Seed": parameters.Seed = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
-                // ToXmlStringX 写入的是 PgenCounter（.NET 标准标签），同时兼容旧版 Counter
+                // PgenCounter 有两种格式：本库 ToXmlStringX 写入的十进制整数，以及历史/外部密钥写入的 Base64 编码整数
                 case "PgenCounter":
-                case "Counter": parameters.Counter = String.IsNullOrEmpty(node.InnerText) ? 0 : Convert.ToInt32(node.InnerText); break;
+                case "Counter": parameters.Counter = ParseCounter(node.InnerText); break;
                 case "X": parameters.X = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
             }
         }
@@ -103,6 +103,32 @@ public static class DSAHelper
             parameters.Seed != null ? Convert.ToBase64String(parameters.Seed) : null,
             parameters.Counter,
             parameters.X != null ? Convert.ToBase64String(parameters.X) : null);
+    }
+
+    /// <summary>解析DSA计数器</summary>
+    /// <remarks>
+    /// 兼容两种格式：十进制整数（本库 ToXmlStringX 写入），以及 Base64 编码整数（历史密钥或外部工具写入，如旧版 NewLife / OpenSSL 转换）。
+    /// Counter 仅用于密钥生成验证，不影响签名验签，解析失败时返回 0。
+    /// </remarks>
+    /// <param name="text">XML 节点文本</param>
+    /// <returns>计数器</returns>
+    static Int32 ParseCounter(String text)
+    {
+        if (String.IsNullOrEmpty(text)) return 0;
+        if (Int32.TryParse(text, out var counter)) return counter;
+
+        // Base64 编码的整数，可能不足 4 字节，按小端补零
+        try
+        {
+            var buf = Convert.FromBase64String(text);
+            if (buf.Length == 0) return 0;
+            if (buf.Length >= 4) return BitConverter.ToInt32(buf, 0);
+
+            var arr = new Byte[4];
+            Buffer.BlockCopy(buf, 0, arr, 0, buf.Length);
+            return BitConverter.ToInt32(arr, 0);
+        }
+        catch { return 0; }
     }
     #endregion
 }
