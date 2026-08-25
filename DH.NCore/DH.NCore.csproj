@@ -30,7 +30,7 @@
     <RepositoryUrl>https://github.com/PeiKeSmart/DH.NCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>湖北登灏科技有限公司;DH组件;DH;$(AssemblyName)</PackageTags>
-    <PackageReleaseNotes>新增 System.Text.Json 对 IDictionarySource 序列化及 ISO 8601 DateTime 格式支持；XmlConfig/JsonConfig 支持原子写入，FileConfigProvider 增强并发安全；优化 HttpContent 埋点标签提取逻辑；修复 SystemJson.Parse 对象类型解析错误及数组序列化 null 元素忽略问题；统一测试并发控制简化配置</PackageReleaseNotes>
+    <PackageReleaseNotes>引入 HTTP 中间件机制，支持 CORS 与统一错误处理、参数化路由、多方法注册、Controller 依赖注入及内嵌资源静态文件服务；连接池架构升级支持池满阻塞与生命周期回收，ObjectPool 信号量限流重构；WebSocket 完善掩码与心跳机制，ProcessHelper 宿主进程识别增强；新增 UInt24 读写、GeoPoint 值类型优化，移除过时接口；修复 PKCS7 填充、MemoryCache 持久化、JSON null 元素、Cron 死循环、CacheLock 锁令牌、Rand 加密安全随机数等 40+ 处缺陷；全量测试 2558 项全部通过并补充核心类型契约测试</PackageReleaseNotes>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
