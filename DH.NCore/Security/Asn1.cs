@@ -219,8 +219,16 @@ public class Asn1
             len = reader.ReadByte();
         else if (len == 0x82)
             len = reader.ReadBytes(2).ToUInt16(0, false);
+        else if (len == 0x83)
+        {
+            // 长格式3字节长度。DER合法编码，长度超过65535时使用，原实现缺失导致解析错位
+            var b = reader.ReadBytes(3);
+            len = (b[0] << 16) | (b[1] << 8) | b[2];
+        }
         else if (len == 0x84)
             len = (Int32)reader.ReadBytes(4).ToUInt32(0, false);
+        else if (len == 0x80)
+            throw new NotSupportedException("不支持BER不定长编码（0x80）");
 
         return len;
     }
