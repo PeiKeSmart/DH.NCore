@@ -9,6 +9,10 @@ public class CacheLock : DisposeBase
     /// <summary>是否持有锁</summary>
     public Boolean HasLock => _hasLock;
 
+    private String _token = "";
+    /// <summary>锁令牌。用于释放时校验归属，避免误删超时后被其它进程接管的锁</summary>
+    public String Token => _token;
+
     /// <summary>键</summary>
     public String Key { get; set; }
 
@@ -33,24 +37,35 @@ public class CacheLock : DisposeBase
         var ch = Client;
         var now = Runtime.TickCount64;
 
+        // 生成唯一令牌，释放时校验归属，避免锁超时被接管后误删新持有者的锁
+        var token = Guid.NewGuid().ToString("N");
+        // 锁值格式：令牌|绝对过期毫秒。缓存TTL向上取整，避免小于1秒的锁因取整为0而立即失效
+        var value = $"{token}|{now + msExpire}";
+        var expire = msExpire > 0 ? (msExpire + 999) / 1000 : 0;
+
         // 循环等待
         var end = now + msTimeout;
         while (now < end)
         {
             // 申请加锁。没有冲突时可以直接返回
-            var rs = ch.Add(Key, now + msExpire, msExpire / 1000);
-            if (rs) return _hasLock = true;
+            var rs = ch.Add(Key, value, expire);
+            if (rs)
+            {
+                _token = token;
+                return _hasLock = true;
+            }
 
             // 死锁超期检测
-            var dt = ch.Get<Int64>(Key);
+            var dt = ParseExpire(ch.Get<String>(Key));
             if (dt <= now)
             {
                 // 开抢死锁。所有竞争者都会修改该锁的时间戳，但是只有一个能拿到旧的超时的值
-                var old = ch.Replace(Key, now + msExpire);
+                var old = ParseExpire(ch.Replace(Key, value));
                 // 如果拿到超时值，说明抢到了锁。其它线程会抢到一个为超时的值
                 if (old <= dt)
                 {
                     ch.SetExpire(Key, TimeSpan.FromMilliseconds(msExpire));
+                    _token = token;
                     return _hasLock = true;
                 }
             }
@@ -62,6 +77,19 @@ public class CacheLock : DisposeBase
         }
 
         return false;
+    }
+
+    /// <summary>解析锁值中的过期时间戳。兼容旧格式（纯数字时间戳）</summary>
+    /// <param name="value">锁值</param>
+    /// <returns>过期时间戳（毫秒）</returns>
+    private static Int64 ParseExpire(String? value)
+    {
+        if (value.IsNullOrEmpty()) return 0;
+
+        var p = value.IndexOf('|');
+        var str = p > 0 ? value[(p + 1)..] : value;
+
+        return str.ToLong();
     }
 
     /// <summary>销毁</summary>
@@ -76,9 +104,11 @@ public class CacheLock : DisposeBase
         }
         else
         {
-            if (_hasLock)
+            if (_hasLock && !_token.IsNullOrEmpty())
             {
-                Client.Remove(Key);
+                // 仅当锁仍由本实例持有时才删除，避免误删超时后被其它进程接管的锁
+                var str = Client.Get<String>(Key);
+                if (str != null && str.StartsWith(_token + "|")) Client.Remove(Key);
             }
         }
     }
