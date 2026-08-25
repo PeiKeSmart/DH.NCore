@@ -21,7 +21,9 @@ public static class BitHelper
     /// <returns></returns>
     public static UInt16 SetBits(this UInt16 value, Int32 position, Int32 length, UInt16 bits)
     {
-        if (length <= 0 || position >= 16) return value;
+        if (length <= 0 || position < 0 || position >= 16) return value;
+        // 防止 position+length 超过 16 位时掩码移位溢出，截断到合法范围
+        if (position + length > 16) length = 16 - position;
 
         var mask = (2 << (length - 1)) - 1;
 
@@ -64,7 +66,9 @@ public static class BitHelper
     /// <returns></returns>
     public static UInt16 GetBits(this UInt16 value, Int32 position, Int32 length)
     {
-        if (length <= 0 || position >= 16) return 0;
+        if (length <= 0 || position < 0 || position >= 16) return 0;
+        // 防止 position+length 超过 16 位时掩码溢出，截断到合法范围
+        if (position + length > 16) length = 16 - position;
 
         var mask = (2 << (length - 1)) - 1;
 

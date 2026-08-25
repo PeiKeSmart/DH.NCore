@@ -462,7 +462,7 @@ public class TarEntry
                 var written = Encoding.ASCII.GetBytes(FileName, 0, FileName.Length, longName, 0);
                 stream.Write(longName, 0, written);
 
-                var padding = 512 - written % 512;
+                var padding = (512 - written % 512) % 512;
                 if (padding > 0)
                     WritePadding(stream, padding);
             }

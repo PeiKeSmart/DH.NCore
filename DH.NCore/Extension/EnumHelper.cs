@@ -94,7 +94,18 @@ public static class EnumHelper
         {
             if (!field.IsStatic) continue;
 
-            var enumValue = Convert.ToInt32(field.GetValue(null));
+            // 兼容所有枚举底层类型，避免 UInt64/Int64 大值或负数转换溢出
+            var enumValue = field.GetValue(null) switch
+            {
+                UInt64 ul => unchecked((Int32)ul),
+                UInt32 u => unchecked((Int32)u),
+                Int64 l => unchecked((Int32)l),
+                Int16 i16 => i16,
+                UInt16 u16 => u16,
+                SByte sb => sb,
+                Byte b => b,
+                var v => Convert.ToInt32(v),
+            };
 
             // 优先使用 DisplayNameAttribute
             var displayName = field.GetCustomAttribute<DisplayNameAttribute>(false);
