@@ -88,7 +88,7 @@ public sealed class Crc32 //: HashAlgorithm
     {
         if (buffer == null) throw new ArgumentNullException(nameof(buffer));
         //if (count < 0) throw new ArgumentOutOfRangeException("count", "Count不能小于0！");
-        if (count < 0) count = buffer.Length;
+        if (count < 0) count = buffer.Length - offset;
         if (offset < 0 || offset + count > buffer.Length) throw new ArgumentOutOfRangeException(nameof(offset));
 
         while (--count >= 0)
@@ -119,7 +119,7 @@ public sealed class Crc32 //: HashAlgorithm
     {
         if (stream == null) throw new ArgumentNullException(nameof(stream));
         //if (count < 0) throw new ArgumentOutOfRangeException("count", "Count不能小于0！");
-        if (count <= 0) count = Int64.MaxValue;
+        if (count < 0) count = Int64.MaxValue;
 
         while (--count >= 0)
         {
