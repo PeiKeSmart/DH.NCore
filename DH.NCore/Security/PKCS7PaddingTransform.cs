@@ -123,8 +123,10 @@ public sealed class PKCS7PaddingTransform : ICryptoTransform
     {
         if (_encryptMode)
         {
-            if (inputCount == 0) return [];
+            //if (inputCount == 0) return [];
 
+            // 整倍块长时 inputCount 可能为 0，PKCS7 仍须追加完整填充块（标准要求），不能提前返回空。
+            // paddingLength 在整倍块长时为 InputBlockSize，生成完整填充块
             var paddingLength = InputBlockSize - (inputCount % InputBlockSize);
             var paddingValue = _mode switch
             {
