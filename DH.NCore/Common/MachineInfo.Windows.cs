@@ -85,6 +85,9 @@ public partial class MachineInfo
 
 #if NETFRAMEWORK || NET6_0_OR_GREATER
     /// <summary>从注册表读取硬件信息（GUID/UUID/Vendor/Product/Processor）并做 csproduct 兜底</summary>
+#if NET5_0_OR_GREATER
+    [SupportedOSPlatform("windows")]
+#endif
     private void LoadHardwareFromRegistry()
     {
         var str = "";
