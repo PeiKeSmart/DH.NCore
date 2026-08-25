@@ -149,8 +149,13 @@ public class EventHub<TEvent> : IEventHandler<IPacket>, IEventHandler<String>, I
 
         var ok = await bus.UnsubscribeAsync(clientId, cancellationToken).ConfigureAwait(false);
 
-        // 取消后若已无订阅者且为默认实现，移除总线避免泄漏
-        if (bus is EventBus<TEvent> eb && eb.Handlers.Count == 0) _eventBuses.TryRemove(topic, out _);
+        // 取消后若已无订阅者且为默认实现，移除总线避免泄漏。
+        // 采用"先移除再复查放回"缩小检查-再行动窗口：若移除后恰好有并发订阅注册到该总线，则重新放回
+        if (bus is EventBus<TEvent> eb && eb.Handlers.Count == 0)
+        {
+            if (_eventBuses.TryRemove(topic, out _) && eb.Handlers.Count > 0)
+                _eventBuses.TryAdd(topic, eb);
+        }
 
         return ok;
     }
@@ -382,8 +387,13 @@ public class EventHub<TEvent> : IEventHandler<IPacket>, IEventHandler<String>, I
         }
         finally
         {
-            // 等待完成后若无其他订阅者，移除总线避免泄漏
-            if (bus is EventBus<TEvent> eb && eb.Handlers.Count == 0) _eventBuses.TryRemove(topic, out _);
+            // 等待完成后若无其他订阅者，移除总线避免泄漏。
+            // 采用"先移除再复查放回"缩小检查-再行动窗口，避免并发订阅丢失
+            if (bus is EventBus<TEvent> eb && eb.Handlers.Count == 0)
+            {
+                if (_eventBuses.TryRemove(topic, out _) && eb.Handlers.Count > 0)
+                    _eventBuses.TryAdd(topic, eb);
+            }
         }
     }
 

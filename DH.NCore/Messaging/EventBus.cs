@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using NewLife.Collections;
 using NewLife.Data;
 using NewLife.Log;
@@ -100,27 +100,33 @@ public class EventBus<TEvent> : DisposeBase, IEventBus, IEventBus<TEvent>, IAsyn
             context = ctx;
         }
         var clientId = (context as EventContext)?.ClientId;
-        foreach (var item in _handlers)
+        try
         {
-            // 不要分发给自己
-            if (clientId != null && clientId == item.Key) continue;
+            foreach (var item in _handlers)
+            {
+                // 不要分发给自己
+                if (clientId != null && clientId == item.Key) continue;
 
-            try
-            {
-                await item.Value.HandleAsync(@event, context, cancellationToken).ConfigureAwait(false);
-                rs++;
-            }
-            catch (Exception ex)
-            {
-                Log?.Error("事件处理器 [{0}] 处理事件时发生异常: {1}", item.Key, ex.Message);
-                if (ThrowOnHandlerError) throw;
+                try
+                {
+                    await item.Value.HandleAsync(@event, context, cancellationToken).ConfigureAwait(false);
+                    rs++;
+                }
+                catch (Exception ex)
+                {
+                    Log?.Error("事件处理器 [{0}] 处理事件时发生异常: {1}", item.Key, ex.Message);
+                    if (ThrowOnHandlerError) throw;
+                }
             }
         }
-
-        if (ctx != null)
+        finally
         {
-            ctx.Reset();
-            _pool.Return(ctx);
+            // 无论正常或异常都归还池化上下文，避免泄漏
+            if (ctx != null)
+            {
+                ctx.Reset();
+                _pool.Return(ctx);
+            }
         }
 
         return rs;
