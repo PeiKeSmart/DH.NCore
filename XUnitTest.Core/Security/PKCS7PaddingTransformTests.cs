@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using NewLife.Security;
 using Xunit;
 
@@ -47,7 +47,7 @@ public class PKCS7PaddingTransformTests
         using var _ = new PKCS7PaddingTransform(inner, PaddingMode.PKCS7, true);
     }
 
-    [Fact(DisplayName = "TransformFinalBlock空数据返回空")]
+    [Fact(DisplayName = "空数据加密追加完整填充块")]
     public void TransformFinalBlockEmptyReturnsEmpty()
     {
         using var aes = Aes.Create();
@@ -56,8 +56,9 @@ public class PKCS7PaddingTransformTests
         using var inner = aes.CreateEncryptor();
         using var target = new PKCS7PaddingTransform(inner, PaddingMode.PKCS7, true);
 
+        // PKCS7 标准要求：空数据加密也必须输出一个完整填充块（16 字节），与 .NET/Java 标准实现互通
         var result = target.TransformFinalBlock([], 0, 0);
-        Assert.Empty(result);
+        Assert.Equal(16, result.Length);
     }
 
     [Fact(DisplayName = "PKCS7加密时填充到块边界")]

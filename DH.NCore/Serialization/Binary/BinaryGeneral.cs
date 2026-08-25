@@ -663,18 +663,24 @@ public class BinaryGeneral : BinaryHandlerBase
         }
 #else
         var buffer = Pool.Shared.Rent(n);
-        if (Host.ReadBytes(buffer, 0, n) == 0) return false;
+        try
+        {
+            if (Host.ReadBytes(buffer, 0, n) == 0) return false;
 
-        var enc = Host.Encoding ?? Encoding.UTF8;
+            var enc = Host.Encoding ?? Encoding.UTF8;
 
-        var str = enc.GetString(buffer);
-        if (Host is Binary bn && bn.TrimZero && str != null) str = str.Trim('\0');
+            // 只解码实际读取的 n 字节，避免 Rent 返回的整块数组尾随垃圾字节
+            var str = enc.GetString(buffer, 0, n);
+            if (Host is Binary bn && bn.TrimZero && str != null) str = str.Trim('\0');
 
-        value = str ?? String.Empty;
+            value = str ?? String.Empty;
 
-        Pool.Shared.Return(buffer);
-
-        return true;
+            return true;
+        }
+        finally
+        {
+            Pool.Shared.Return(buffer);
+        }
 #endif
     }
     #endregion
