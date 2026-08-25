@@ -574,6 +574,8 @@ public class PinYin
 
         _gb2312 ??= Encoding.GetEncoding("gb2312");
         var arr = _gb2312.GetBytes(ch.ToString());
+        // GB2312 未收录的汉字（如龘）在 .NET Core 编码为单个替换字节，arr[1] 会越界
+        if (arr.Length < 2) return ch.ToString();
         var chr = arr[0] * 256 + arr[1] - 65536;
 
         // 单字符--英文或半角字符  

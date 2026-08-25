@@ -75,4 +75,15 @@ public class PinYinTests
         var py = PinYin.GetAll(name);
         Assert.Equal(pinyin, py.Join(""));
     }
+
+    [Fact(DisplayName = "GB2312未收录汉字不越界")]
+    public void RareChar()
+    {
+        // 龘（U+9F98）不在 GB2312 范围内，编码为替换字节时不应越界
+        var py = PinYin.Get('龘');
+        Assert.NotNull(py);
+
+        var first = PinYin.GetFirst("龘");
+        Assert.Equal("龘", first);
+    }
 }
