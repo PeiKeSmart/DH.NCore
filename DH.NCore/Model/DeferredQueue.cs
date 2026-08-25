@@ -249,14 +249,17 @@ public class DeferredQueue : DisposeBase
 
     private void Work(Object? state)
     {
-        var es = _Entities;
+        // 先快速判断原字典是否为空，避免空转（定时周期内通常无数据）时也实例化新字典
+        if (_Entities.IsEmpty) return;
+
+        // 原子交换，避免与 Flush 并发时拿到同一批对象导致双重处理。
+        // 预检查与交换之间的窗口由交换后的 es.IsEmpty 二次判断兜底，不会双重处理或丢失
+        var es = Interlocked.Exchange(ref _Entities, new ConcurrentDictionary<String, Object>());
         if (es.IsEmpty) return;
 
-        _Entities = new ConcurrentDictionary<String, Object>();
-        var times = _Times;
+        var times = Interlocked.Exchange(ref _Times, 0);
 
         Interlocked.Add(ref _count, -es.Count);
-        Interlocked.Add(ref _Times, -times);
 
         // 检查繁忙数，等待外部未完成的修改
         var t = WaitForBusy;
