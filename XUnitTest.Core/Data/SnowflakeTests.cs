@@ -368,8 +368,8 @@ public class SnowflakeTests
 
         try
         {
-            // 测试有效范围内的全局Id
-            var testId = Rand.Next(0, 1024);
+            // 测试有效范围内的全局Id。注意排除0：GlobalWorkerId=0 表示未设置，会回退到 IP+进程计算
+            var testId = Rand.Next(1, 1024);
             Snowflake.GlobalWorkerId = testId;
 
             var snowflake = new Snowflake();
