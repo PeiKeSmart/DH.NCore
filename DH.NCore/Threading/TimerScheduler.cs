@@ -218,16 +218,21 @@ public class TimerScheduler : IDisposable, ILogFeature
             // 准备好定时器列表
             var arr = Timers;
 
-            // 如果没有任务，则销毁线程
+            // 如果没有任务，则销毁线程。在锁内重新检查并置空，避免与 Add 并发时：
+            // Add 看到旧线程非空而不创建新线程，随后本线程销毁导致新定时器无人消费
             if (arr.Length == 0 && _period == 60_000)
             {
-                WriteLog("没有可用任务，销毁线程");
+                lock (this)
+                {
+                    if (Timers.Length == 0 && _period == 60_000)
+                    {
+                        WriteLog("没有可用任务，销毁线程");
 
-                var th = thread;
-                thread = null;
-                //th?.Abort();
+                        thread = null;
 
-                break;
+                        break;
+                    }
+                }
             }
 
             try

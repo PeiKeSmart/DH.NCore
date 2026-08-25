@@ -71,7 +71,9 @@ public class TimerX : ITimer, IDisposable
     public Boolean Absolutely { get; set; }
 
     /// <summary>调用中。表示回调正在执行</summary>
-    public Boolean Calling { get; internal set; }
+    private volatile Boolean _calling;
+    /// <summary>是否正在执行。由执行线程写入、调度线程读取，volatile 保证跨线程可见，防止重复触发</summary>
+    public Boolean Calling { get => _calling; internal set => _calling = value; }
 
     /// <summary>平均耗时。毫秒</summary>
     public Int32 Cost { get; internal set; }
@@ -316,8 +318,8 @@ public class TimerX : ITimer, IDisposable
     #endregion
 
     #region 方法
-    /// <summary>是否已设置下一次时间</summary>
-    internal Boolean hasSetNext;
+    /// <summary>是否已设置下一次时间。volatile 发布-获取语义同时保证 <see cref="_nextTick"/> 的跨线程可见性</summary>
+    internal volatile Boolean hasSetNext;
 
     private void SetNextTick(Int64 ms)
     {
