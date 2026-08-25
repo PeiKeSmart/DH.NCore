@@ -72,6 +72,7 @@ public class LengthFieldCodec : MessageCodec<IPacket>
                 writer.Write(encodedLen);
                 break;
             case 1:
+            case -1:
                 writer.WriteByte((Byte)dlen);
                 break;
             case 2:

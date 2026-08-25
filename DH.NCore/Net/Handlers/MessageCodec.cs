@@ -258,6 +258,7 @@ public class MessageCodec<T> : Handler
                 len = reader.ReadEncodedInt() + reader.Position - p;
                 break;
             case 1:
+            case -1:
                 len = reader.ReadByte();
                 break;
             case 2:

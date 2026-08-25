@@ -104,7 +104,8 @@ public class WebClientX : DisposeBase
         }
 
         // 发送请求
-        using var ctx = CancellationTokenSource.CreateLinkedTokenSource(new CancellationTokenSource(Timeout).Token, cancellationToken);
+        using var cts = new CancellationTokenSource(Timeout);
+        using var ctx = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
         var rs = await http.SendAsync(request, ctx.Token).ConfigureAwait(false);
 
         if (rs.StatusCode < HttpStatusCode.BadRequest)
