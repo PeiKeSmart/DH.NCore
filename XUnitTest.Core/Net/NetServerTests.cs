@@ -963,6 +963,27 @@ public class NetServerTests
         Assert.True(server.Port > 0);
         Assert.True(server.Port < 65536);
     }
+
+    /// <summary>反复随机端口启停，验证端口分配与回收稳定</summary>
+    [Fact]
+    public void RandomPortRepeatedStartStop()
+    {
+        // 随机端口可能落入系统保留段，OnStart 内置有界重试，反复启停不应失败
+        for (var i = 0; i < 5; i++)
+        {
+            using var server = new NetServer
+            {
+                Port = 0,
+                ProtocolType = NetType.Tcp,
+                Log = XTrace.Log,
+            };
+
+            server.Start();
+            Assert.True(server.Port > 0);
+
+            server.Stop("测试重启");
+        }
+    }
     #endregion
 
     #region ToString测试
