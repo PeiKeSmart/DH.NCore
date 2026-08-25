@@ -80,4 +80,16 @@ public class Crc16Tests
         var expected = Crc16.ComputeModbus(sub, 0);
         Assert.Equal(expected, crc);
     }
+
+    [Fact(DisplayName = "超大 count 不绕过边界校验")]
+    public void Update_OverflowCount_Throws()
+    {
+        var data = "123456789"u8.ToArray();
+        var crc = new Crc16();
+
+        // offset+count 溢出为负数时旧实现会绕过校验并越界读
+        Assert.Throws<ArgumentOutOfRangeException>(() => crc.Update(data, 1, Int32.MaxValue));
+        Assert.Throws<ArgumentOutOfRangeException>(() => crc.Update(data, 9, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => crc.Update(data, -1, 0));
+    }
 }

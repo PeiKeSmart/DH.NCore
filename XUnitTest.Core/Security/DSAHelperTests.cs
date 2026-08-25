@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using NewLife.Security;
 using Xunit;
@@ -78,5 +78,22 @@ public class DSAHelperTests
         dsa2.FromXmlStringX(xmlPrivate);
         var param2 = dsa2.ExportParameters(true);
         Assert.NotNull(param2.X);
+    }
+
+    [Fact(DisplayName = "PgenCounter与Counter兼容读取")]
+    public void PgenCounterRoundTrip()
+    {
+        var dsa = new DSACryptoServiceProvider(1024);
+        var xml = dsa.ToXmlStringX(true);
+        Assert.Contains("<PgenCounter>", xml);
+
+        var src = dsa.ExportParameters(true);
+
+        // 导入自产 XML，Counter/Seed 应保持
+        var dsa2 = new DSACryptoServiceProvider();
+        dsa2.FromXmlStringX(xml);
+        var dst = dsa2.ExportParameters(true);
+        Assert.Equal(src.Counter, dst.Counter);
+        Assert.Equal(src.Seed, dst.Seed);
     }
 }

@@ -77,7 +77,9 @@ public static class DSAHelper
                 case "G": parameters.G = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
                 case "Y": parameters.Y = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
                 case "Seed": parameters.Seed = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
-                case "Counter": parameters.Counter = Convert.ToInt32(node.InnerText); break;
+                // ToXmlStringX 写入的是 PgenCounter（.NET 标准标签），同时兼容旧版 Counter
+                case "PgenCounter":
+                case "Counter": parameters.Counter = String.IsNullOrEmpty(node.InnerText) ? 0 : Convert.ToInt32(node.InnerText); break;
                 case "X": parameters.X = (String.IsNullOrEmpty(node.InnerText) ? null : Convert.FromBase64String(node.InnerText)); break;
             }
         }

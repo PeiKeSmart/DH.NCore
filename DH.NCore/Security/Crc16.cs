@@ -71,7 +71,8 @@ public sealed class Crc16
     {
         if (buffer == null) throw new ArgumentNullException(nameof(buffer));
         if (count < 0) count = buffer.Length - offset;
-        if (offset < 0 || offset + count > buffer.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+        // 用减法形式避免 offset+count 溢出后绕过校验导致越界读
+        if (offset < 0 || offset > buffer.Length || count < 0 || count > buffer.Length - offset) throw new ArgumentOutOfRangeException(nameof(offset));
 
         var crc = (UInt16)(Value ^ CrcSeed);
         for (var i = 0; i < count; i++)
@@ -98,7 +99,7 @@ public sealed class Crc16
         return this;
     }
 
-    /// <summary>添加数据流进行校验，不查表计算  CRC-16 x16+x15+x2+1 8005 IBM SDLC</summary>
+    /// <summary>添加数据流进行校验，与字节数组版本一致使用查表法（CRC16-CCITT 0x1021）</summary>
     /// <param name="stream"></param>
     /// <param name="count">数量</param>
     public Crc16 Update(Stream stream, Int64 count = -1)
@@ -168,7 +169,9 @@ public sealed class Crc16
         if (position >= 0)
         {
             if (count > 0) count = -count;
-            count += (Int32)(stream.Position - position);
+            // Int64 累加避免大流（>2GB）回绕，结果钳制回 Int32
+            var n = (Int64)count + (stream.Position - position);
+            count = n > Int32.MaxValue ? Int32.MaxValue : (Int32)n;
             stream.Position = position;
         }
 
