@@ -200,7 +200,8 @@ public class XmlGeneral : XmlHandlerBase
                 value = v.ToDateTime();
                 return true;
             case TypeCode.Decimal:
-                value = (Decimal)v.ToDouble();
+                // 直接转 Decimal 保真，经 Double 中转会丢失精度（Decimal 高达 28-29 位有效数字）
+                value = v.ToDecimal();
                 return true;
             case TypeCode.Double:
                 value = v.ToDouble();

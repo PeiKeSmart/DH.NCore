@@ -195,7 +195,23 @@ public class RaceLoadBalancer : LoadBalancerBase, ITracerFeature
         {
             var uri = new Uri(service.Address, ProbePath + "");
             var func = ProbeAsync ?? ExecuteProbeAsync;
-            var rtt = await func(uri, cancellationToken).ConfigureAwait(false);
+
+            // 自定义探测委托抛异常时不应击穿整次竞速调用，按失败处理
+            TimeSpan? rtt;
+            try
+            {
+                rtt = await func(uri, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                MarkFailure(service, ex);
+                return;
+            }
+
             if (rtt != null)
                 MarkSuccess(service, rtt.Value);
             else
