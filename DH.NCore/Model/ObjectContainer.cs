@@ -87,6 +87,34 @@ public class ObjectContainer : IObjectContainer
         }
     }
 
+    /// <summary>是否已注册指定服务类型</summary>
+    /// <param name="serviceType">服务类型</param>
+    /// <returns>是否存在</returns>
+    public Boolean ContainsService(Type serviceType)
+    {
+        if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+
+        // 与 Add/TryAdd 使用同一把锁，避免并发注册时遍历 _list 抛集合修改异常
+        lock (_list)
+        {
+            return _list.Any(e => e.ServiceType == serviceType);
+        }
+    }
+
+    /// <summary>获取指定服务类型的所有注册项（线程安全快照）</summary>
+    /// <param name="serviceType">服务类型</param>
+    /// <returns>注册项列表</returns>
+    public IList<IObject> FindServices(Type serviceType)
+    {
+        if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+
+        // 与 Add/TryAdd 使用同一把锁，返回快照避免并发注册时遍历 _list 抛集合修改异常
+        lock (_list)
+        {
+            return _list.Where(e => e.ServiceType == serviceType).ToList();
+        }
+    }
+
     /// <summary>注册服务</summary>
     /// <param name="serviceType">服务类型</param>
     /// <param name="implementationType">实现类型</param>
@@ -116,8 +144,12 @@ public class ObjectContainer : IObjectContainer
     {
         if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
 
-        // 优先查找最后一个，避免重复注册
-        var item = _list.LastOrDefault(e => e.ServiceType == serviceType);
+        // 优先查找最后一个，避免重复注册。与 Add/TryAdd 并发时加锁遍历，避免集合修改异常
+        IObject? item;
+        lock (_list)
+        {
+            item = _list.LastOrDefault(e => e.ServiceType == serviceType);
+        }
         if (item == null) return null;
 
         return Resolve(item, null);
@@ -132,8 +164,12 @@ public class ObjectContainer : IObjectContainer
     {
         if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
 
-        // 优先查找最后一个，避免重复注册
-        var item = _list.LastOrDefault(e => e.ServiceType == serviceType);
+        // 优先查找最后一个，避免重复注册。与 Add/TryAdd 并发时加锁遍历，避免集合修改异常
+        IObject? item;
+        lock (_list)
+        {
+            item = _list.LastOrDefault(e => e.ServiceType == serviceType);
+        }
         if (item == null) return null;
 
         return Resolve(item, serviceProvider);
@@ -353,7 +389,8 @@ internal class ServiceProvider(IObjectContainer container, IServiceProvider? inn
         if (serviceType == typeof(IServiceProvider)) return this;
 
         var ioc = _container as ObjectContainer;
-        if (ioc != null && !ioc.Services.Any(e => e.ServiceType == typeof(IServiceScopeFactory)))
+        // 线程安全查询，避免启动期与并发注册遍历 Services 抛集合修改异常
+        if (ioc != null && !ioc.ContainsService(typeof(IServiceScopeFactory)))
         {
             ioc.TryAdd(new ServiceDescriptor(typeof(IServiceScopeFactory))
             {

@@ -56,17 +56,12 @@ public static class ModelExtension
         var ioc = GetService<ObjectContainer>(provider);
         if (ioc != null)
         {
-            //var list = new List<Object>();
-            //foreach (var item in ioc.Services)
-            //{
-            //    if (item.ServiceType == serviceType) list.Add(ioc.Resolve(item, provider));
-            //}
-            for (var i = ioc.Services.Count - 1; i >= 0; i--)
+            // 线程安全获取注册项快照，避免启动期与并发注册遍历 Services 抛集合修改异常
+            var services = ioc.FindServices(serviceType);
+            for (var i = services.Count - 1; i >= 0; i--)
             {
-                var item = ioc.Services[i];
-                if (item.ServiceType == serviceType) yield return ioc.Resolve(item, provider);
+                yield return ioc.Resolve(services[i], provider);
             }
-            //return list;
         }
         else
         {
