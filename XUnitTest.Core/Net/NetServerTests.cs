@@ -665,7 +665,7 @@ public class NetServerTests
         }
 
         // 至少有一个客户端收到数据
-        Assert.True(receiveCounts.Any(c => c > 0));
+        Assert.Contains(receiveCounts, c => c > 0);
 
         // 清理
         foreach (var client in clients)

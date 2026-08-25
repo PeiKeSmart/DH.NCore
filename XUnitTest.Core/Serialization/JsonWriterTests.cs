@@ -237,7 +237,7 @@ public class JsonWriterTests
     public void ArrayTest()
     {
         var arr = new[] { 12, 34, 56, 78 };
-        var str = JsonWriter.ToJson(arr);
+        var str = JsonWriter.ToJson(arr, new JsonOptions());
         Assert.Equal("[12,34,56,78]", str);
     }
 
@@ -245,7 +245,7 @@ public class JsonWriterTests
     public void Array_匿名()
     {
         var arr = new[] { 12, 34, 56, 78 };
-        var str = JsonWriter.ToJson(arr.Select(e => e + 100));
+        var str = JsonWriter.ToJson(arr.Select(e => e + 100), new JsonOptions());
         Assert.Equal("[112,134,156,178]", str);
     }
 
@@ -261,7 +261,7 @@ public class JsonWriterTests
         dt.Rows.Add(new Object[] { 12, 34, 56, 78 });
         dt.Rows.Add(new Object[] { 87, 65, 43, 32 });
 
-        var str = JsonWriter.ToJson(dt);
+        var str = JsonWriter.ToJson(dt, new JsonOptions());
         Assert.Equal("{\"Columns\":[\"id1\",\"id1\",\"id1\",\"id1\"],\"Rows\":[[12,34,56,78],[87,65,43,32]],\"Total\":1234}", str);
     }
 
@@ -306,7 +306,7 @@ public class JsonWriterTests
             ["back\\slash"] = 2,
             ["new\nline"] = 3,
         };
-        var str = JsonWriter.ToJson(dic);
+        var str = JsonWriter.ToJson(dic, new JsonOptions());
         // 必须可被 JsonParser 正确解析
         var js = new JsonParser(str);
         var parsed = js.Decode() as IDictionary<String, Object>;

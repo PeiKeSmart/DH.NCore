@@ -50,7 +50,7 @@ public class EasyClientTests
         var rs = await client.DeleteAsync(name);
         Assert.Equal(1, rs);
 
-        infs = await client.Search();
+        infs = await client.SearchAsync();
         Assert.NotNull(infs);
         foreach (var item in infs)
         {
