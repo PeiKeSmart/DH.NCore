@@ -232,15 +232,17 @@ public static class ProcessHelper
     {
         // 某些进程可能返回 0，或异常的超大值（损坏/竞争）；做基本防御
         val = default;
-        var size = us.MaximumLength;
-        if (size <= 0) return false;
+        // 用实际字节数 Length 而非 MaximumLength，避免缓冲未以 0 结尾时越界读取
+        var size = us.Length;
+        if (size <= 0 || size > us.MaximumLength) return false;
 
         var ptr = Marshal.AllocHGlobal(size);
         try
         {
             if (ReadProcessMemory(hProcess, us.Buffer, ptr, size, out var len) && len == size)
             {
-                val = Marshal.PtrToStringUni(ptr);
+                // 按实际字符数构造字符串，避免 PtrToStringUni 越过缓冲末尾读取
+                val = Marshal.PtrToStringUni(ptr, size / 2)?.TrimEnd('\0');
                 return true;
             }
         }
