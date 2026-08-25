@@ -103,7 +103,12 @@ public class JsonReader
 
         foreach (var item in vlist)
         {
-            if (item == null) continue;
+            if (item == null)
+            {
+                // 值类型元素添加默认值，引用类型添加 null，保持列表元素位置
+                list.Add(elmType != null && elmType.IsValueType ? elmType.CreateInstance() : null);
+                continue;
+            }
 
             var val = ToObject(item, elmType, null);
             list.Add(val);
@@ -128,7 +133,12 @@ public class JsonReader
         for (var i = 0; i < list.Count && i < arr.Length; i++)
         {
             var item = list[i];
-            if (item == null) continue;
+            if (item == null)
+            {
+                // 值类型元素默认值，引用类型 null，保持数组元素位置
+                arr.SetValue(elmType != null && elmType.IsValueType ? elmType.CreateInstance() : null, i);
+                continue;
+            }
 
             var val = ToObject(item, elmType, arr.GetValue(i));
             arr.SetValue(val, i);

@@ -96,7 +96,7 @@ public class JsonComposite : JsonHandlerBase
             WriteLog("    {0}.{1} {2}", type.Name, member.Name, v);
 
             // 成员访问器优先
-            if (value is IMemberAccessor ac && ac.Read(Host, context)) continue;
+            if (value is IMemberAccessor ac && ac.Write(Host, context)) continue;
 
             if (!Host.Write(v, mtype))
             {
