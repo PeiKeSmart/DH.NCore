@@ -1,4 +1,4 @@
-using NewLife;
+﻿using NewLife;
 using Xunit;
 
 namespace XUnitTest.Extension;
@@ -107,6 +107,16 @@ public class BitHelperTests
     {
         Byte value = 0xFF;
         Assert.False(value.GetBit(8));
+    }
+
+    [Fact(DisplayName = "Byte负位置不破坏原值")]
+    public void Byte_NegativePosition()
+    {
+        Byte value = 0xFF;
+        var result = value.SetBit(-1, false);
+        Assert.Equal(value, result); // 原值不变
+        Assert.True(result.GetBit(7)); // 第7位不被破坏
+        Assert.False(value.GetBit(-1)); // 负位置返回 false 而不是垃圾值
     }
     #endregion
 

@@ -536,6 +536,8 @@ public static class ProcessHelper
                 StandardOutputEncoding = outputEncoding,
                 StandardErrorEncoding = outputEncoding,
             };
+            // 仅需要返回错误输出时才重定向 stderr。无条件重定向但不读取时，子进程 stderr 管道写满会阻塞自身
+            if (returnError) psi.RedirectStandardError = true;
             var process = Process.Start(psi);
             if (process == null) return null;
 

@@ -40,7 +40,8 @@ public static class BitHelper
     /// <returns></returns>
     public static Byte SetBit(this Byte value, Int32 position, Boolean flag)
     {
-        if (position >= 8) return value;
+        // 负位置移位会产生不可预期结果（如 -1 被掩码为 31），必须拦截
+        if (position < 0 || position >= 8) return value;
 
         var mask = (2 << (1 - 1)) - 1;
 
@@ -81,7 +82,7 @@ public static class BitHelper
     /// <returns></returns>
     public static Boolean GetBit(this Byte value, Int32 position)
     {
-        if (position >= 8) return false;
+        if (position < 0 || position >= 8) return false;
 
         var mask = (2 << (1 - 1)) - 1;
 
