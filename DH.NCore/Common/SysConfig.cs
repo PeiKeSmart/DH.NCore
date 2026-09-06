@@ -21,6 +21,7 @@ public class SysConfig : Config<SysConfig>
 
     /// <summary>系统版本</summary>
     [DisplayName("系统版本")]
+    [Description("程序集版本号，用于界面展示")]
     public String Version { get; set; } = "";
 
     /// <summary>显示名称</summary>
@@ -30,22 +31,27 @@ public class SysConfig : Config<SysConfig>
 
     /// <summary>公司</summary>
     [DisplayName("公司")]
+    [Description("公司名称，来自程序集信息")]
     public String Company { get; set; } = "";
 
     /// <summary>应用实例。单应用多实例部署时用于唯一标识实例节点</summary>
-    [DisplayName("应用实例。单应用多实例部署时用于唯一标识实例节点")]
+    [DisplayName("应用实例")]
+    [Description("单应用多实例部署时用于唯一标识实例节点")]
     public Int32 Instance { get; set; }
 
     /// <summary>开发者模式</summary>
     [DisplayName("开发者模式")]
+    [Description("启用后开放开发调试功能（SQL收集、备份、开发操作）")]
     public Boolean Develop { get; set; } = true;
 
     /// <summary>启用</summary>
     [DisplayName("启用")]
+    [Description("是否启用该系统")]
     public Boolean Enable { get; set; } = true;
 
     /// <summary>安装时间</summary>
     [DisplayName("安装时间")]
+    [Description("系统首次安装时间，用作Cookie加密密钥")]
     public DateTime InstallTime { get; set; } = DateTime.Now;
     #endregion
 
