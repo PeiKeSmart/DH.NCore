@@ -171,7 +171,7 @@ NewLife 默认使用 `TextFileLog`，将日志输出到文本文件。
   <Setting>
     <LogPath>Logs</LogPath>         <!-- 日志路径 -->
     <LogLevel>Info</LogLevel>        <!-- 日志级别 -->
-    <LogFileFormat>{0:yyyy-MM-dd}.log</LogFileFormat>  <!-- 文件命名格式 -->
+    <LogFileFormat>{0:yyyy_MM_dd}.log</LogFileFormat>  <!-- 文件命名格式 -->
   </Setting>
 </Config>
 ```
@@ -183,7 +183,7 @@ NewLife 默认使用 `TextFileLog`，将日志输出到文本文件。
     "Setting": {
       "LogPath": "Logs",
       "LogLevel": "Info",
-      "LogFileFormat": "{0:yyyy-MM-dd}.log"
+      "LogFileFormat": "{0:yyyy_MM_dd}.log"
     }
   }
 }
@@ -560,7 +560,7 @@ XTrace.Log = Logger.Null;
 
 ### 2. 日志文件在哪里？
 
-默认在应用程序根目录的 `Logs` 文件夹下，文件名格式为 `yyyy-MM-dd.log`。
+默认在应用程序根目录的 `Logs` 文件夹下，文件名格式为 `yyyy_MM_dd.log`。
 
 ### 3. 如何输出到多个目标？
 

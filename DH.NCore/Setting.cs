@@ -18,7 +18,7 @@ public class Setting : Config<Setting>
 {
     #region 属性
     /// <summary>是否启用全局调试。默认启用</summary>
-    [Description("全局调试。XTrace.Debug")]
+    [Description("启用全局调试。XTrace.Debug")]
     public Boolean Debug { get; set; } = true;
 
     /// <summary>日志等级，只输出大于等于该级别的日志，All/Debug/Info/Warn/Error/Fatal，默认Info</summary>
@@ -30,7 +30,7 @@ public class Setting : Config<Setting>
     public String LogPath { get; set; } = "";
 
     /// <summary>日志文件上限。超过上限后拆分新日志文件，默认10MB，0表示不限制大小</summary>
-    [Description("日志文件上限。超过上限后拆分新日志文件，默认10MB，0表示不限制大小")]
+    [Description("日志文件上限（MB）。超过上限后拆分新日志文件，默认10MB，0表示不限制大小")]
     public Int32 LogFileMaxBytes { get; set; } = 10;
 
     /// <summary>日志文件备份。超过备份数后，最旧的文件将被删除，网络安全法要求至少保存6个月日志，默认200，0表示不限制个数</summary>
@@ -49,10 +49,6 @@ public class Setting : Config<Setting>
     [Description("网络日志。本地子网日志广播udp://255.255.255.255:514，或者http://xxx:80/log")]
     public String NetworkLog { get; set; } = "";
 
-    /// <summary>日志记录时间UTC校正，单位：小时。默认0表示使用的是本地时间，使用UTC时间的系统转换成本地时间则相差8小时</summary>
-    [Description("日志记录时间UTC校正，小时")]
-    public Int32 UtcIntervalHours { get; set; } = 0;
-
     /// <summary>数据目录。本地数据库目录，默认Data子目录</summary>
     [Description("数据目录。本地数据库目录，默认Data子目录")]
     public String DataPath { get; set; } = "";
@@ -62,7 +58,7 @@ public class Setting : Config<Setting>
     public String BackupPath { get; set; } = "";
 
     /// <summary>插件目录</summary>
-    [Description("插件目录")]
+    [Description("插件目录。本地插件存放目录，默认Plugins子目录")]
     public String PluginPath { get; set; } = "";
 
     /// <summary>插件服务器。将从该网页上根据关键字分析链接并下载插件，部分嵌入式设备不支持https</summary>
