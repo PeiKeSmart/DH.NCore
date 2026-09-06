@@ -30,7 +30,7 @@
     <RepositoryUrl>https://github.com/PeiKeSmart/DH.NCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>湖北登灏科技有限公司;DH组件;DH;$(AssemblyName)</PackageTags>
-    <PackageReleaseNotes>引入 HTTP 中间件机制，支持 CORS 与统一错误处理、参数化路由、多方法注册、Controller 依赖注入及内嵌资源静态文件服务；连接池架构升级支持池满阻塞与生命周期回收，ObjectPool 信号量限流重构；WebSocket 完善掩码与心跳机制，ProcessHelper 宿主进程识别增强；新增 UInt24 读写、GeoPoint 值类型优化，移除过时接口；修复 PKCS7 填充、MemoryCache 持久化、JSON null 元素、Cron 死循环、CacheLock 锁令牌、Rand 加密安全随机数等 40+ 处缺陷；全量测试 2558 项全部通过并补充核心类型契约测试</PackageReleaseNotes>
+    <PackageReleaseNotes>新增向量存储接口 IVectorStore/VectorRecord，支持 Top-K 相似度检索，为 AI 应用提供向量检索基础设施；增强 Murmur128 哈希与 GeoPoint 功能并补充单元测试；SysConfig 属性补充 Description 注解，日志文件命名统一为下划线分隔并移除 UTC 校正；修复 DSAHelper、Crc16/Crc32、PerfCounter、JwtBuilder、PinYin、CacheLock、MemoryCache、ProcessHelper、PKCS7、Asn1 等 20+ 处缺陷</PackageReleaseNotes>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
