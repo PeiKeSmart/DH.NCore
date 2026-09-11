@@ -15,8 +15,9 @@ namespace NewLife.Http;
 public class DnsHttpHandler(HttpMessageHandler innerHandler) : DelegatingHandler(innerHandler)
 {
     #region 属性
+    // .NET 11 起 System.Net 新增 DnsResolver，与 NewLife.Net.DnsResolver 同名冲突，这里显式限定命名空间
     /// <summary>DNS解析器</summary>
-    public IDnsResolver Resolver { get; set; } = DnsResolver.Instance;
+    public IDnsResolver Resolver { get; set; } = NewLife.Net.DnsResolver.Instance;
     #endregion
 
 #if NET5_0_OR_GREATER

@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
-    <TargetFrameworks>net45;net461;net462;netstandard2.0;netstandard2.1;netcoreapp3.1;net5.0;net6.0;net5.0-windows;net6.0-windows;net7.0;net7.0-windows;net8.0;net8.0-windows;net9.0;net9.0-windows;net10.0;net10.0-windows</TargetFrameworks>
+    <TargetFrameworks>net45;net461;net462;netstandard2.0;netstandard2.1;netcoreapp3.1;net5.0;net6.0;net5.0-windows;net6.0-windows;net7.0;net7.0-windows;net8.0;net8.0-windows;net9.0;net9.0-windows;net10.0;net10.0-windows;net11.0;net11.0-windows</TargetFrameworks>
     <AssemblyName>DH.NCore</AssemblyName>
     <RootNamespace>DH</RootNamespace>
     <AssemblyTitle>DH核心组件库</AssemblyTitle>
-    <Description>Core library of NewLife framework. Provides high-performance infrastructure for building scalable applications: logging (file/network), configuration (XML/JSON/HTTP), cache (memory/distributed), network (TCP/UDP/HTTP/WebSocket), serialization (binary/XML/JSON), APM tracing, IoC container, actor model, timer scheduler, plugin framework, and more. Supports .NET Framework 4.5 to .NET 10. 核心组件库，为构建可扩展应用程序提供高性能基础设施。提供日志（文件/网络）、配置（XML/JSON/HTTP）、缓存（内存/分布式）、网络（TCP/UDP/HTTP/WebSocket）、序列化（Binary/XML/JSON）、APM性能追踪、对象容器、并行模型、定时调度、插件框架等。支持.NET Framework 4.5至.NET 10全版本。</Description>
+    <Description>Core library of NewLife framework. Provides high-performance infrastructure for building scalable applications: logging (file/network), configuration (XML/JSON/HTTP), cache (memory/distributed), network (TCP/UDP/HTTP/WebSocket), serialization (binary/XML/JSON), APM tracing, IoC container, actor model, timer scheduler, plugin framework, and more. Supports .NET Framework 4.5 to .NET 11. 核心组件库，为构建可扩展应用程序提供高性能基础设施。提供日志（文件/网络）、配置（XML/JSON/HTTP）、缓存（内存/分布式）、网络（TCP/UDP/HTTP/WebSocket）、序列化（Binary/XML/JSON）、APM性能追踪、对象容器、并行模型、定时调度、插件框架等。支持.NET Framework 4.5至.NET 11全版本。</Description>
     <Company>湖北登灏科技有限公司</Company>
     <Copyright>©2020-2026 湖北登灏科技有限公司</Copyright>
     <VersionPrefix>4.24</VersionPrefix>
@@ -46,7 +46,7 @@
     </PackageReference>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='net45' or '$(TargetFramework)'=='net461' or '$(TargetFramework)'=='net462' or '$(TargetFramework)'=='net5.0-windows' or '$(TargetFramework)'=='net6.0-windows' or '$(TargetFramework)'=='net7.0-windows' or '$(TargetFramework)'=='net8.0-windows' or '$(TargetFramework)'=='net9.0-windows' or '$(TargetFramework)'=='net10.0-windows'">
+  <PropertyGroup Condition="'$(TargetFramework)'=='net45' or '$(TargetFramework)'=='net461' or '$(TargetFramework)'=='net462' or '$(TargetFramework)'=='net5.0-windows' or '$(TargetFramework)'=='net6.0-windows' or '$(TargetFramework)'=='net7.0-windows' or '$(TargetFramework)'=='net8.0-windows' or '$(TargetFramework)'=='net9.0-windows' or '$(TargetFramework)'=='net10.0-windows' or '$(TargetFramework)'=='net11.0-windows'">
     <DefineConstants>$(DefineConstants);__WIN__</DefineConstants>
   </PropertyGroup>
 
@@ -68,9 +68,13 @@
   <ItemGroup Condition="'$(TargetFramework)'=='net10.0-windows'">
     <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" IsImplicitlyDefined="true" TargetingPackVersion="10.0.0" />
   </ItemGroup>
+  <!-- .NET 11 尚未正式发布，官方参考包当前仅有 RC1 版本，暂固定到 RC1；正式版发布后改回 11.0.0 -->
+  <ItemGroup Condition="'$(TargetFramework)'=='net11.0-windows'">
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" IsImplicitlyDefined="true" TargetingPackVersion="11.0.0-rc.1.26425.128" />
+  </ItemGroup>
 
   <!-- net*-windows 使用 System.Management 进行标准 WMI 查询（反射调用，避免核心库直接暴露该类型） -->
-  <ItemGroup Condition="'$(TargetFramework)'=='net5.0-windows' or '$(TargetFramework)'=='net6.0-windows' or '$(TargetFramework)'=='net7.0-windows' or '$(TargetFramework)'=='net8.0-windows' or '$(TargetFramework)'=='net9.0-windows' or '$(TargetFramework)'=='net10.0-windows'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net5.0-windows' or '$(TargetFramework)'=='net6.0-windows' or '$(TargetFramework)'=='net7.0-windows' or '$(TargetFramework)'=='net8.0-windows' or '$(TargetFramework)'=='net9.0-windows' or '$(TargetFramework)'=='net10.0-windows' or '$(TargetFramework)'=='net11.0-windows'">
     <PackageReference Include="System.Management" Version="9.0.5" />
   </ItemGroup>
 
