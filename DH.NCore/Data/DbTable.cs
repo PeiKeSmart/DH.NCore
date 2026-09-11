@@ -677,14 +677,16 @@ public class DbTable : IEnumerable<DbRow>, ICloneable, IAccessor, ISpanSerializa
         using var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
         var bn = CreateBinary(fs);
 
-        // 压缩
+        // 压缩。GZipStream 包装 fs，leaveOpen 保持底层流存活，Dispose 时刷出内部缓冲并写入 gzip footer
+        GZipStream? gz = null;
         if (file.EndsWithIgnoreCase(".gz"))
-            bn.Stream = new GZipStream(fs, CompressionMode.Compress);
+            bn.Stream = gz = new GZipStream(fs, CompressionMode.Compress, true);
 
         WriteHeader(bn);
         var count = WriteRows(bn, rows, fields);
 
-        // 如果文件已存在，此处截掉多余部分
+        // 释放压缩流，确保压缩数据完整写入后，再截掉多余部分
+        gz?.Dispose();
         fs.SetLength(fs.Position);
 
         return count;
@@ -794,11 +796,11 @@ public class DbTable : IEnumerable<DbRow>, ICloneable, IAccessor, ISpanSerializa
                     await writer.WriteStartElementAsync(null, cs[i], null).ConfigureAwait(false);
 
                     if (ts[i] == typeof(Boolean))
-                        writer.WriteValue(row[i].ToBoolean());
+                        await writer.WriteStringAsync(XmlConvert.ToString(row[i].ToBoolean())).ConfigureAwait(false);
                     else if (ts[i] == typeof(DateTime))
-                        writer.WriteValue(new DateTimeOffset(row[i].ChangeType<DateTime>()));
+                        await writer.WriteStringAsync(XmlConvert.ToString(row[i].ChangeType<DateTime>(), XmlDateTimeSerializationMode.RoundtripKind)).ConfigureAwait(false);
                     else if (ts[i] == typeof(DateTimeOffset))
-                        writer.WriteValue(row[i].ChangeType<DateTimeOffset>());
+                        await writer.WriteStringAsync(XmlConvert.ToString(row[i].ChangeType<DateTimeOffset>())).ConfigureAwait(false);
                     else if (row[i] is IFormattable ft)
                         await writer.WriteStringAsync(ft + "").ConfigureAwait(false);
                     else

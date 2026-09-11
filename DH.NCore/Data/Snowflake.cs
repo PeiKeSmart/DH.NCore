@@ -204,7 +204,8 @@ public class Snowflake
                     sequence = Interlocked.Increment(ref _sequence);
                     if (sequence <= MaxSequence) break;
 
-                    // 序列号溢出，等待下一毫秒
+                    // 序列号溢出，推进到下一毫秒。
+                    // 正常无回拨时等于等待真实时钟走1ms；回拨冻结期间则时间戳短暂超前真实时钟（保证单调唯一），真实时间追上后自动恢复
                     timestamp = _lastTimestamp + 1;
                     _sequence = 0;
                 }

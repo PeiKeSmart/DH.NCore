@@ -194,10 +194,10 @@ public class MemoryCacheTests
         var key = "buf";
 
         var str = "学无先后达者为师";
-        var pk = new Packet(str.GetBytes());
+        var pk = new ArrayPacket(str.GetBytes());
 
         ic.Set(key, pk);
-        var pk2 = ic.Get<Packet>(key);
+        var pk2 = ic.Get<ArrayPacket>(key);
 
         Assert.Equal(pk.ToHex(), pk2.ToHex());
     }

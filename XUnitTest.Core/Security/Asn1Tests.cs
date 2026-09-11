@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using NewLife.Security;
 using Xunit;
 
@@ -94,6 +94,36 @@ public class Asn1Tests
         Assert.Equal("1.2.840.113549.1.1.1", oids[0].Value);
     }
 
+    [Fact(DisplayName = "读取长格式长度(0x83)")]
+    public void ReadLongLength83()
+    {
+        // OctetString，0x83 三字节长格式 = 256 字节
+        var value = new Byte[256];
+        for (var i = 0; i < value.Length; i++) value[i] = (Byte)i;
+
+        var data = new List<Byte> { 0x04, 0x83, 0x00, 0x01, 0x00 };
+        data.AddRange(value);
+
+        var asn = Asn1.Read(data.ToArray());
+
+        Assert.NotNull(asn);
+        Assert.Equal(Asn1Tags.OctetString, asn.Tag);
+        Assert.Equal(256, asn.Length);
+        var val = asn.Value as Byte[];
+        Assert.NotNull(val);
+        Assert.Equal(256, val.Length);
+        Assert.Equal(0xFF, val[255]);
+    }
+
+    [Fact(DisplayName = "BER不定长(0x80)抛异常")]
+    public void ReadIndefiniteLengthThrows()
+    {
+        // OctetString + 不定长标记 0x80。BER 才允许不定长，DER 禁止，此处应显式报错而非静默错解
+        var data = new Byte[] { 0x04, 0x80 };
+
+        Assert.Throws<NotSupportedException>(() => Asn1.Read(data));
+    }
+
     [Fact(DisplayName = "GetByteArray返回值")]
     public void GetByteArray()
     {
@@ -151,5 +181,16 @@ public class Asn1Tests
 
         Assert.NotNull(asn);
         Assert.Equal(Asn1Tags.Integer, asn.Tag);
+    }
+
+    [Fact(DisplayName = "GetByteArray空缓冲不越界")]
+    public void GetByteArrayEmptyBuffer()
+    {
+        // 空数组时 trimZero 不应访问 buf[0] 导致越界
+        var asn = new Asn1 { Tag = Asn1Tags.Integer, Value = Array.Empty<Byte>() };
+        var bytes = asn.GetByteArray(true);
+
+        Assert.NotNull(bytes);
+        Assert.Empty(bytes);
     }
 }

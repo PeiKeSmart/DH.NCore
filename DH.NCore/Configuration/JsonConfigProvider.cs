@@ -81,7 +81,8 @@ public class JsonConfigProvider : FileConfigProvider
         foreach (var item in src)
         {
             var name = item.Key;
-            if (name[0] == '#') continue;
+            // 空键或注释键跳过，否则 name[0] 越界
+            if (name.IsNullOrEmpty() || name[0] == '#') continue;
 
             var cfg = section.GetOrAddChild(name);
             var cname = "#" + name;

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using NewLife.Data;
 using NewLife.Security;
 using NewLife.Serialization;
@@ -230,10 +231,23 @@ public class JwtBuilder : IExtend
 
         if (_decodes.TryGetValue(Algorithm, out var dec))
         {
-            if (dec != null) return dec(data, Secret, ts[2].ToBase64());
+            if (dec != null)
+            {
+                // 失败时给出具体消息，成功时保持 null（调用方约定）
+                var ok = dec(data, Secret, ts[2].ToBase64());
+                if (!ok) message = "签名验证失败";
+
+                return ok;
+            }
 
             // 没有验证算法，对比签名
-            if (_encodes.TryGetValue(Algorithm, out var enc) && enc != null) return enc(data, Secret).ToUrlBase64() == ts[2];
+            if (_encodes.TryGetValue(Algorithm, out var enc) && enc != null)
+            {
+                var ok = enc(data, Secret).ToUrlBase64() == ts[2];
+                if (!ok) message = "签名验证失败";
+
+                return ok;
+            }
         }
 
         throw new InvalidOperationException($"Unsupported algorithm [{Algorithm}]");
@@ -241,8 +255,9 @@ public class JwtBuilder : IExtend
     #endregion
 
     #region 算法管理
-    private static readonly Dictionary<String, JwtEncodeDelegate> _encodes = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly Dictionary<String, JwtDecodeDelegate?> _decodes = new(StringComparer.OrdinalIgnoreCase);
+    // 并发字典：RegisterAlgorithm 可能在运行期注册（如测试/插件），普通字典并发读写会破坏内部结构
+    private static readonly ConcurrentDictionary<String, JwtEncodeDelegate> _encodes = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<String, JwtDecodeDelegate?> _decodes = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>注册算法的编解码实现</summary>
     /// <param name="algorithm"></param>

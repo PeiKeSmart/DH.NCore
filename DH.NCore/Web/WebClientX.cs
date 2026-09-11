@@ -72,10 +72,12 @@ public class WebClientX : DisposeBase
             http.Timeout = TimeSpan.FromMilliseconds(Timeout);
             http.SetUserAgent();
 
-            _client = http;
+            // 原子发布，并发创建时释放多余客户端，避免泄漏
+            if (Interlocked.CompareExchange(ref _client, http, null) != null)
+                http.Dispose();
         }
 
-        return http;
+        return _client;
     }
 
     /// <summary>发送请求，获取响应</summary>
@@ -104,7 +106,8 @@ public class WebClientX : DisposeBase
         }
 
         // 发送请求
-        using var ctx = CancellationTokenSource.CreateLinkedTokenSource(new CancellationTokenSource(Timeout).Token, cancellationToken);
+        using var cts = new CancellationTokenSource(Timeout);
+        using var ctx = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
         var rs = await http.SendAsync(request, ctx.Token).ConfigureAwait(false);
 
         if (rs.StatusCode < HttpStatusCode.BadRequest)

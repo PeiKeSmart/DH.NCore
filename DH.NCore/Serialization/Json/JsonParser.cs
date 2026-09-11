@@ -206,7 +206,8 @@ public class JsonParser
 
                 default:
                     var v = ParseValue();
-                    if (v != null) arr.Add(v);
+                    // 保留 null 元素，避免数组元素位置错位
+                    arr.Add(v!);
                     break;
             }
         }

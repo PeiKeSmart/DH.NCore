@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using NewLife.Net;
 
 namespace NewLife.Http;
@@ -293,7 +294,7 @@ public class HttpServer : NetServer, IHttpHost
     private readonly HttpRouter _router = new();
 
     /// <summary>路径匹配缓存。Key 为请求路径，Value 为匹配到的路由键</summary>
-    private readonly IDictionary<String, String> _pathCache = new Dictionary<String, String>(StringComparer.OrdinalIgnoreCase);
+    private readonly IDictionary<String, String> _pathCache = new ConcurrentDictionary<String, String>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>匹配处理器（兼容 IHttpHost 接口）</summary>
     /// <param name="path">已规范化后的请求路径（不含查询字符串）</param>

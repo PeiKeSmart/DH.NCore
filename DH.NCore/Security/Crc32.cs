@@ -88,8 +88,9 @@ public sealed class Crc32 //: HashAlgorithm
     {
         if (buffer == null) throw new ArgumentNullException(nameof(buffer));
         //if (count < 0) throw new ArgumentOutOfRangeException("count", "Count不能小于0！");
-        if (count < 0) count = buffer.Length;
-        if (offset < 0 || offset + count > buffer.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+        if (count < 0) count = buffer.Length - offset;
+        // 用减法形式避免 offset+count 溢出后绕过校验导致越界读
+        if (offset < 0 || offset > buffer.Length || count < 0 || count > buffer.Length - offset) throw new ArgumentOutOfRangeException(nameof(offset));
 
         while (--count >= 0)
         {
@@ -119,7 +120,7 @@ public sealed class Crc32 //: HashAlgorithm
     {
         if (stream == null) throw new ArgumentNullException(nameof(stream));
         //if (count < 0) throw new ArgumentOutOfRangeException("count", "Count不能小于0！");
-        if (count <= 0) count = Int64.MaxValue;
+        if (count < 0) count = Int64.MaxValue;
 
         while (--count >= 0)
         {
@@ -180,7 +181,9 @@ public sealed class Crc32 //: HashAlgorithm
         if (position >= 0)
         {
             if (count > 0) count = -count;
-            count += (Int32)(stream.Position - position);
+            // Int64 累加避免大流（>2GB）回绕，结果钳制回 Int32
+            var n = (Int64)count + (stream.Position - position);
+            count = n > Int32.MaxValue ? Int32.MaxValue : (Int32)n;
             if (count == 0) return 0;
 
             stream.Position = position;

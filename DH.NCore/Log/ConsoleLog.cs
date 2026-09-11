@@ -40,18 +40,27 @@ public class ConsoleLog : Logger
         // 异步写日志，实时。即使这里错误，定时器那边仍然会补上
         if (Interlocked.CompareExchange(ref _writing, 1, 0) == 0)
         {
-            ThreadPool.UnsafeQueueUserWorkItem(s =>
+            ThreadPool.UnsafeQueueUserWorkItem(WriteConsoleAsync, null);
+        }
+    }
+
+    /// <summary>异步写控制台日志。复位写入标记后若队列仍有日志则接力调度，避免竞态窗口内日志滞留</summary>
+    private void WriteConsoleAsync(Object? state)
+    {
+        try
+        {
+            WriteConsole();
+        }
+        catch { }
+        finally
+        {
+            _writing = 0;
+
+            // 复位后如果又有新日志入队，且没有其它 worker 在处理，则接力调度
+            if (!_Logs.IsEmpty && Interlocked.CompareExchange(ref _writing, 1, 0) == 0)
             {
-                try
-                {
-                    WriteConsole();
-                }
-                catch { }
-                finally
-                {
-                    _writing = 0;
-                }
-            }, null);
+                ThreadPool.UnsafeQueueUserWorkItem(WriteConsoleAsync, null);
+            }
         }
     }
 

@@ -96,9 +96,17 @@ public class HttpRouter
         var routeSegs = entry.Segments;
         var hasWildcard = routeSegs.Count > 0 && routeSegs[^1].IsWildcard;
 
-        // 非通配路由：段数必须相等
-        if (!hasWildcard && pathSegs.Length != routeSegs.Count)
-            return false;
+        // 非通配路由：路径段数必须在 [最少段数, 路由段数] 范围内。
+        // 尾部可选段可省略，因此最少段数 = 路由段数 - 尾部可选段数，使 /api/users/{id?} 也能匹配 /api/users
+        if (!hasWildcard)
+        {
+            var minSegs = routeSegs.Count;
+            for (var i = routeSegs.Count - 1; i >= 0 && routeSegs[i].IsOptional; i--)
+                minSegs--;
+
+            if (pathSegs.Length < minSegs || pathSegs.Length > routeSegs.Count)
+                return false;
+        }
 
         // 通配路由：路径段数必须 >= 路由段数
         if (hasWildcard && pathSegs.Length < routeSegs.Count)

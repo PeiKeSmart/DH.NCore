@@ -93,7 +93,7 @@
             txtServer.Name = "txtServer";
             txtServer.Size = new Size(346, 26);
             txtServer.TabIndex = 3;
-            txtServer.Text = "tcp://127.0.0.1:5500";
+            txtServer.Text = "udp://127.0.0.1:5500";
             // 
             // btnOpen
             // 

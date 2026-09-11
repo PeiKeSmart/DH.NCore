@@ -189,7 +189,20 @@ public abstract class FileConfigProvider : ConfigProvider
         File.WriteAllText(tmp, str);
 
         if (File.Exists(fileName))
-            File.Replace(tmp, fileName, null, true);
+        {
+            // File.Replace 仅 Windows 支持，Linux/macOS 抛 PlatformNotSupportedException，改用 Move 覆盖
+            if (Runtime.Windows)
+                File.Replace(tmp, fileName, null, true);
+            else
+#if NET5_0_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                File.Move(tmp, fileName, true);
+#else
+            {
+                File.Delete(fileName);
+                File.Move(tmp, fileName);
+            }
+#endif
+        }
         else
             File.Move(tmp, fileName);
     }

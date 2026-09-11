@@ -40,7 +40,7 @@ public class IOHelperTests
         p = buf.IndexOf(NewLine2);
         Assert.Equal(43, p);
 
-        var pk = new Packet(buf);
+        var pk = new ArrayPacket(buf);
 
         var value = pk.Slice(p + 4).ToStr();
         Assert.Equal("大石头", value);
@@ -211,7 +211,7 @@ public class IOHelperTests
         buf = BitConverter.GetBytes(v);
 
         //buf = buf.Reverse().ToArray();
-        buf=Enumerable.Reverse(buf).ToArray();
+        buf = Enumerable.Reverse(buf).ToArray();
         value = buf.ToSingle(0, false);
         Assert.Equal(v, value);
 

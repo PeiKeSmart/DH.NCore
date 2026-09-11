@@ -483,7 +483,7 @@ public class DateTimeFormatTests
         Assert.Contains("2025-06-22 15:30:00", sysJson);
 
         // 往返验证
-        var back = sysJson.ToJsonEntity(model.GetType());
+        var back = sysJson.ToJsonEntity(model.GetType(), null);
         Assert.NotNull(back);
     }
 
@@ -501,7 +501,7 @@ public class DateTimeFormatTests
         Assert.Contains("Z", fastJson);
         Assert.Contains("Z", sysJson);
         // 往返验证
-        var fastBack = fastJson.ToJsonEntity(model.GetType());
+        var fastBack = fastJson.ToJsonEntity(model.GetType(), null);
         Assert.NotNull(fastBack);
     }
 

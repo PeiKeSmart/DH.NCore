@@ -68,9 +68,33 @@ public class ServiceEndpoint
     [XmlIgnore, IgnoreDataMember]
     public DateTime NextTime { get; set; }
 
+    private HttpClient? _client;
     /// <summary>Http客户端。复用连接以提高性能</summary>
     [XmlIgnore, IgnoreDataMember]
-    public HttpClient? Client { get; set; }
+    public HttpClient? Client
+    {
+        get => _client;
+        set => _client = value;
+    }
+
+    /// <summary>原子获取或创建客户端，避免并发首次调用时重复创建导致连接池泄漏</summary>
+    /// <param name="factory">客户端工厂</param>
+    /// <returns>Http客户端</returns>
+    internal HttpClient TryGetClient(Func<HttpClient> factory)
+    {
+        var client = _client;
+        if (client != null) return client;
+
+        var newClient = factory();
+        var old = Interlocked.CompareExchange(ref _client, newClient, null);
+        if (old != null)
+        {
+            // 并发下已有客户端，释放新建的，避免泄漏
+            newClient.Dispose();
+            return old;
+        }
+        return newClient;
+    }
     #endregion
 
     #region 加权轮询属性
@@ -169,6 +193,8 @@ public class ServiceEndpoint
     public void Reset()
     {
         NextTime = DateTime.MinValue;
+        // 释放旧客户端，避免连接池资源泄漏
+        Client?.Dispose();
         Client = null;
         CreateTime = DateTime.MinValue;
     }
@@ -178,6 +204,8 @@ public class ServiceEndpoint
     public void MarkFailure(Int32 shieldingSeconds)
     {
         Errors++;
+        // 释放旧客户端，避免连接池资源泄漏
+        Client?.Dispose();
         Client = null;
         NextTime = DateTime.Now.AddSeconds(shieldingSeconds);
         CreateTime = DateTime.MinValue;

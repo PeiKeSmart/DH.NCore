@@ -96,7 +96,7 @@ public static class SamplingHelper
     {
         if (data == null || data.Length == 0) throw new ArgumentNullException(nameof(data));
         if (size <= 0) throw new ArgumentNullException(nameof(size));
-        if (offset >= size) throw new ArgumentOutOfRangeException(nameof(offset));
+        if (offset < 0 || offset >= size) throw new ArgumentOutOfRangeException(nameof(offset));
 
         // 计算首尾对齐后的时间边界
         var start = data[0] / size * size + offset;

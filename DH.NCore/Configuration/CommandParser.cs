@@ -23,6 +23,9 @@ public class CommandParser
         {
             var key = args[i];
 
+            // 空参数跳过，否则 key[0] 越界
+            if (key.IsNullOrEmpty()) continue;
+
             // 如果key以-开头，说明是参数名，下一个可能是参数值
             if (key[0] == '-')
             {
@@ -39,7 +42,7 @@ public class CommandParser
                 {
                     // 下一个是值
                     if (TrimStart) key = key.TrimStart('-');
-                    var value = (i + 1 < args.Length && args[i + 1][0] != '-') ? args[++i] : null;
+                    var value = (i + 1 < args.Length && !args[i + 1].IsNullOrEmpty() && args[i + 1][0] != '-') ? args[++i] : null;
                     dic[key] = TrimQuote(value);
                 }
             }
@@ -47,7 +50,7 @@ public class CommandParser
             {
                 // 下一个是值
                 if (TrimStart) key = key.TrimStart('-');
-                var value = (i + 1 < args.Length && args[i + 1][0] != '-') ? args[++i] : null;
+                var value = (i + 1 < args.Length && !args[i + 1].IsNullOrEmpty() && args[i + 1][0] != '-') ? args[++i] : null;
                 dic[key] = TrimQuote(value);
             }
         }
@@ -62,8 +65,9 @@ public class CommandParser
     {
         if (value.IsNullOrEmpty()) return value;
 
-        if (value[0] == '"' && value[value.Length - 1] == '"') value = value.Substring(1, value.Length - 2);
-        if (value[0] == '\'' && value[value.Length - 1] == '\'') value = value.Substring(1, value.Length - 2);
+        // 长度不足2时 Substring(1, -1) 越界，需拦截
+        if (value.Length >= 2 && value[0] == '"' && value[^1] == '"') value = value.Substring(1, value.Length - 2);
+        if (value.Length >= 2 && value[0] == '\'' && value[^1] == '\'') value = value.Substring(1, value.Length - 2);
 
         return value;
     }

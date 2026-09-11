@@ -1,5 +1,6 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
+using System.Xml;
 using NewLife.Security;
 using Xunit;
 
@@ -78,5 +79,50 @@ public class DSAHelperTests
         dsa2.FromXmlStringX(xmlPrivate);
         var param2 = dsa2.ExportParameters(true);
         Assert.NotNull(param2.X);
+    }
+
+    [Fact(DisplayName = "PgenCounter与Counter兼容读取")]
+    public void PgenCounterRoundTrip()
+    {
+        var dsa = new DSACryptoServiceProvider(1024);
+        var xml = dsa.ToXmlStringX(true);
+        Assert.Contains("<PgenCounter>", xml);
+
+        var src = dsa.ExportParameters(true);
+
+        // 导入自产 XML，Counter/Seed 应保持
+        var dsa2 = new DSACryptoServiceProvider();
+        dsa2.FromXmlStringX(xml);
+        var dst = dsa2.ExportParameters(true);
+        Assert.Equal(src.Counter, dst.Counter);
+        Assert.Equal(src.Seed, dst.Seed);
+    }
+
+    [Fact(DisplayName = "兼容Base64编码的PgenCounter（历史/外部密钥）")]
+    public void PgenCounterBase64Compatibility()
+    {
+        // 构造含 Base64 编码 PgenCounter 的私钥 XML，模拟历史密钥或外部工具生成的密钥
+        var dsa = new DSACryptoServiceProvider(1024);
+        var xml = dsa.ToXmlStringX(true);
+
+        // 将十进制 PgenCounter 替换为 Base64 编码值（如报错中的 'Azo='）
+        var doc = new XmlDocument();
+        doc.LoadXml(xml);
+        doc.DocumentElement.SelectSingleNode("PgenCounter").InnerText = "Azo=";
+        xml = doc.OuterXml;
+
+        Assert.Contains("<PgenCounter>Azo=</PgenCounter>", xml);
+
+        // 导入不应抛异常
+        var dsa2 = new DSACryptoServiceProvider();
+        dsa2.FromXmlStringX(xml);
+
+        // 导入后签名，公钥应能验签
+        var data = Encoding.UTF8.GetBytes("Hello DSA Base64 PgenCounter!");
+        var sig = dsa2.SignData(data);
+
+        var pub = new DSACryptoServiceProvider();
+        pub.FromXmlStringX(dsa.ToXmlStringX(false));
+        Assert.True(pub.VerifyData(data, sig));
     }
 }

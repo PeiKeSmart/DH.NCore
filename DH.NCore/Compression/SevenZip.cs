@@ -80,6 +80,10 @@ public class SevenZip
         Run(args);
     }
 
-    private Int32 Run(String args) => _7z.Run(args, 5000);
+    private Int32 Run(String args)
+    {
+        if (_7z.IsNullOrEmpty()) throw new InvalidOperationException("未找到7z.exe，无法执行压缩/解压缩操作");
+        return _7z.Run(args, 5000);
+    }
     #endregion
 }

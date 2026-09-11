@@ -123,8 +123,10 @@ public sealed class PKCS7PaddingTransform : ICryptoTransform
     {
         if (_encryptMode)
         {
-            if (inputCount == 0) return [];
+            //if (inputCount == 0) return [];
 
+            // 整倍块长时 inputCount 可能为 0，PKCS7 仍须追加完整填充块（标准要求），不能提前返回空。
+            // paddingLength 在整倍块长时为 InputBlockSize，生成完整填充块
             var paddingLength = InputBlockSize - (inputCount % InputBlockSize);
             var paddingValue = _mode switch
             {
@@ -156,8 +158,10 @@ public sealed class PKCS7PaddingTransform : ICryptoTransform
                     _transform.TransformBlock(cipherBlock, i * InputBlockSize, InputBlockSize, returnData, i * OutputBlockSize);
 
                 var lastBlock = _transform.TransformFinalBlock(cipherBlock, cipherBlockLength - InputBlockSize, InputBlockSize);
-                Array.Resize(ref returnData, returnData.Length + lastBlock.Length);
-                Array.Copy(lastBlock, 0, returnData, OutputBlockSize, lastBlock.Length);
+                // 拷贝目标偏移必须是剩余块起点，原实现固定 OutputBlockSize 会覆盖前一块并留零块
+                var dataOffset = returnData.Length;
+                Array.Resize(ref returnData, dataOffset + lastBlock.Length);
+                Array.Copy(lastBlock, 0, returnData, dataOffset, lastBlock.Length);
                 return returnData;
             }
             finally

@@ -122,10 +122,16 @@ public class BinaryNormal : BinaryHandlerBase
             value = new Guid(buffer);
 #else
             var buffer = Pool.Shared.Rent(16);
-            if (Host.ReadBytes(buffer, 0, 16) == 0) return false;
+            try
+            {
+                if (Host.ReadBytes(buffer, 0, 16) == 0) return false;
 
-            value = new Guid(buffer);
-            Pool.Shared.Return(buffer);
+                value = new Guid(buffer);
+            }
+            finally
+            {
+                Pool.Shared.Return(buffer);
+            }
 #endif
 
             return true;

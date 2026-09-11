@@ -128,9 +128,10 @@ public class NetClient : DisposeBase, ILogFeature, ITracerFeature
         if (_client != null && _client.Active) return true;
 
         _userClosed = false;
+        ISocketClient? client = null;
         try
         {
-            var client = CreateClient();
+            client = CreateClient();
             if (!client.Open())
             {
                 client.TryDispose();
@@ -142,6 +143,8 @@ public class NetClient : DisposeBase, ILogFeature, ITracerFeature
         }
         catch (Exception ex) when (ex is not InvalidOperationException)
         {
+            // 连接失败时释放新建客户端，避免资源泄漏
+            client?.TryDispose();
             return false;
         }
     }
@@ -154,9 +157,10 @@ public class NetClient : DisposeBase, ILogFeature, ITracerFeature
         if (_client != null && _client.Active) return true;
 
         _userClosed = false;
+        ISocketClient? client = null;
         try
         {
-            var client = CreateClient();
+            client = CreateClient();
             if (!await client.OpenAsync(cancellationToken).ConfigureAwait(false))
             {
                 client.TryDispose();
@@ -168,6 +172,8 @@ public class NetClient : DisposeBase, ILogFeature, ITracerFeature
         }
         catch (Exception ex) when (ex is not InvalidOperationException)
         {
+            // 连接失败时释放新建客户端，避免资源泄漏
+            client?.TryDispose();
             return false;
         }
     }

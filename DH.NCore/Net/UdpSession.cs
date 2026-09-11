@@ -211,15 +211,20 @@ public class UdpSession : DisposeBase, ISocketSession, ITransport, ILogFeature
         if (Pipeline == null) throw new InvalidOperationException(nameof(Pipeline));
 
         using var span = Tracer?.NewSpan($"net:{Name}:SendMessage", message);
+        var ctx = Server.CreateContext(this);
         try
         {
-            var ctx = Server.CreateContext(this);
             return (Int32)(Pipeline.Write(ctx, message) ?? -1);
         }
         catch (Exception ex)
         {
             span?.SetError(ex, message);
             throw;
+        }
+        finally
+        {
+            // 写入完成后归还上下文，避免池化对象泄漏
+            Server.ReturnContext(ctx);
         }
     }
 

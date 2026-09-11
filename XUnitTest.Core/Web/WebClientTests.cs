@@ -45,4 +45,16 @@ public class WebClientTests
         Assert.True(link.Time >= "2024-05-14".ToDateTime());
         Assert.Null(link.Version);
     }
+
+    [Fact(DisplayName = "并发创建客户端只保留一个实例")]
+    public void EnsureCreate_Concurrent()
+    {
+        using var client = new WebClientX();
+
+        var results = new HttpClient?[16];
+        Parallel.For(0, results.Length, i => results[i] = client.EnsureCreate());
+
+        var first = results[0];
+        Assert.All(results, e => Assert.Same(first, e));
+    }
 }

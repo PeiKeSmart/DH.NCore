@@ -1,4 +1,4 @@
-using NewLife;
+﻿using NewLife;
 using NewLife.Serialization;
 using NewLife.Xml;
 using Xunit;
@@ -39,6 +39,23 @@ public class XmlTests
         Assert.NotNull(restored);
         Assert.Equal(original.Name, restored.Name);
         Assert.Equal(original.Value, restored.Value);
+    }
+
+    [Fact(DisplayName = "高精度Decimal往返不丢精度")]
+    public void Decimal_RoundTrip()
+    {
+        // 超过 Double 15-17 位有效数字，经 Double 中转必丢精度
+        var original = new DecimalModel { Amount = 1234567890123456789.123456789m };
+        var xmlStr = XmlHelper.ToXml(original);
+        var restored = XmlHelper.ToXmlEntity<DecimalModel>(xmlStr);
+
+        Assert.NotNull(restored);
+        Assert.Equal(original.Amount, restored.Amount);
+    }
+
+    private class DecimalModel
+    {
+        public Decimal Amount { get; set; }
     }
 
     private class XmlModel

@@ -23,6 +23,8 @@ namespace NewLife.Xml;
 public class XmlConfig<TConfig> : DisposeBase where TConfig : XmlConfig<TConfig>, new()
 {
     #region 静态
+    // 静态锁对象。不能用字符串做锁（GetBasePath 每次返回新实例导致锁失效）
+    private static readonly Object SyncRoot = new();
     private static Boolean _loading;
     private static TConfig? _Current;
     /// <summary>当前实例。通过置空可以使其重新加载。</summary>
@@ -58,7 +60,7 @@ public class XmlConfig<TConfig> : DisposeBase where TConfig : XmlConfig<TConfig>
             }
 
             // 现在没有对象，尝试加载，若返回null则实例化一个新的
-            lock (dcf)
+            lock (SyncRoot)
             {
                 if (_Current != null) return _Current;
 
@@ -294,7 +296,7 @@ public class XmlConfig<TConfig> : DisposeBase where TConfig : XmlConfig<TConfig>
         filename = filename.GetBasePath();
 
         // 加锁避免多线程保存同一个文件冲突
-        lock (filename)
+        lock (SyncRoot)
         {
             var xml1 = File.Exists(filename) ? File.ReadAllText(filename).Trim() : null;
             var xml2 = GetXml();

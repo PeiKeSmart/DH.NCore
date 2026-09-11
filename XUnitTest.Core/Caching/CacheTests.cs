@@ -1,4 +1,4 @@
-using NewLife.Caching;
+﻿using NewLife.Caching;
 using Xunit;
 
 namespace XUnitTest.Caching;
@@ -114,5 +114,26 @@ public class CacheTests
     public void Default_NotNull()
     {
         Assert.NotNull(Cache.Default);
+    }
+
+    [Fact(DisplayName = "零等待超时空闲锁可一次抢到")]
+    public void AcquireLock_ZeroTimeout()
+    {
+        // msTimeout=0 时至少尝试一次，空闲锁应能直接抢到
+        using var rlock = _cache.AcquireLock("zero_lock", 0);
+        Assert.NotNull(rlock);
+        Assert.True(_cache.ContainsKey("zero_lock"));
+    }
+
+    [Fact(DisplayName = "锁占用时零等待超时抢锁失败返回null")]
+    public void AcquireLock_ZeroTimeoutConflict()
+    {
+        // 锁1持有正常过期时间（简单重载的过期时间=等待时间，不能为0）
+        using var rlock1 = _cache.AcquireLock("conflict_lock", 5_000);
+        Assert.NotNull(rlock1);
+
+        // 锁被占用且不等待，应返回 null 而不是抛出
+        using var rlock2 = _cache.AcquireLock("conflict_lock", 0, 5_000, false);
+        Assert.Null(rlock2);
     }
 }

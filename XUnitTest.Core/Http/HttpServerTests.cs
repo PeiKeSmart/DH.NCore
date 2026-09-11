@@ -10,7 +10,8 @@ using NewLife.Log;
 using NewLife.Net;
 using NewLife.Remoting;
 using Xunit;
-
+// 本文件部分用例涉及 Packet 的链式 class 语义（struct 的 ArrayPacket 无此行为），抑制 CS0618 过时警告
+#pragma warning disable CS0618
 namespace XUnitTest.Http;
 
 public class HttpServerTests : IDisposable
@@ -166,7 +167,7 @@ public class HttpServerTests : IDisposable
 
         var buf = new Byte[1024];
         var rs = await client.ReceiveAsync(new ArraySegment<Byte>(buf), default);
-        Assert.EndsWith("说，Hello NewLife", new Packet(buf, 0, rs.Count).ToStr());
+        Assert.EndsWith("说，Hello NewLife", new ArrayPacket(buf, 0, rs.Count).ToStr());
 
         await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "通信完成", default);
         XTrace.WriteLine("Close [{0}] {1}", client.CloseStatus, client.CloseStatusDescription);

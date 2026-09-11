@@ -84,7 +84,14 @@ public class Packet : IPacket
         //Set(stream.ToArray());
 
         var buf = new Byte[stream.Length - stream.Position];
-        var count = stream.Read(buf, 0, buf.Length);
+        // 流可能部分读取（网络流/FileStream），循环读满
+        var count = 0;
+        while (count < buf.Length)
+        {
+            var n = stream.Read(buf, count, buf.Length - count);
+            if (n <= 0) break;
+            count += n;
+        }
         Set(buf, 0, count);
 
         // 必须确保数据流位置不变
@@ -508,7 +515,7 @@ public class Packet : IPacket
     {
         if (Data == null) return String.Empty;
 
-        if (Next == null) Data.ToBase64(Offset, Count);
+        if (Next == null) return Data.ToBase64(Offset, Count);
 
         return ToArray().ToBase64();
     }

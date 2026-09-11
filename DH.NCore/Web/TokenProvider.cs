@@ -76,6 +76,8 @@ public class TokenProvider
 
         // Base64拆分数据和签名
         var p = token.IndexOf('.');
+        // 无分隔符视为非法令牌，避免切片越界
+        if (p < 0) return null;
         var data = token[..p].ToBase64();
         var sig = token[(p + 1)..].ToBase64();
 
@@ -86,6 +88,7 @@ public class TokenProvider
         // 拆分数据和有效期
         var str = data.ToStr();
         p = str.LastIndexOf(',');
+        if (p < 0) return null;
 
         var user = str[..p];
         var secs = str[(p + 1)..].ToInt();
@@ -106,12 +109,25 @@ public class TokenProvider
 
         // Base64拆分数据和签名
         var p = token.IndexOf('.');
+        // 无分隔符视为非法令牌，避免切片越界
+        if (p < 0)
+        {
+            user = "";
+            expire = default;
+            return false;
+        }
         var data = token[..p].ToBase64();
         var sig = token[(p + 1)..].ToBase64();
 
         // 拆分数据和有效期
         var str = data.ToStr();
         p = str.LastIndexOf(',');
+        if (p < 0)
+        {
+            user = "";
+            expire = default;
+            return false;
+        }
 
         user = str[..p];
         var secs = str[(p + 1)..].ToInt();

@@ -55,8 +55,9 @@ public static class Rand
 
         var n = BitConverter.ToInt32(_buf, 0);
         if (min == Int32.MinValue && max == Int32.MaxValue) return n;
-        if (min == 0 && max == Int32.MaxValue) return Math.Abs(n);
-        if (min == Int32.MinValue && max == 0) return -Math.Abs(n);
+        // Math.Abs(Int32.MinValue) 会抛 OverflowException，改用掩码取绝对值（极低概率但必现崩溃）
+        if (min == 0 && max == Int32.MaxValue) return n & Int32.MaxValue;
+        if (min == Int32.MinValue && max == 0) return -(n & Int32.MaxValue);
 
         var num = max - min;
         // 不要进行复杂运算，看做是生成从0到(max-min)的随机数，然后再加上min即可
@@ -75,30 +76,18 @@ public static class Rand
 #if NET6_0_OR_GREATER
         return RandomNumberGenerator.GetBytes(count);
 #elif NETFRAMEWORK || NETSTANDARD2_0
-        return new Random().NextBytes(count);
+        // 使用加密安全随机数生成器，与 Next() 保持一致（原 new Random() 非加密安全）
+        if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+
+        var data = new Byte[count];
+        _rnd.GetBytes(data);
+        return data;
 #else
         var buf = new Byte[count];
         RandomNumberGenerator.Fill(buf);
         return buf;
 #endif
     }
-
-#if NETFRAMEWORK || NETSTANDARD2_0
-    /// <summary>
-    /// 返回随机数填充的指定长度的数组
-    /// </summary>
-    /// <param name="random"></param>
-    /// <param name="length">数组长度</param>
-    /// <returns>随机数填充的指定长度的数组</returns>
-    private static Byte[] NextBytes(this Random random, Int32 length)
-    {
-        if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-
-        var data = new Byte[length];
-        random.NextBytes(data);
-        return data;
-    }
-#endif
 
     /// <summary>返回指定长度随机字符串</summary>
     /// <param name="length">长度</param>

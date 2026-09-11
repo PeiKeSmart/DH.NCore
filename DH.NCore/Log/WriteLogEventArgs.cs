@@ -77,8 +77,7 @@ public class WriteLogEventArgs : EventArgs
 
     void Init()
     {
-        // todo: 如果系统使用utc时间，可以把日志时间转换为本地时间
-        Time = DateTime.Now.AddHours(Setting.Current.UtcIntervalHours);
+        Time = DateTime.Now;
         var thread = Thread.CurrentThread;
         ThreadID = thread.ManagedThreadId;
         IsPool = thread.IsThreadPoolThread;

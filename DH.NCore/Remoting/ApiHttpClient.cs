@@ -593,11 +593,14 @@ public partial class ApiHttpClient : DisposeBase, IApiClient, IConfigMapping, IL
         {
             if (service.CreateTime.Year < 2000) Log?.Debug("使用[{0}]：{1}", service.Name, service.Address);
 
-            client = CreateClient();
-            client.BaseAddress = service.Address;
-            if (!service.Token.IsNullOrEmpty()) Token = service.Token;
-
-            service.Client = client;
+            // 原子创建，避免并发首次调用时重复创建导致连接池泄漏
+            client = service.TryGetClient(() =>
+            {
+                var c = CreateClient();
+                c.BaseAddress = service.Address;
+                if (!service.Token.IsNullOrEmpty()) Token = service.Token;
+                return c;
+            });
             service.CreateTime = DateTime.Now;
         }
 
@@ -629,6 +632,25 @@ public partial class ApiHttpClient : DisposeBase, IApiClient, IConfigMapping, IL
         OnCreateClient?.Invoke(this, new HttpClientEventArgs { Client = client });
 
         return client;
+    }
+    #endregion
+
+    #region 释放
+    /// <summary>释放资源</summary>
+    /// <param name="disposing">是否释放托管资源</param>
+    protected override void Dispose(Boolean disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            // 释放各节点的 HttpClient，回收连接池资源
+            foreach (var svc in Services)
+            {
+                svc.Client?.Dispose();
+                svc.Client = null;
+            }
+        }
     }
     #endregion
 

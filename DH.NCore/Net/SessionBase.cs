@@ -675,6 +675,8 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
         var total = pk.Length;
         var local = se.ReceiveMessageFromPacketInfo.Address;
         using var span = Tracer?.NewSpan($"net:{Name}:ProcessReceive", new { total, local, remote }, total);
+        ReceivedEventArgs? e = null;
+        NetHandlerContext? ctx = null;
         try
         {
             LastTime = DateTime.Now;
@@ -687,7 +689,7 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
 
             if (Local.IsTcp) remote = Remote.EndPoint;
 
-            var e = ReceivedEventArgs.Rent();
+            e = ReceivedEventArgs.Rent();
             e.Packet = pk;
             e.Local = local;
             e.Remote = remote;
@@ -698,24 +700,24 @@ public abstract class SessionBase : DisposeBase, ISocketClient, ITransport, ILog
                 OnReceive(e);
             else
             {
-                var ctx = CreateContext(ss);
+                ctx = CreateContext(ss);
                 ctx.Data = e;
                 ctx.EventArgs = se;
 
                 // 进入管道处理，如果有一个或多个结果通过Finish来处理
                 pp.Read(ctx, pk);
-
-                // 同步调用完成后归还上下文
-                ReturnContext(ctx);
             }
-
-            // 同步调用链结束，归还事件参数
-            ReceivedEventArgs.Return(e);
         }
         catch (Exception ex)
         {
             span?.SetError(ex, pk.ToHex());
             if (!ex.IsDisposed()) OnError("OnReceive", ex);
+        }
+        finally
+        {
+            // 无论正常或异常，都归还池化对象，避免泄漏
+            if (ctx != null) ReturnContext(ctx);
+            if (e != null) ReceivedEventArgs.Return(e);
         }
     }
 

@@ -32,7 +32,7 @@ public class SM4 : SymmetricAlgorithm
     public override void GenerateIV() => IV = Rand.NextBytes(16);
 
     /// <summary>生成密钥</summary>
-    public override void GenerateKey() => IV = Rand.NextBytes(16);
+    public override void GenerateKey() => Key = Rand.NextBytes(16);
 
     /// <summary>生成加密器</summary>
     /// <param name="key"></param>
@@ -238,7 +238,7 @@ public class SM4Transform : ICryptoTransform
     public SM4Transform(Byte[] key, Byte[]? iv, Boolean encryptMode)
     {
         if (key == null || key.Length != 16) throw new ArgumentException(nameof(key), "Key must be a 16-byte array.");
-        if (iv != null && iv.Length != 16) throw new ArgumentException(nameof(key), "IV must be a 16-byte array.");
+        if (iv != null && iv.Length != 16) throw new ArgumentException(nameof(iv), "IV must be a 16-byte array.");
 
         ExpandKey(encryptMode, key);
 

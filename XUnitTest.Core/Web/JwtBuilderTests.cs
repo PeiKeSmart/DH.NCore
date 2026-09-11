@@ -514,4 +514,21 @@ q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
 
         Assert.False(rs);
     }
+
+    [Fact(DisplayName = "签名被篡改时返回失败与非空消息")]
+    public void TamperedSignature()
+    {
+        var builder = new JwtBuilder { Secret = "Smart", Expire = DateTime.MinValue };
+        var token = builder.Encode(new { sub = "0201" });
+
+        // 篡改签名最后一个字符
+        var tampered = token[..^1] + (token[^1] == 'A' ? "B" : "A");
+
+        var jwt = new JwtBuilder { Secret = "Smart" };
+        var rs = jwt.TryDecode(tampered, out var msg);
+
+        Assert.False(rs);
+        Assert.NotNull(msg);
+        Assert.NotEmpty(msg);
+    }
 }

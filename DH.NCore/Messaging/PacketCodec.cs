@@ -163,7 +163,8 @@ public class PacketCodec : IDisposable
                 // 根据计算得到的长度，重新设置数据片正确长度
                 //pk2.Set(pk2.Data, pk2.Offset, Offset + len);
                 //pk2 = new ArrayPacket(pk2.Buffer, pk2.Offset, pk2.Offset + len);
-                list.Add(pk2.Slice(0, len));
+                // 慢路径返回独立副本：内部缓存 MemoryStream 解包后会清空复用，共享缓冲会被后续数据覆盖
+                list.Add(new ArrayPacket(pk2.ReadBytes(0, len)));
 
                 ms.Seek(len, SeekOrigin.Current);
             }

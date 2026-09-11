@@ -187,7 +187,8 @@ public class XmlGeneral : XmlHandlerBase
                 value = v.ToBoolean();
                 return true;
             case TypeCode.Byte:
-                value = Byte.Parse(v, NumberStyles.HexNumber);
+                // 与写入端一致：Byte 以字符写出（如 65 写为 'A'）
+                if (v.Length > 0) value = (Byte)v[0];
                 return true;
             case TypeCode.Char:
                 if (v.Length > 0) value = v[0];
@@ -199,7 +200,8 @@ public class XmlGeneral : XmlHandlerBase
                 value = v.ToDateTime();
                 return true;
             case TypeCode.Decimal:
-                value = (Decimal)v.ToDouble();
+                // 直接转 Decimal 保真，经 Double 中转会丢失精度（Decimal 高达 28-29 位有效数字）
+                value = v.ToDecimal();
                 return true;
             case TypeCode.Double:
                 value = v.ToDouble();
@@ -219,7 +221,8 @@ public class XmlGeneral : XmlHandlerBase
             case TypeCode.Object:
                 break;
             case TypeCode.SByte:
-                value = SByte.Parse(v, NumberStyles.HexNumber);
+                // 与写入端一致：SByte 以字符写出
+                if (v.Length > 0) value = (SByte)v[0];
                 return true;
             case TypeCode.Single:
                 value = (Single)v.ToDouble();

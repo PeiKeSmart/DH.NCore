@@ -10,7 +10,7 @@ namespace XUnitTest.Model
     public class HostTests
     {
         [Fact]
-        public void TestHost()
+        public async Task TestHost()
         {
             var services = ObjectContainer.Current;
 
@@ -24,11 +24,12 @@ namespace XUnitTest.Model
             host.Add<MyService>();
 
             var task = host.RunAsync();
-            task.Wait(3_000);
+            // 模拟 Wait(3s) 语义：超时不抛异常，继续执行（后续断言自然失败）
+            await Task.WhenAny(task, Task.Delay(3_000));
 
             var host2 = host as Host;
             Assert.NotNull(host2);
-            Assert.Equal(1, host2.HostedServices.Count);
+            Assert.Single(host2.HostedServices);
 
             var my = host2.HostedServices[0] as MyService;
             Assert.NotNull(my);

@@ -311,4 +311,18 @@ public class ProcessHelperTests
         var again = p.GetHasExited();
         Assert.True(again);
     }
+
+    /// <summary>returnError 在无标准输出时返回错误输出</summary>
+    [Fact]
+    public void Execute_ReturnError()
+    {
+        String? rs;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            rs = "cmd".Execute("/c echo err_out 1>&2", 5_000, true);
+        else
+            rs = "sh".Execute("-c \"echo err_out 1>&2\"", 5_000, true);
+
+        Assert.NotNull(rs);
+        Assert.Contains("err_out", rs);
+    }
 }

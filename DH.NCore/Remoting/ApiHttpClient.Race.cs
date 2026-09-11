@@ -346,10 +346,18 @@ public partial class ApiHttpClient
             Source = selectedService.Name;
 
             var jsonHost = JsonHost ?? ServiceProvider?.GetService<IJsonHost>() ?? JsonHelper.Default;
-            var result = await ApiHelper.ProcessResponse<TResult>(selectedResponse, CodeName, DataName, jsonHost).ConfigureAwait(false);
+            try
+            {
+                var result = await ApiHelper.ProcessResponse<TResult>(selectedResponse, CodeName, DataName, jsonHost).ConfigureAwait(false);
 
-            Current = selectedService;
-            return result;
+                Current = selectedService;
+                return result;
+            }
+            finally
+            {
+                // 释放选中的响应，避免连接池资源泄漏
+                selectedResponse.Dispose();
+            }
         }
         catch (Exception ex)
         {

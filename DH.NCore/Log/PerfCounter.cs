@@ -89,8 +89,9 @@ public class PerfCounter : DisposeBase, ICounter
     /// <param name="state"></param>
     private void DoWork(Object? state)
     {
-        // 计算采样次数
-        var len = Duration * 1000 / Interval;
+        // 计算采样次数。至少 1，避免 Duration/Interval 配置异常时除零或数组长度为 0 导致越界
+        var len = Interval > 0 ? Duration * 1000 / Interval : 1;
+        if (len < 1) len = 1;
 
         if (_quSpeed.Length != len) _quSpeed = new Int64[len];
         if (_quCost.Length != len) _quCost = new Int64[len];
@@ -105,7 +106,8 @@ public class PerfCounter : DisposeBase, ICounter
             var ms = _sw.Elapsed.TotalMilliseconds;
             _sw.Restart();
 
-            sp = (Int64)((Value - _LastValue) * 1000 / ms);
+            // 采样周期过短时两次采样可能在同一毫秒内，除零会得到无穷大并溢出
+            if (ms > 0) sp = (Int64)((Value - _LastValue) * 1000 / ms);
         }
 
         _LastValue = Value;
